@@ -6,14 +6,14 @@ export default function Services() {
           <h2 className="text-4xl sm:text-5xl font-bold text-gray-800 mb-4">
             Nuestros Servicios
           </h2>
-          <div className="w-24 h-1 bg-[#9b59b6] mx-auto rounded-full mb-6"></div>
+          <div className="w-24 h-1 bg-[#e4b4dd] mx-auto rounded-full mb-6"></div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Ofrecemos tratamientos de última generación para ayudarte a conseguir el cuerpo que siempre has deseado
           </p>
         </div>
         
         <div className="max-w-4xl mx-auto">
-          <div className="bg-gradient-to-r from-[#9b59b6] to-[#8e44ad] rounded-3xl p-8 sm:p-12 text-white shadow-2xl">
+          <div className="bg-gradient-to-r from-[#fad7f2] to-[#b65997] rounded-3xl p-8 sm:p-12 text-white shadow-2xl">
             <div className="grid md:grid-cols-2 gap-8 items-center">
               <div>
                 <h3 className="text-3xl sm:text-4xl font-bold mb-6">

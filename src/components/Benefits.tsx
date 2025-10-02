@@ -1,29 +1,45 @@
+"use client";
+
+import { generateWhatsAppURL } from "@/utils/whatsapp";
+import Image from "next/image";
+
 export default function Benefits() {
   const benefits = [
     {
       icon: (
-        <svg className="w-12 h-12 text-[#9b59b6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-        </svg>
+        <Image 
+          src="/cinturasin.png" 
+          alt="Reducción de Grasa" 
+          width={80}
+          height={80}
+          className="object-contain"
+        />
       ),
       title: "Reducción de Grasa",
       description: "Elimina la grasa localizada de forma efectiva y permanente con tecnología láser de última generación."
     },
     {
       icon: (
-        <svg className="w-12 h-12 text-[#9b59b6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+        <Image 
+          src="/recuperacionrapidasin.png" 
+          alt="Recuperación Rápida" 
+          width={80}
+          height={80}
+          className="object-contain"
+        />
       ),
       title: "Recuperación Rápida",
       description: "Procedimiento no invasivo que te permite retomar tus actividades diarias inmediatamente después del tratamiento."
     },
     {
       icon: (
-        <svg className="w-12 h-12 text-[#9b59b6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-        </svg>
+        <Image 
+          src="/backwomansin.png" 
+          alt="Resultados Visibles" 
+          width={80}
+          height={80}
+          className="object-contain"
+        />
       ),
       title: "Resultados Visibles",
       description: "Observa mejoras desde la primera sesión. Resultados progresivos y duraderos que transformarán tu figura."
@@ -37,7 +53,7 @@ export default function Benefits() {
           <h2 className="text-4xl sm:text-5xl font-bold text-gray-800 mb-4">
             ¿Por qué elegir Perfestetic?
           </h2>
-          <div className="w-24 h-1 bg-[#9b59b6] mx-auto rounded-full mb-6"></div>
+          <div className="w-24 h-1 bg-[#e495ca] mx-auto rounded-full mb-6"></div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Descubre las ventajas de nuestros tratamientos y por qué somos la mejor opción para tu transformación
           </p>
@@ -49,7 +65,7 @@ export default function Benefits() {
               key={index}
               className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 text-center group"
             >
-              <div className="bg-gradient-to-r from-[#9b59b6] to-[#8e44ad] rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+              <div className="bg-gradient-to-r from-[#feb3c7] to-[#feb3c7] rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                 <div className="text-white">
                   {benefit.icon}
                 </div>
@@ -65,7 +81,7 @@ export default function Benefits() {
               
               {/* Decorative element */}
               <div className="mt-6">
-                <div className="w-12 h-1 bg-gradient-to-r from-[#9b59b6] to-[#8e44ad] mx-auto rounded-full opacity-50"></div>
+                <div className="w-12 h-1 bg-gradient-to-r from-[#b659b0] to-[#ad44a1] mx-auto rounded-full opacity-50"></div>
               </div>
             </div>
           ))}
@@ -81,7 +97,7 @@ export default function Benefits() {
               Agenda tu consulta gratuita y descubre cómo podemos ayudarte a conseguir el cuerpo que siempre has deseado.
             </p>
             <a
-              href="https://wa.me/1234567890"
+              href={generateWhatsAppURL("benefits")}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-3 bg-[#25D366] hover:bg-[#20b358] text-white font-semibold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105"

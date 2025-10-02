@@ -1,5 +1,9 @@
 'use client';
 
+"use client";
+
+import { generateWhatsAppURL } from "@/utils/whatsapp";
+
 export default function Gallery() {
 
   // Placeholder data - in a real app, these would be actual before/after images
@@ -34,7 +38,7 @@ export default function Gallery() {
           <h2 className="text-4xl sm:text-5xl font-bold text-gray-800 mb-4">
             Resultados Reales
           </h2>
-          <div className="w-24 h-1 bg-[#9b59b6] mx-auto rounded-full mb-6"></div>
+          <div className="w-24 h-1 bg-[#b659a0] mx-auto rounded-full mb-6"></div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Descubre las transformaciones increíbles que hemos logrado con nuestros pacientes
           </p>
@@ -48,7 +52,7 @@ export default function Gallery() {
               <div key={item.id} className="bg-gray-50 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <div className="mb-4">
                   <h3 className="text-xl font-bold text-gray-800 mb-2">{item.area}</h3>
-                  <p className="text-sm text-[#9b59b6] font-semibold">{item.duration}</p>
+                  <p className="text-sm text-[#b659a8] font-semibold">{item.duration}</p>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
@@ -93,7 +97,7 @@ export default function Gallery() {
           </div>
 
           {/* Testimonial Section */}
-          <div className="mt-16 bg-gradient-to-r from-[#9b59b6] to-[#8e44ad] rounded-3xl p-8 sm:p-12 text-white text-center">
+          <div className="mt-16 bg-gradient-to-r from-[#b659a3] to-[#ad448a] rounded-3xl p-8 sm:p-12 text-white text-center">
             <div className="max-w-3xl mx-auto">
               <svg className="w-12 h-12 text-white opacity-50 mx-auto mb-6" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h4v10h-10z"/>
@@ -121,7 +125,7 @@ export default function Gallery() {
               ¿Quieres ser el próximo en lograr estos resultados?
             </p>
             <a
-              href="https://wa.me/1234567890"
+              href={generateWhatsAppURL("gallery")}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-3 bg-[#25D366] hover:bg-[#20b358] text-white font-semibold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105"
