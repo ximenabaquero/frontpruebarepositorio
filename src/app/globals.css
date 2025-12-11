@@ -1,3 +1,187 @@
 @import "tailwindcss";
 
 /* Estilos base - Los colores ahora se manejan desde src/config/colors.ts */
+
+/* Hero animations */
+@keyframes heroFloat {
+	0% {
+		transform: translateY(0px);
+	}
+	50% {
+		transform: translateY(-10px);
+	}
+	100% {
+		transform: translateY(0px);
+	}
+}
+
+@keyframes heroGlowPulse {
+	0%,
+	100% {
+		opacity: 0.2;
+	}
+	50% {
+		opacity: 0.55;
+	}
+}
+
+@keyframes heroSweep {
+	0% {
+		transform: translateX(-80%);
+	}
+	100% {
+		transform: translateX(140%);
+	}
+}
+
+@keyframes heroOrbDrift {
+	0% {
+		transform: translate(0, 0) scale(1);
+	}
+	50% {
+		transform: translate(20px, -15px) scale(1.05);
+	}
+	100% {
+		transform: translate(-10px, 10px) scale(1);
+	}
+}
+
+.hero-section {
+	isolation: isolate;
+}
+
+.hero-backdrop {
+	position: absolute;
+	inset: -25%;
+	background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.5), transparent 60%);
+	z-index: 0;
+	animation: heroGlowPulse 8s ease-in-out infinite;
+	pointer-events: none;
+}
+
+.hero-logo-ring {
+	position: relative;
+	display: inline-flex;
+	padding: 1rem;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.6);
+	box-shadow: 0 25px 60px rgba(0, 0, 0, 0.12);
+	animation: heroFloat 10s ease-in-out infinite;
+}
+
+.hero-logo-ring::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: 50%;
+	border: 1px solid rgba(255, 255, 255, 0.4);
+	filter: blur(2px);
+	pointer-events: none;
+}
+
+.hero-logo {
+	animation: heroFloat 8s ease-in-out infinite;
+}
+
+.hero-divider {
+	background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.5), currentColor, rgba(255, 255, 255, 0.5));
+	animation: heroGlowPulse 5s ease-in-out infinite;
+}
+
+.hero-whatsapp-btn {
+	box-shadow: 0 20px 45px rgba(0, 0, 0, 0.2);
+}
+
+.hero-whatsapp-btn__glow {
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(120deg, rgba(255, 255, 255, 0.35), transparent 60%);
+	transform: translateX(-60%);
+	animation: heroSweep 6s linear infinite;
+	mix-blend-mode: screen;
+	pointer-events: none;
+}
+
+.hero-orb {
+	animation: heroOrbDrift 12s ease-in-out infinite;
+	filter: blur(30px);
+}
+
+.hero-orb--right {
+	animation-duration: 16s;
+}
+
+/* Services interactions */
+@keyframes servicesFloat {
+	0% {
+		transform: translateY(0px);
+	}
+	50% {
+		transform: translateY(-8px);
+	}
+	100% {
+		transform: translateY(0px);
+	}
+}
+
+@keyframes servicesPulse {
+	0%,
+	100% {
+		opacity: 0.35;
+	}
+	50% {
+		opacity: 0.7;
+	}
+}
+
+@keyframes servicesShimmer {
+	0% {
+		transform: translateX(-60%);
+	}
+	100% {
+		transform: translateX(120%);
+	}
+}
+
+.services-card__halo {
+	position: absolute;
+	inset: -15%;
+	z-index: 0;
+	background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.35), transparent 60%);
+	opacity: 0.5;
+	animation: servicesPulse 6s ease-in-out infinite;
+}
+
+.services-card__glare {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	background: linear-gradient(120deg, rgba(255, 255, 255, 0.25), transparent 55%);
+	mix-blend-mode: screen;
+	opacity: 0;
+	transition: opacity 0.6s ease;
+}
+
+.group\/card:hover .services-card__glare {
+	opacity: 0.8;
+}
+
+.services-image-frame {
+	animation: servicesFloat 8s ease-in-out infinite;
+	box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+}
+
+.services-image-frame__shine {
+	position: absolute;
+	inset: 0;
+	border-radius: 1rem;
+	background: linear-gradient(70deg, rgba(255, 255, 255, 0.4), transparent 45%);
+	mix-blend-mode: screen;
+	opacity: 0.2;
+	animation: servicesShimmer 10s linear infinite;
+	pointer-events: none;
+}
+
+.services-image-frame:hover .services-image-frame__shine {
+	opacity: 0.5;
+}

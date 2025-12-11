@@ -1,3 +1,36 @@
+const services = [
+  {
+    title: "Lipólisis láser",
+    description: "Moldea y elimina grasa localizada con energía láser de precisión, sin cirugía ni incapacidad.",
+    benefit: "Resultados visibles desde la primera sesión",
+  },
+  {
+    title: "Tensamax",
+    description: "Tecnología avanzada que estimula colágeno y elastina para una piel más firme y definida.",
+    benefit: "Efecto tensor inmediato y progresivo",
+  },
+  {
+    title: "Ácido hialurónico",
+    description: "Hidratación profunda y volumen natural para armonizar rasgos sin perder expresividad.",
+    benefit: "Resultados naturales y seguros",
+  },
+  {
+    title: "Hilos tensores",
+    description: "Reafirma y levanta tejidos con bioestimulación de colágeno, sin quirófano.",
+    benefit: "Efecto lifting y estimulación de colágeno",
+  },
+  {
+    title: "Plasma rico en plaquetas",
+    description: "Regenera y mejora textura cutánea con tus propios factores de crecimiento.",
+    benefit: "Mejora de textura y luminosidad",
+  },
+  {
+    title: "Botox",
+    description: "Suaviza líneas de expresión manteniendo gestos naturales con técnica precisa.",
+    benefit: "Resultados naturales y controlados",
+  },
+];
+
 export default function Services() {
   return (
     <section className="py-20 bg-white">
@@ -8,102 +41,38 @@ export default function Services() {
           </h2>
           <div className="w-24 h-1 bg-[#e4b4dd] mx-auto rounded-full mb-6"></div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Ofrecemos tratamientos de última generación para ayudarte a
-            conseguir el cuerpo que siempre has deseado
+            Tratamientos médicos con tecnología avanzada, enfoque personalizado y resultados visibles.
           </p>
         </div>
 
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-gradient-to-r from-[#dd93d9] to-[#e084da] rounded-3xl p-8 sm:p-12 text-white shadow-2xl">
-            <div className="grid md:grid-cols-2 gap-8 items-center">
-              <div>
-                <h3 className="text-3xl sm:text-4xl font-bold mb-6">
-                  Lipolisis Láser
-                </h3>
-                <p className="text-lg mb-6 opacity-90">
-                  Tratamiento no invasivo que utiliza tecnología láser de última
-                  generación para eliminar la grasa localizada de forma segura y
-                  efectiva.
-                </p>
-                <ul className="space-y-3">
-                  <li className="flex items-center gap-3">
-                    <svg
-                      className="w-5 h-5 text-green-300"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <span>Procedimiento no invasivo</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      className="w-5 h-5 text-green-300"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <span>Sin tiempo de recuperación</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      className="w-5 h-5 text-green-300"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <span>Resultados visibles desde la primera sesión</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      className="w-5 h-5 text-green-300"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <span>Tratamiento personalizado</span>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="text-center">
-                <div className="bg-white rounded-2xl overflow-hidden p-2">
-                  {/*<div className="w-24 h-24 bg-white bg-opacity-30 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
+        <div className="max-w-6xl mx-auto">
+          <div className="grid gap-8 lg:grid-cols-3">
+            {services.map((service) => (
+              <div
+                key={service.title}
+                className="group/card relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#dd93d9] via-[#e084da] to-[#f0b0e8] p-[1px] shadow-2xl transition-transform duration-500 hover:-translate-y-1"
+              >
+                <div className="services-card__halo" aria-hidden />
+                <div className="services-card__glare" aria-hidden />
+                <div className="relative h-full rounded-[22px] bg-white/90 p-6 backdrop-blur">
+                  <div className="mb-4 inline-flex items-center rounded-full bg-[#f7e2f5] px-3 py-1 text-xs font-semibold text-[#b14ccf]">
+                    {service.title}
                   </div>
-                  <h4 className="text-2xl font-bold mb-2">Tecnología Avanzada</h4>
-                  <p className="opacity-90">
-                    Equipos de última generación para garantizar los mejores resultados
-                  </p>*/}
-                  <img
-                    src="/imagen-medica.jpg"
-                    alt="Lipolisis Láser"
-                    className="w-100 h-95 mx-auto object-cover rounded-xl"
-                  />
+                  <p className="text-gray-800 text-lg font-semibold mb-3">{service.title}</p>
+                  <p className="text-gray-600 text-sm leading-relaxed mb-4">{service.description}</p>
+                  <div className="flex items-center gap-2 text-[#1fa76b] text-sm font-semibold">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <span>{service.benefit}</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>

@@ -9,40 +9,53 @@ export default function Benefits() {
       icon: (
         <Image 
           src="/cinturasin.png" 
-          alt="Reducción de Grasa" 
+          alt="Tecnología avanzada" 
           width={80}
           height={80}
           className="object-contain"
         />
       ),
-      title: "Reducción de Grasa",
-      description: "Elimina la grasa localizada de forma efectiva y permanente con tecnología láser de última generación."
+      title: "Tecnología avanzada",
+      description: "Láser lipólisis + láser diodo + soft laser para esculpir con precisión, estimular colágeno y proteger la piel."
     },
     {
       icon: (
         <Image 
           src="/recuperacionrapidasin.png" 
-          alt="Recuperación Rápida" 
+          alt="Acompañamiento médico" 
           width={80}
           height={80}
           className="object-contain"
         />
       ),
-      title: "Recuperación Rápida",
-      description: "Procedimiento no invasivo que te permite retomar tus actividades diarias inmediatamente después del tratamiento."
+      title: "Acompañamiento médico",
+      description: "Protocolos personalizados, seguimiento cercano y prevención de fibrosis para una recuperación guiada y segura."
     },
     {
       icon: (
         <Image 
           src="/backwomansin.png" 
-          alt="Resultados Visibles" 
+          alt="Resultados inmediatos" 
           width={80}
           height={80}
           className="object-contain"
         />
       ),
-      title: "Resultados Visibles",
-      description: "Observa mejoras desde la primera sesión. Resultados progresivos y duraderos que transformarán tu figura."
+      title: "Resultados visibles",
+      description: "Cambios desde la primera sesión: menos volumen, mejor definición y piel más firme."
+    },
+    {
+      icon: (
+        <Image 
+          src="/recuperacionrapidasin.png" 
+          alt="Recuperación rápida" 
+          width={80}
+          height={80}
+          className="object-contain"
+        />
+      ),
+      title: "Recuperación rápida",
+      description: "Procedimientos sin incapacidad ni dolor post, para retomar tus actividades el mismo día."
     }
   ];
 
