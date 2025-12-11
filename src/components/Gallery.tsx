@@ -1,7 +1,7 @@
 "use client";
 
-"use client";
-
+import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { generateWhatsAppURL } from "@/utils/whatsapp";
 
 export default function Gallery() {
@@ -30,6 +30,30 @@ export default function Gallery() {
     },
   ];
 
+  const [visible, setVisible] = useState<boolean[]>(() => beforeAfterGallery.map(() => false));
+  const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const idx = Number((entry.target as HTMLElement).dataset.index);
+            setVisible((prev) => prev.map((v, i) => (i === idx ? true : v)));
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.2, rootMargin: "0px 0px -10% 0px" }
+    );
+
+    cardsRef.current.forEach((el) => {
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section className="py-20 bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -48,21 +72,28 @@ export default function Gallery() {
         <div className="max-w-6xl mx-auto">
           {/* Before/After Gallery */}
           <div className="grid md:grid-cols-3 gap-8">
-            {beforeAfterGallery.map((item) => (
+            {beforeAfterGallery.map((item, index) => (
               <div
                 key={item.id}
-                className="bg-gray-50 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300"
+                data-index={index}
+                ref={(el) => {
+                  cardsRef.current[index] = el;
+                }}
+                className={`gallery-card ${visible[index] ? "is-visible" : ""}`}
+                style={{ animationDelay: `${index * 0.15}s` }}
               >
-                <div className="mb-4">
+                <div className="gallery-card__inner rounded-2xl bg-white/90 backdrop-blur-md p-6 sm:p-7">
+                  <div className="absolute inset-0 gallery-card__border" aria-hidden />
+                  <div className="mb-4">
                   <h3 className="text-xl font-bold text-gray-800 mb-2">
                     {item.area}
                   </h3>
                   <p className="text-sm text-[#b659a8] font-semibold">
                     {item.duration}
                   </p>
-                </div>
+                  </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-4">
                   {/* Before */}
                   <div className="text-center">
                     <p className="text-sm font-semibold text-gray-600 mb-2">
@@ -85,9 +116,11 @@ export default function Gallery() {
                         </svg>
                         <p className="text-xs">Imagen Antes</p>
                       </div>*/}
-                      <img
+                      <Image
                         src={item.before}
                         alt={`Antes - ${item.area}`}
+                        width={420}
+                        height={320}
                         className="rounded-lg h-48 w-full object-cover shadow-inner"
                       />
                     </div>
@@ -115,65 +148,38 @@ export default function Gallery() {
                         </svg>
                         <p className="text-xs">Imagen Después</p>
                       </div>*/}
-                      <img
+                      <Image
                         src={item.after}
                         alt={`Después - ${item.area}`}
+                        width={420}
+                        height={320}
                         className="rounded-lg h-48 w-full object-cover shadow-inner"
                       />
                     </div>
                   </div>
-                </div>
+                  </div>
 
-                {/* Results badge */}
-                <div className="mt-4 text-center">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#9b59b6] text-white">
-                    <svg
-                      className="w-3 h-3 mr-1"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    Resultado Exitoso
-                  </span>
+                  {/* Results badge */}
+                  <div className="mt-4 text-center">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#9b59b6] text-white">
+                      <svg
+                        className="w-3 h-3 mr-1"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      Resultado Exitoso
+                    </span>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
-
-          {/* Testimonial Section */}
-          <div className="mt-16 bg-gradient-to-r from-[#b659a3] to-[#ad448a] rounded-3xl p-8 sm:p-12 text-white text-center">
-            <div className="max-w-3xl mx-auto">
-              <svg
-                className="w-12 h-12 text-white opacity-50 mx-auto mb-6"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h4v10h-10z" />
-              </svg>
-
-              <blockquote className="text-xl sm:text-2xl font-light mb-6 leading-relaxed">
-                &ldquo;Los resultados superaron todas mis expectativas. El
-                equipo de Perfestetic es increíble y la tecnología realmente
-                funciona. ¡Recomiendo totalmente este tratamiento!&rdquo;
-              </blockquote>
-
-              <div className="flex items-center justify-center gap-4">
-                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                  <span className="text-lg font-bold">MR</span>
-                </div>
-                <div className="text-left">
-                  <p className="font-semibold">María Rodríguez</p>
-                  <p className="text-sm opacity-80">Cliente satisfecha</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Call to action */}
           <div className="text-center mt-12">
             <p className="text-lg text-gray-600 mb-6">

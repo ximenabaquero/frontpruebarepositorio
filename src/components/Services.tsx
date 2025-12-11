@@ -39,7 +39,7 @@ export default function Services() {
           <h2 className="text-4xl sm:text-5xl font-bold text-gray-800 mb-4">
             Nuestros Servicios
           </h2>
-          <div className="w-24 h-1 bg-[#e4b4dd] mx-auto rounded-full mb-6"></div>
+          <div className="decor-line" aria-hidden />
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Tratamientos médicos con tecnología avanzada, enfoque personalizado y resultados visibles.
           </p>
@@ -50,12 +50,10 @@ export default function Services() {
             {services.map((service) => (
               <div
                 key={service.title}
-                className="group/card relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#dd93d9] via-[#e084da] to-[#f0b0e8] p-[1px] shadow-2xl transition-transform duration-500 hover:-translate-y-1"
+                className="group/card soft-gradient-border shadow-2xl card-hover-elevate"
               >
-                <div className="services-card__halo" aria-hidden />
-                <div className="services-card__glare" aria-hidden />
-                <div className="relative h-full rounded-[22px] bg-white/90 p-6 backdrop-blur">
-                  <div className="mb-4 inline-flex items-center rounded-full bg-[#f7e2f5] px-3 py-1 text-xs font-semibold text-[#b14ccf]">
+                <div className="card-sheen relative h-full rounded-[22px] bg-white/25 backdrop-blur-[12px] border border-white/40 p-6 shadow-lg">
+                  <div className="mb-4 inline-flex items-center justify-center rounded-full bg-[#f7e2f5] px-3 py-1 text-xs font-semibold text-[#b14ccf]">
                     {service.title}
                   </div>
                   <p className="text-gray-800 text-lg font-semibold mb-3">{service.title}</p>

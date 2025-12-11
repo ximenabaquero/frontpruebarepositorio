@@ -21,7 +21,7 @@ export default function Hero() {
         <div className="text-center">
           {/* Logo */}
           <div className="mb-8">
-            <div className="flex justify-center mb-6 hero-logo-wrapper">
+            <div className="flex justify-center mb-6 hero-logo-wrapper group">
               <div className="hero-logo-ring">
                 <Image
                   src="/logoperfesthetic.jpeg"
