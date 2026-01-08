@@ -1,37 +1,66 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import Image from "next/image";
-import { generateWhatsAppURL } from "@/utils/whatsapp";
+import { Star, CheckCircle, Target, Camera } from 'lucide-react';
+
+function mulberry32(seed: number) {
+  return function () {
+    let t = (seed += 0x6d2b79f5);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const beforeAfterGallery = [
+  {
+    id: 1,
+    before: "/antes-despues/imagen1-antes.jpg",
+    after: "/antes-despues/imagen1-despues.jpg",
+    area: "Moldeamiento Corporal",
+    duration: "Reducción de grasa localizada",
+    result: "4.5 cm menos",
+    gradient: "from-emerald-400 to-blue-500",
+  },
+  {
+    id: 2,
+    before: "/antes-despues/imagen2-antes.jpg",
+    after: "/antes-despues/imagen2-despues.jpg",
+    area: "Esculpido de Cintura",
+    duration: "Reducción de abdomen",
+    result: "6.2 cm menos",
+    gradient: "from-blue-400 to-emerald-500",
+  },
+  {
+    id: 3,
+    before: "/antes-despues/imagen3-antes.jpg",
+    after: "/antes-despues/imagen3-despues.jpg",
+    area: "Firmeza Cutánea",
+    duration: "Reducción y reafirmación",
+    result: "Piel 82% más firme",
+    gradient: "from-blue-400 to-emerald-500",
+  },
+];
 
 export default function Gallery() {
-  // Placeholder data - in a real app, these would be actual before/after images
-  const beforeAfterGallery = [
-    {
-      id: 1,
-      before: "/antes-despues/imagen1-antes.jpg",
-      after: "/antes-despues/imagen1-despues.jpg",
-      area: "Moldeamiento Corporal",
-      duration: "Reducción de grasa localizada",
-    },
-    {
-      id: 2,
-      before: "/antes-despues/imagen2-antes.jpg",
-      after: "/antes-despues/imagen2-despues.jpg",
-      area: "Moldeamiento Corporal",
-      duration: "Esculpido de cintura/abdomen",
-    },
-    {
-      id: 3,
-      before: "/antes-despues/imagen3-antes.jpg",
-      after: "/antes-despues/imagen3-despues.jpg",
-      area: "Moldeamiento Corporal",
-      duration: "Reducción y firmeza",
-    },
-  ];
-
   const [visible, setVisible] = useState<boolean[]>(() => beforeAfterGallery.map(() => false));
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
+
+  const floatStyles = useMemo<CSSProperties[]>(() => {
+    const rand = mulberry32(456789);
+    return Array.from({ length: 8 }, () => {
+      const size = rand() * 80 + 20;
+      const left = rand() * 100;
+      const top = rand() * 100;
+      return {
+        width: `${size}px`,
+        height: `${size}px`,
+        left: `${left}%`,
+        top: `${top}%`,
+      };
+    });
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -44,7 +73,7 @@ export default function Gallery() {
           }
         });
       },
-      { threshold: 0.2, rootMargin: "0px 0px -10% 0px" }
+      { threshold: 0.15, rootMargin: "0px 0px -10% 0px" }
     );
 
     cardsRef.current.forEach((el) => {
@@ -55,148 +84,167 @@ export default function Gallery() {
   }, []);
 
   return (
-    <section className="py-20 bg-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-800 mb-4">
-            Resultados Reales
+    <section className="relative py-16 md:py-20 lg:py-24 overflow-hidden">
+      {/* Background with gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-white via-emerald-50/20 to-white">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-200/10 via-transparent to-transparent"></div>
+      </div>
+
+      {/* Floating elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {floatStyles.map((style, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full bg-emerald-300/10"
+            style={style}
+          />
+        ))}
+      </div>
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        {/* Header Section */}
+        <div className="text-center max-w-3xl mx-auto mb-12 md:mb-16 lg:mb-20 px-4">
+          <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 mb-6 md:mb-8 shadow-sm border border-emerald-100">
+            <Camera className="w-4 h-4 text-emerald-500" />
+            <span className="text-sm font-semibold bg-gradient-to-r from-emerald-500 to-blue-600 bg-clip-text text-transparent">
+              Resultados Verificados
+            </span>
+          </div>
+          
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 md:mb-6">
+            <span className="text-gray-900">Resultados</span>{' '}
+            <span className="bg-gradient-to-r from-emerald-500 to-blue-600 bg-clip-text text-transparent">
+              Reales
+            </span>
           </h2>
-          <div className="w-24 h-1 bg-[#b659a0] mx-auto rounded-full mb-6"></div>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Descubre las transformaciones increíbles que hemos logrado con
-            nuestros pacientes
+          
+          <p className="text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed">
+            Descubre las transformaciones increíbles que hemos logrado con nuestros pacientes mediante tecnología láser de precisión.
           </p>
         </div>
 
-        {/* Gallery Content */}
-        <div className="max-w-6xl mx-auto">
-          {/* Before/After Gallery */}
-          <div className="grid md:grid-cols-3 gap-8">
-            {beforeAfterGallery.map((item, index) => (
-              <div
-                key={item.id}
-                data-index={index}
-                ref={(el) => {
-                  cardsRef.current[index] = el;
-                }}
-                className={`gallery-card ${visible[index] ? "is-visible" : ""}`}
-                style={{ animationDelay: `${index * 0.15}s` }}
-              >
-                <div className="gallery-card__inner rounded-2xl bg-white/90 backdrop-blur-md p-6 sm:p-7">
-                  <div className="absolute inset-0 gallery-card__border" aria-hidden />
-                  <div className="mb-4">
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">
-                    {item.area}
-                  </h3>
-                  <p className="text-sm text-[#b659a8] font-semibold">
-                    {item.duration}
-                  </p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                  {/* Before */}
-                  <div className="text-center">
-                    <p className="text-sm font-semibold text-gray-600 mb-2">
-                      ANTES
-                    </p>
-                    <div className="bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg h-48 flex items-center justify-center shadow-inner">
-                      {/*<div className="text-center text-gray-500">
-                        <svg
-                          className="w-12 h-12 mx-auto mb-2"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                          />
-                        </svg>
-                        <p className="text-xs">Imagen Antes</p>
-                      </div>*/}
-                      <Image
-                        src={item.before}
-                        alt={`Antes - ${item.area}`}
-                        width={420}
-                        height={320}
-                        className="rounded-lg h-48 w-full object-cover shadow-inner"
-                      />
+        {/* Gallery Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-10 mb-16 md:mb-20 px-4 sm:px-0">
+          {beforeAfterGallery.map((item, index) => (
+            <div
+              key={item.id}
+              data-index={index}
+              ref={(el) => {
+                cardsRef.current[index] = el;
+              }}
+              className="group relative"
+            >
+              {/* Hover Border Effect */}
+              <div className={`absolute -inset-0.5 bg-gradient-to-r ${item.gradient} rounded-2xl md:rounded-3xl blur opacity-0 group-hover:opacity-30 transition duration-500`}></div>
+              
+              {/* Card */}
+              <div className={`relative h-full bg-white/95 backdrop-blur-sm rounded-2xl md:rounded-3xl border border-gray-100 p-5 md:p-6 shadow-lg hover:shadow-xl transition-all duration-500 ${
+                visible[index] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+              }`}
+              style={{ transitionDelay: `${index * 150}ms` }}>
+                
+                {/* Card Header - REORGANIZADO */}
+                <div className="mb-6 md:mb-7">
+                  {/* Area title with icon - AHORA EN LÍNEA */}
+                  <div className="flex items-center justify-start mb-4 gap-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br ${item.gradient}`}>
+                      <Target className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl md:text-2xl font-bold text-gray-900 leading-tight">
+                        {item.area}
+                      </h3>
+                      <p className="text-sm md:text-base text-gray-600 mt-1">
+                        {item.duration}
+                      </p>
                     </div>
                   </div>
-
-                  {/* After */}
-                  <div className="text-center">
-                    <p className="text-sm font-semibold text-gray-600 mb-2">
-                      DESPUÉS
-                    </p>
-                    <div className="bg-gradient-to-br from-green-100 to-green-200 rounded-lg h-48 flex items-center justify-center shadow-inner">
-                      {/*<div className="text-center text-green-600">
-                        <svg
-                          className="w-12 h-12 mx-auto mb-2"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                          />
-                        </svg>
-                        <p className="text-xs">Imagen Después</p>
-                      </div>*/}
-                      <Image
-                        src={item.after}
-                        alt={`Después - ${item.area}`}
-                        width={420}
-                        height={320}
-                        className="rounded-lg h-48 w-full object-cover shadow-inner"
-                      />
-                    </div>
-                  </div>
-                  </div>
-
-                  {/* Results badge */}
-                  <div className="mt-4 text-center">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#9b59b6] text-white">
-                      <svg
-                        className="w-3 h-3 mr-1"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      Resultado Exitoso
+                  
+                  {/* Result Badge - SEPARADO CLARAMENTE */}
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-50 to-blue-50 rounded-full border border-emerald-100 shadow-sm">
+                    <Star className="w-4 h-4 text-emerald-500" />
+                    <span className="text-sm font-bold text-emerald-700">
+                      {item.result}
                     </span>
                   </div>
                 </div>
+
+                {/* Before/After Comparison - ESPACIADO ADECUADO */}
+                <div className="mb-6 md:mb-7 relative">
+                  <div className="grid grid-cols-2 gap-4 md:gap-5">
+                    {/* Before */}
+                    <div className="relative">
+                      <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
+                        <span className="px-3 py-1 text-xs font-bold bg-gray-700 text-white rounded-full shadow-md">
+                          ANTES
+                        </span>
+                      </div>
+                      <div className="relative overflow-hidden rounded-xl md:rounded-2xl h-44 md:h-52 shadow-inner bg-gradient-to-br from-gray-100 to-gray-200">
+                        <Image
+                          src={item.before}
+                          alt={`Antes - ${item.area}`}
+                          width={300}
+                          height={416}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                        {/* Overlay gradient */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
+                      </div>
+                    </div>
+
+                    {/* After */}
+                    <div className="relative">
+                      <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
+                        <span className="px-3 py-1 text-xs font-bold bg-gradient-to-r from-emerald-500 to-blue-600 text-white rounded-full shadow-md">
+                          DESPUÉS
+                        </span>
+                      </div>
+                      <div className="relative overflow-hidden rounded-xl md:rounded-2xl h-44 md:h-52 shadow-inner bg-gradient-to-br from-emerald-50 to-blue-50">
+                        <Image
+                          src={item.after}
+                          alt={`Después - ${item.area}`}
+                          width={300}
+                          height={416}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                        {/* Overlay gradient */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Verification Badge - POSICIONADO CLARAMENTE */}
+                <div className="pt-4 md:pt-5 border-t border-gray-100">
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-full border border-emerald-100">
+                      <CheckCircle className="w-4 h-4 text-emerald-500" />
+                      <span className="text-xs font-medium text-emerald-700">
+                        Verificado
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-full border border-blue-100">
+                      <Camera className="w-4 h-4 text-blue-500" />
+                      <span className="text-xs font-medium text-blue-700">
+                        Sin edición
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Hover Indicator */}
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-emerald-500 to-blue-600 group-hover:w-2/3 transition-all duration-500 rounded-full"></div>
               </div>
-            ))}
-          </div>
-          {/* Call to action */}
-          <div className="text-center mt-12">
-            <p className="text-lg text-gray-600 mb-6">
-              ¿Quieres ser el próximo en lograr estos resultados?
-            </p>
-            <a
-              href={generateWhatsAppURL("gallery")}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 bg-[#25D366] hover:bg-[#20b358] text-white font-semibold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488" />
-              </svg>
-              Agenda tu Consulta
-            </a>
-          </div>
+            </div>
+          ))}
+        </div>
+
+        {/* CTA Section */}
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-0">
+          {/* Glow Effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-blue-500/10 blur-xl md:blur-2xl rounded-2xl md:rounded-3xl"></div>
+          
+          
         </div>
       </div>
     </section>

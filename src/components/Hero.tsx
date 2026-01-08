@@ -19,12 +19,12 @@ export default function Hero() {
   ];
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-pink-50 via-white to-rose-50">
+    <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-blue-50">
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 -left-40 w-80 h-80 rounded-full bg-gradient-to-r from-pink-200/20 to-rose-200/20 blur-3xl"></div>
-        <div className="absolute bottom-1/4 -right-40 w-96 h-96 rounded-full bg-gradient-to-l from-pink-200/20 to-rose-200/20 blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full border border-pink-100/30"></div>
+        <div className="absolute top-1/4 -left-40 w-80 h-80 rounded-full bg-gradient-to-r from-emerald-200/20 to-blue-200/20 blur-3xl"></div>
+        <div className="absolute bottom-1/4 -right-40 w-96 h-96 rounded-full bg-gradient-to-l from-emerald-200/20 to-blue-200/20 blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full border border-emerald-100/30"></div>
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-20">
@@ -32,9 +32,9 @@ export default function Hero() {
           {/* Left Column - Content */}
           <div className={`space-y-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}>
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 shadow-sm border border-pink-100">
-              <Sparkles className="w-4 h-4 text-pink-400" />
-              <span className="text-sm font-semibold bg-gradient-to-r from-pink-400 to-rose-500 bg-clip-text text-transparent">
+            <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 shadow-sm border border-emerald-100">
+              <Sparkles className="w-4 h-4 text-emerald-500" />
+              <span className="text-sm font-semibold bg-gradient-to-r from-emerald-500 to-blue-600 bg-clip-text text-transparent">
                 Tecnología Médica Avanzada
               </span>
             </div>
@@ -42,7 +42,7 @@ export default function Hero() {
             {/* Main Title */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
               <span className="block text-gray-900">Lipólisis láser</span>
-              <span className="block bg-gradient-to-r from-pink-400 via-rose-400 to-pink-500 bg-clip-text text-transparent mt-2">
+              <span className="block bg-gradient-to-r from-emerald-500 via-blue-500 to-emerald-600 bg-clip-text text-transparent mt-2">
                 sin cirugía
               </span>
             </h1>
@@ -50,7 +50,7 @@ export default function Hero() {
             {/* Subtitle */}
             <div className="space-y-4">
               <p className="text-xl text-gray-600 leading-relaxed">
-                <span className="font-semibold text-pink-500">Resultados desde la primera sesión</span>. 
+                <span className="font-semibold text-emerald-600">Resultados desde la primera sesión</span>. 
                 Eliminamos grasa localizada sin dolor ni incapacidad, reafirmamos la piel y te devolvemos la firmeza con tecnología láser médica segura.
               </p>
               
@@ -59,10 +59,10 @@ export default function Hero() {
                 {benefits.map((benefit, index) => (
                   <div 
                     key={index}
-                    className={`flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 border border-pink-100 shadow-sm transition-all duration-300 hover:shadow-md hover:border-pink-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+                    className={`flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 border border-emerald-100 shadow-sm transition-all duration-300 hover:shadow-md hover:border-emerald-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
                     style={{ transitionDelay: `${index * 100}ms` }}
                   >
-                    <div className="text-pink-400">{benefit.icon}</div>
+                    <div className="text-emerald-500">{benefit.icon}</div>
                     <span className="text-sm font-medium text-gray-700">{benefit.text}</span>
                   </div>
                 ))}
@@ -75,7 +75,7 @@ export default function Hero() {
                 href={generateWhatsAppURL("hero")}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative inline-flex items-center justify-center gap-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-semibold py-4 px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:from-pink-600 hover:to-rose-600"
+                className="group relative inline-flex items-center justify-center gap-3 bg-gradient-to-r from-emerald-500 to-blue-600 text-white font-semibold py-4 px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:from-emerald-600 hover:to-blue-700"
               >
                 <div className="absolute inset-0 rounded-full bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -85,13 +85,7 @@ export default function Hero() {
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </a>
               
-              <a
-                href="#servicios"
-                className="group inline-flex items-center justify-center gap-2 bg-white/80 backdrop-blur-sm text-gray-700 font-medium py-4 px-8 rounded-full border border-gray-200 hover:border-pink-300 hover:bg-white transition-all duration-300"
-              >
-                <span>Ver servicios</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </a>
+           
             </div>
 
             {/* Trust indicators */}
@@ -106,7 +100,7 @@ export default function Hero() {
                   <span>Tecnología certificada</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-pink-400"></div>
+                  <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
                   <span>Resultados garantizados</span>
                 </div>
               </div>
@@ -118,9 +112,9 @@ export default function Hero() {
             <div className="relative mx-auto max-w-lg">
               {/* Main image container */}
               <div className="relative aspect-square rounded-3xl overflow-hidden shadow-2xl border-8 border-white">
-                <Image
-                  src="/logoperfesthetic.jpeg"
-                  alt="Perfestetic - Lipólisis láser sin cirugía"
+                  <Image
+                    src="/coldestheticlogo.png"
+                  alt="Coldesthetic - Lipólisis láser sin cirugía"
                   width={600}
                   height={600}
                   className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-700"
@@ -132,27 +126,27 @@ export default function Hero() {
               </div>
 
               {/* Floating card 1 */}
-              <div className="absolute -bottom-6 -left-6 bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-xl border border-pink-100">
+              <div className="absolute -bottom-6 -left-6 bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-xl border border-emerald-100">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-100 to-pink-200 flex items-center justify-center">
-                    <Sparkles className="w-6 h-6 text-pink-500" />
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-200 flex items-center justify-center">
+                    <Sparkles className="w-6 h-6 text-emerald-600" />
                   </div>
                   <div>
                     <div className="text-sm font-semibold text-gray-900">Desde la 1ra sesión</div>
-                    <div className="text-xs text-pink-500">Resultados visibles</div>
+                    <div className="text-xs text-emerald-600">Resultados visibles</div>
                   </div>
                 </div>
               </div>
 
               {/* Floating card 2 */}
-              <div className="absolute -top-6 -right-6 bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-xl border border-pink-100">
+              <div className="absolute -top-6 -right-6 bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-xl border border-blue-100">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-rose-100 to-rose-200 flex items-center justify-center">
-                    <Shield className="w-6 h-6 text-rose-500" />
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
+                    <Shield className="w-6 h-6 text-blue-600" />
                   </div>
                   <div>
                     <div className="text-sm font-semibold text-gray-900">Sin dolor</div>
-                    <div className="text-xs text-rose-500">Sin incapacidad</div>
+                    <div className="text-xs text-blue-600">Sin incapacidad</div>
                   </div>
                 </div>
               </div>
@@ -163,8 +157,8 @@ export default function Hero() {
 
       {/* Scroll indicator */}
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <div className="w-6 h-10 rounded-full border-2 border-pink-300 flex justify-center">
-          <div className="w-1 h-3 bg-pink-400 rounded-full mt-2"></div>
+        <div className="w-6 h-10 rounded-full border-2 border-emerald-300 flex justify-center">
+          <div className="w-1 h-3 bg-emerald-400 rounded-full mt-2"></div>
         </div>
       </div>
     </section>

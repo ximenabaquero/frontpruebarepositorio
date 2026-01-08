@@ -1,28 +1,31 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import { colors } from "@/config/colors";
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+// ¿TIENES ESTAS IMPORTACIONES?
+// import Header from '@/components/Header';
+// import Footer from '@/components/Footer';
+
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "Perfestetic - Lipolisis Láser",
-  description: "Centro de estética especializado en lipolisis láser. Reducción de grasa, recuperación rápida y resultados visibles.",
+  title: 'Coldesthetic - Estética Médica Avanzada',
+  description: 'Lipólisis láser sin cirugía, resultados desde la primera sesión',
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="es">
-      <body 
-        className="antialiased"
-        style={{ 
-          backgroundColor: colors.background, 
-          color: colors.foreground,
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif'
-        }}
-      >
-        {children}
+      <body className={inter.className}>
+        {/* ¿TIENES HEADER Y FOOTER AQUÍ? */}
+        {/* <Header /> */}
+        <main className="min-h-screen">
+          {children}
+        </main>
+        {/* <Footer /> */}
       </body>
     </html>
   );

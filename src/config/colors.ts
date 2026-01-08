@@ -1,4 +1,4 @@
-// Configuración de colores para Perfestetic
+// Configuración de colores para Coldesthetic
 // Puedes cambiar estos colores directamente aquí sin tocar globals.css
 
 export const colors = {
