@@ -1,12 +1,40 @@
 "use client";
 
 import { Menu, X, Phone } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAuthed, setIsAuthed] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const readAuth = () => {
+      try {
+        return window.localStorage.getItem('coldesthetic_admin_authed') === '1';
+      } catch {
+        return false;
+      }
+    };
+
+    setIsAuthed(readAuth());
+    const onStorage = () => setIsAuthed(readAuth());
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
+  const handleLogout = () => {
+    try {
+      window.localStorage.removeItem('coldesthetic_admin_authed');
+    } catch {
+      // ignore
+    }
+    setIsAuthed(false);
+    router.push('/login');
+  };
 
 
 
@@ -46,31 +74,49 @@ export default function Header() {
           <div className="flex items-center gap-4">
             {/* Teléfono */}
             <a
-              href="tel:+573224042286"
+              href="tel:+573001434089"
               className="hidden sm:flex items-center gap-2 text-gray-600 hover:text-emerald-600 transition-colors duration-200"
               aria-label="Llamar"
             >
               <Phone size={16} />
-              <span className="text-sm font-medium">+57 322 404 2286</span>
+              <span className="text-sm font-medium">+57 300 143 4089</span>
             </a>
 
-            {/* Botón de Login que va a la página completa */}
-            <Link
-              href="/login"
-              className="flex items-center gap-2 text-sm font-medium text-emerald-600 hover:text-blue-700 transition-colors duration-200 group"
-            >
-              <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-100 transition-colors duration-200">
-                <svg 
-                  className="w-4 h-4 text-emerald-600" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
+            {isAuthed ? (
+              <>
+                <Link
+                  href="/register-patient"
+                  className="hidden sm:flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-emerald-600 transition-colors duration-200"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </div>
-              <span className="hidden sm:inline">Iniciar Sesión</span>
-            </Link>
+                  <span className="text-sm font-medium">Pacientes</span>
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-emerald-600 transition-colors duration-200"
+                >
+                  <span className="hidden sm:inline">Cerrar sesión</span>
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/login"
+                className="flex items-center gap-2 text-sm font-medium text-emerald-600 hover:text-blue-700 transition-colors duration-200 group"
+              >
+                <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-100 transition-colors duration-200">
+                  <svg 
+                    className="w-4 h-4 text-emerald-600" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <span className="hidden sm:inline">Iniciar Sesión</span>
+              </Link>
+            )}
 
             {/* Mobile Menu Button */}
             <button
@@ -91,30 +137,53 @@ export default function Header() {
               
               <div className="pt-3 mt-2 border-t border-gray-100">
                 <a
-                  href="tel:+573224042286"
+                  href="tel:+573001434089"
                   className="flex items-center gap-3 text-gray-600 hover:text-emerald-600 py-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <Phone size={18} />
-                  <span className="font-medium">+57 322 404 2286</span>
+                  <span className="font-medium">+57 300 143 4089</span>
                 </a>
                 
                 {/* Login en mobile */}
-                <Link
-                  href="/login"
-                  className="flex items-center gap-3 text-emerald-600 hover:text-blue-700 font-medium py-2"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <svg 
-                    className="w-5 h-5" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
+                {isAuthed ? (
+                  <>
+                    <Link
+                      href="/register-patient"
+                      className="flex items-center gap-3 text-gray-700 hover:text-emerald-600 font-medium py-2"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <span>Pacientes</span>
+                    </Link>
+
+                    <button
+                      type="button"
+                      className="flex items-center gap-3 text-gray-700 hover:text-emerald-600 font-medium py-2"
+                      onClick={() => {
+                        setIsMenuOpen(false);
+                        handleLogout();
+                      }}
+                    >
+                      <span>Cerrar sesión</span>
+                    </button>
+                  </>
+                ) : (
+                  <Link
+                    href="/login"
+                    className="flex items-center gap-3 text-emerald-600 hover:text-blue-700 font-medium py-2"
+                    onClick={() => setIsMenuOpen(false)}
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                  <span>Iniciar Sesión</span>
-                </Link>
+                    <svg 
+                      className="w-5 h-5" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span>Iniciar Sesión</span>
+                  </Link>
+                )}
               </div>
             </div>
           </div>

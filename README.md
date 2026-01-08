@@ -6,6 +6,25 @@ First, run the development server:
 
 ```bash
 npm run dev
+
+## PHP/MySQL Patient Registration (no frameworks)
+
+This repo also includes a minimal PHP 8+ + MySQL module for registering patients:
+
+- SQL schema: [php/schema.sql](php/schema.sql)
+- Config template: [php/config.example.php](php/config.example.php) (copy to `php/config.php`)
+- Register page: [php/register_patient.php](php/register_patient.php)
+
+Quick setup:
+
+1) Create a MySQL database (example: `coldesthetic`).
+2) Run the schema in `php/schema.sql`.
+3) Copy config:
+	- `php/config.example.php` → `php/config.php`
+4) Start PHP built-in server from the repo root:
+	- `php -S localhost:8080 -t php`
+5) Open:
+	- `http://localhost:8080/register_patient.php`
 # or
 yarn dev
 # or

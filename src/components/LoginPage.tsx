@@ -47,7 +47,16 @@ export default function LoginPage() {
       setIsLoading(false);
       console.log("Login attempt:", formData);
       // Aquí iría tu lógica de autenticación real
-      // Después de login exitoso: window.location.href = '/dashboard';
+      // Demo guard: mark as authed so internal pages aren't public.
+      try {
+        window.localStorage.setItem("coldesthetic_admin_authed", "1");
+      } catch {
+        // ignore
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const next = params.get("next") || "/register-patient";
+      window.location.href = next;
     }, 1500);
   };
 
