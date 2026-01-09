@@ -81,7 +81,7 @@ export default function Contact() {
   }, []);
 
   return (
-    <section className="relative py-16 md:py-20 lg:py-24 overflow-hidden">
+    <section className="relative py-16 md:py-20 lg:py-24 overflow-hidden" id="contacto">
       {/* Background with gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 via-white to-blue-50/30">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-200/20 via-transparent to-transparent"></div>
@@ -302,8 +302,6 @@ export default function Contact() {
             </div>
           </div>
         </div>
-
-        
       </div>
     </section>
   );

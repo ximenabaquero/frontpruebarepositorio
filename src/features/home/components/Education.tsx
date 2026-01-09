@@ -175,7 +175,7 @@ export default function Education() {
           ))}
         </div>
 
-        {/* CTA Section - Añadido */}
+        {/* CTA Section */}
         <div className="relative max-w-3xl mx-auto px-4 sm:px-0">
           {/* Glow Effect */}
           <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-blue-500/10 blur-xl md:blur-2xl rounded-2xl md:rounded-3xl"></div>

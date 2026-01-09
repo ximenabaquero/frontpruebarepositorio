@@ -1,4 +1,4 @@
-import LoginPage from '@/components/LoginPage';
+import LoginPage from "@/features/auth/LoginPage";
 
 export const metadata = {
   title: 'Acceso Admin - Coldesthetic',

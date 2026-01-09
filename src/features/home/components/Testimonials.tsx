@@ -254,7 +254,7 @@ export default function Testimonials() {
             ))}
           </div>
 
-          {/* Chat Footer / CTA - CORRECCIÓN APLICADA AQUÍ */}
+          {/* Chat Footer / CTA */}
           <div className="rounded-b-2xl md:rounded-b-3xl bg-gradient-to-r from-white to-emerald-50 border border-gray-100 border-t-0 px-4 sm:px-6 py-6 md:py-8 shadow-lg">
             <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
               <div className="text-center lg:text-left">
@@ -269,7 +269,6 @@ export default function Testimonials() {
                 </p>
               </div>
               
-              {/* LÍNEA CORREGIDA: Cambiado "testimonios" por "general" */}
               <a
                 href={generateWhatsAppURL("general")}
                 target="_blank"
