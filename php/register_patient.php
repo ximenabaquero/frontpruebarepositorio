@@ -12,11 +12,13 @@ $successProceduresTotal = null;
 
 $values = [
     'full_name' => '',
+  'remitente' => '',
     'age' => '',
     'biological_sex' => 'Female',
     'weight_kg' => '',
     'height_m' => '',
     'treatment_area' => '',
+  'contraindications_text' => '',
     'diabetes' => '0',
     'hypertension' => '0',
     'pregnancy' => '0',
@@ -96,15 +98,74 @@ function bmiCategory(float $bmi): string
   return 'Obesidad grado III (≥ 40)';
 }
 
-function computeEligibility(array $bools): int
+function normalizeForSearch(string $text): string
 {
-    // Minimal, conservative rule: eligible unless any contraindication is checked.
-    foreach ($bools as $v) {
-        if ((int)$v === 1) {
-            return 0;
-        }
+  $t = mb_strtolower($text, 'UTF-8');
+  // Basic accent folding for Spanish.
+  $t = strtr($t, [
+    'á' => 'a', 'à' => 'a', 'ä' => 'a', 'â' => 'a',
+    'é' => 'e', 'è' => 'e', 'ë' => 'e', 'ê' => 'e',
+    'í' => 'i', 'ì' => 'i', 'ï' => 'i', 'î' => 'i',
+    'ó' => 'o', 'ò' => 'o', 'ö' => 'o', 'ô' => 'o',
+    'ú' => 'u', 'ù' => 'u', 'ü' => 'u', 'û' => 'u',
+    'ñ' => 'n',
+  ]);
+  return $t;
+}
+
+function isNegatedNear(string $normalized, int $matchOffset): bool
+{
+  if ($matchOffset <= 0) {
+    return false;
+  }
+  $start = max(0, $matchOffset - 40);
+  $window = substr($normalized, $start, $matchOffset - $start);
+  // Consider it negated if a negation token appears shortly before the match.
+  return (bool)preg_match('/\b(no|niega|neg(?:a|o)|sin|descarta|ningun(?:a)?)\b[^\n]{0,20}$/', $window);
+}
+
+function computeEligibilityFromText(string $contraText, array $bools = []): int
+{
+  // Backward compatible: if any explicit checkbox contraindication is present, not eligible.
+  foreach ($bools as $v) {
+    if ((int)$v === 1) {
+      return 0;
     }
+  }
+
+  $t = trim($contraText);
+  if ($t === '') {
+    // Default to eligible unless we detect a contraindication.
     return 1;
+  }
+
+  $n = normalizeForSearch($t);
+
+  // Simple heuristic keyword checks.
+  $patterns = [
+    '/\bembaraz\w*\b/u',
+    '/\bgestant\w*\b/u',
+    '/\blactan\w*\b/u',
+    '/\bdiabet\w*\b/u',
+    '/\bhipertens\w*\b/u',
+    '/\bhta\b/u',
+    '/\bmarcapasos\b/u',
+    '/\bimplant\w*\b/u',
+    '/\bdispositivo\s+implant\w*\b/u',
+  ];
+
+  foreach ($patterns as $re) {
+    if (preg_match_all($re, $n, $m, PREG_OFFSET_CAPTURE)) {
+      foreach ($m[0] as $hit) {
+        $offset = (int)($hit[1] ?? 0);
+        if (!isNegatedNear($n, $offset)) {
+          return 0;
+        }
+      }
+    }
+  }
+
+  return 1;
 }
 
 function parseMoney(string $value): ?float
@@ -215,11 +276,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 
     $fullName = $values['full_name'];
+    $remitenteRaw = $values['remitente'];
     $age = filter_var($values['age'], FILTER_VALIDATE_INT);
     $sex = $values['biological_sex'];
     $weightKg = filter_var($values['weight_kg'], FILTER_VALIDATE_FLOAT);
     $heightM = filter_var($values['height_m'], FILTER_VALIDATE_FLOAT);
     $treatmentArea = $values['treatment_area'];
+    $contraTextRaw = $values['contraindications_text'];
 
     $diabetes = toBool($values['diabetes']);
     $hypertension = toBool($values['hypertension']);
@@ -227,9 +290,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $lactation = toBool($values['lactation']);
     $implantedDevice = toBool($values['implanted_device']);
     $notes = $values['notes'] !== '' ? $values['notes'] : null;
+    $remitente = $remitenteRaw !== '' ? $remitenteRaw : null;
+    $contraText = $contraTextRaw !== '' ? $contraTextRaw : null;
 
     if ($fullName === '') {
       $errors[] = 'El nombre completo es obligatorio.';
+    }
+    if ($remitente !== null && mb_strlen($remitente) > 255) {
+      $errors[] = 'El remitente es demasiado largo.';
     }
     if ($age === false || $age < 0 || $age > 150) {
       $errors[] = 'La edad debe ser un número válido.';
@@ -245,6 +313,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     if ($treatmentArea === '') {
       $errors[] = 'El área de tratamiento es obligatoria.';
+    }
+    if ($contraText !== null && mb_strlen($contraText) > 5000) {
+      $errors[] = 'El texto de antecedentes / contraindicaciones es demasiado largo.';
     }
 
     // Validate procedures: only allow prices for checked items; checked items must have a valid price.
@@ -262,7 +333,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           continue;
         }
 
-        $details = null;
+        $detailsObj = [];
+        $freeDetails = isset($procedureMeta[$procedureId]['details'])
+          ? trim((string)$procedureMeta[$procedureId]['details'])
+          : '';
+        if ($freeDetails !== '') {
+          if (mb_strlen($freeDetails) > 2000) {
+            $errors[] = 'Los detalles son demasiado largos para el procedimiento: ' . ($procedureLabelMap[$procedureId] ?? $procedureId);
+            continue;
+          }
+          $detailsObj['details'] = $freeDetails;
+        }
+
         if ($procedureId === 'pierna') {
           $interna = isset($procedureMeta['pierna']['interna']) ? toBool((string)$procedureMeta['pierna']['interna']) : 0;
           $externa = isset($procedureMeta['pierna']['externa']) ? toBool((string)$procedureMeta['pierna']['externa']) : 0;
@@ -270,7 +352,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errors[] = 'En Pierna debes seleccionar Interna y/o Externa.';
             continue;
           }
-          $details = json_encode(['interna' => (bool)$interna, 'externa' => (bool)$externa], JSON_UNESCAPED_UNICODE);
+          $detailsObj['interna'] = (bool)$interna;
+          $detailsObj['externa'] = (bool)$externa;
         }
 
         if ($procedureId === 'faja_postoperatoria') {
@@ -283,7 +366,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errors[] = 'La talla de Faja postoperatoria es demasiado larga.';
             continue;
           }
-          $details = json_encode(['talla' => $talla], JSON_UNESCAPED_UNICODE);
+          $detailsObj['talla'] = $talla;
+        }
+
+        $details = null;
+        if (!empty($detailsObj)) {
+          $encoded = json_encode($detailsObj, JSON_UNESCAPED_UNICODE);
+          if ($encoded === false) {
+            $errors[] = 'Error serializando detalles del procedimiento: ' . ($procedureLabelMap[$procedureId] ?? $procedureId);
+            continue;
+          }
+          $details = $encoded;
         }
 
         $rawPrice = $procedurePrices[$procedureId] ?? '';
@@ -313,12 +406,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$errors) {
         $bmi = round(computeBmi((float)$weightKg, (float)$heightM), 2);
       $bmiCat = bmiCategory((float)$bmi);
-        $eligible = computeEligibility([
-            $diabetes,
-            $hypertension,
-            $pregnancy,
-            $lactation,
-            $implantedDevice,
+        $eligible = computeEligibilityFromText((string)($contraText ?? ''), [
+          $diabetes,
+          $hypertension,
+          $pregnancy,
+          $lactation,
+          $implantedDevice,
         ]);
 
         try {
@@ -326,11 +419,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
           $stmt = db()->prepare(
             'INSERT INTO patients (
-              full_name, age, biological_sex, weight_kg, height_m, bmi, treatment_area,
+              full_name, remitente, age, biological_sex, weight_kg, height_m, bmi, treatment_area,
+              contraindications_text,
               diabetes, hypertension, pregnancy, lactation, implanted_device,
               eligible, notes, procedures_total
             ) VALUES (
-              :full_name, :age, :biological_sex, :weight_kg, :height_m, :bmi, :treatment_area,
+              :full_name, :remitente, :age, :biological_sex, :weight_kg, :height_m, :bmi, :treatment_area,
+              :contraindications_text,
               :diabetes, :hypertension, :pregnancy, :lactation, :implanted_device,
               :eligible, :notes, :procedures_total
             )'
@@ -338,12 +433,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
           $stmt->execute([
             ':full_name' => $fullName,
+            ':remitente' => $remitente,
             ':age' => (int)$age,
             ':biological_sex' => $sex,
             ':weight_kg' => (float)$weightKg,
             ':height_m' => (float)$heightM,
             ':bmi' => (float)$bmi,
             ':treatment_area' => $treatmentArea,
+            ':contraindications_text' => $contraText,
             ':diabetes' => $diabetes,
             ':hypertension' => $hypertension,
             ':pregnancy' => $pregnancy,
@@ -462,6 +559,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input id="full_name" name="full_name" value="<?= h($values['full_name']) ?>" required />
           </div>
           <div class="field">
+            <label for="remitente">Remitente (opcional)</label>
+            <input id="remitente" name="remitente" maxlength="255" value="<?= h($values['remitente']) ?>" placeholder="Ej. Dr. Juan / Instagram / Referido" />
+          </div>
+          <div class="field">
             <label for="age">Edad</label>
             <input id="age" name="age" type="number" min="0" max="150" value="<?= h($values['age']) ?>" required />
           </div>
@@ -487,6 +588,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <div class="field">
             <label for="bmi_preview">IMC (auto)</label>
             <input id="bmi_preview" value="" disabled />
+                $pdetails = $procedureMeta[$pid]['details'] ?? '';
+                $piernaInternaChecked = isset($procedureMeta['pierna']['interna']) ? toBool((string)$procedureMeta['pierna']['interna']) : 0;
+                $piernaExternaChecked = isset($procedureMeta['pierna']['externa']) ? toBool((string)$procedureMeta['pierna']['externa']) : 0;
+                $fajaTallaVal = $procedureMeta['faja_postoperatoria']['talla'] ?? '';
             <div id="bmi_status" class="hint">El IMC se calcula en el servidor y se guarda como `bmi`.</div>
           </div>
         </div>
@@ -499,31 +604,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="field">
           <label>Procedimientos</label>
           <div class="hint">Marca los procedimientos realizados e ingresa el precio solo en los marcados.</div>
-          <div class="checks" style="grid-template-columns:1fr; gap:12px;">
-            <?php foreach ($PROCEDURES as $p):
-              $pid = (string)$p['id'];
-              $checked = isset($procedureSelected[$pid]) && $procedureSelected[$pid] === true;
-              $pval = $procedurePrices[$pid] ?? '';
-            ?>
-              <div class="row" style="align-items:center; margin:0;">
-                <label class="check" style="flex:1; min-width:220px;">
-                  <input
-                    type="checkbox"
-                    name="procedures[]"
-                    value="<?= h($pid) ?>"
-                    <?= $checked ? 'checked' : '' ?>
+                  <div class="field" style="min-width:220px; margin:0;">
+                    <label for="procedure_price_<?= h($pid) ?>" style="margin:0 0 6px;">Precio</label>
+                    <input
+                      id="procedure_price_<?= h($pid) ?>"
+                      name="procedure_price[<?= h($pid) ?>]"
+                      inputmode="decimal"
+                      value="<?= h($pval) ?>"
+                      <?= $checked ? '' : 'disabled' ?>
+                      <?= $checked ? 'required' : '' ?>
+                      data-proc-price
+                    />
+
+                    <?php if ($pid === 'pierna'): ?>
+                      <div class="hint" style="margin-top:8px;">Pierna: selecciona Interna y/o Externa</div>
+                      <div class="check" style="margin-top:6px;">
+                        <input type="checkbox" name="procedure_meta[pierna][interna]" value="1" <?= $piernaInternaChecked ? 'checked' : '' ?> <?= $checked ? '' : 'disabled' ?> data-proc-meta />
+                        <span>Interna</span>
+                      </div>
+                      <div class="check" style="margin-top:6px;">
+                        <input type="checkbox" name="procedure_meta[pierna][externa]" value="1" <?= $piernaExternaChecked ? 'checked' : '' ?> <?= $checked ? '' : 'disabled' ?> data-proc-meta />
+                        <span>Externa</span>
+                      </div>
+                    <?php endif; ?>
+
+                    <?php if ($pid === 'faja_postoperatoria'): ?>
+                      <label for="procedure_talla_<?= h($pid) ?>" style="margin:10px 0 6px;">Talla</label>
+                      <input
+                        id="procedure_talla_<?= h($pid) ?>"
+                        name="procedure_meta[faja_postoperatoria][talla]"
+                        value="<?= h((string)$fajaTallaVal) ?>"
+                        <?= $checked ? '' : 'disabled' ?>
+                        <?= $checked ? 'required' : '' ?>
+                        data-proc-meta
+                      />
+                    <?php endif; ?>
+
+                    <label for="procedure_details_<?= h($pid) ?>" style="margin:10px 0 6px;">Detalles (opcional)</label>
+                    <textarea
+                      id="procedure_details_<?= h($pid) ?>"
+                      name="procedure_meta[<?= h($pid) ?>][details]"
+                      maxlength="2000"
+                      <?= $checked ? '' : 'disabled' ?>
+                      data-proc-meta
+                    ><?= h((string)$pdetails) ?></textarea>
+
+                    <input type="hidden" name="procedure_label[<?= h($pid) ?>]" value="<?= h((string)$p['label']) ?>" />
+                  </div>
                     data-proc-check
                   />
                   <?= h((string)$p['label']) ?>
                 </label>
-                <div class="field" style="min-width:220px; margin:0;">
-                  <label for="procedure_price_<?= h($pid) ?>" style="margin:0 0 6px;">Precio</label>
-                  <input
-                    id="procedure_price_<?= h($pid) ?>"
-                    name="procedure_price[<?= h($pid) ?>]"
-                    inputmode="decimal"
-                    value="<?= h($pval) ?>"
-                    <?= $checked ? '' : 'disabled' ?>
+
+          <div class="field">
+            <label for="contraindications_text">Antecedentes / contraindicaciones (texto libre)</label>
+            <textarea id="contraindications_text" name="contraindications_text" maxlength="5000" placeholder="Ej. Niega embarazo y lactancia. HTA controlada. Sin marcapasos..."><?= h($values['contraindications_text']) ?></textarea>
+            <div class="hint">El backend usa una heurística del texto para calcular elegibilidad.</div>
+          </div>
                     <?= $checked ? 'required' : '' ?>
                     data-proc-price
                   />
@@ -609,6 +746,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         price.disabled = !check.checked;
         price.required = !!check.checked;
         if (!check.checked) price.value = '';
+
+        var meta = row.querySelectorAll('[data-proc-meta]');
+        meta.forEach(function (el) {
+          el.disabled = !check.checked;
+          if (!check.checked) {
+            if (el.tagName === 'INPUT' && (el.type === 'checkbox' || el.type === 'radio')) {
+              el.checked = false;
+            } else if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+              el.value = '';
+            }
+          }
+        });
       }
 
       checks.forEach(function (c) {
