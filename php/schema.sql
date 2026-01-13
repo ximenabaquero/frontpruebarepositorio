@@ -20,3 +20,23 @@ CREATE TABLE IF NOT EXISTS `patients` (
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Procedures performed for a given patient (1:N)
+CREATE TABLE IF NOT EXISTS `patient_procedures` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `patient_id` INT NOT NULL,
+  `procedure_id` VARCHAR(64) NOT NULL,
+  `procedure_label` VARCHAR(255) NULL,
+  `price` DECIMAL(10,2) NOT NULL,
+  `details_json` JSON NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_patient_procedures_patient_id` (`patient_id`),
+  CONSTRAINT `fk_patient_procedures_patient`
+    FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`)
+    ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Optional denormalized total for quick reporting
+ALTER TABLE `patients`
+  ADD COLUMN IF NOT EXISTS `procedures_total` DECIMAL(10,2) NOT NULL DEFAULT 0;

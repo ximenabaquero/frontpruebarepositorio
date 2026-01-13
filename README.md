@@ -18,7 +18,7 @@ This repo also includes a minimal PHP 8+ + MySQL module for registering patients
 Quick setup:
 
 1) Create a MySQL database (example: `coldesthetic`).
-2) Run the schema in `php/schema.sql`.
+2) Run the schema in `php/schema.sql` (includes `patients` and `patient_procedures`).
 3) Copy config:
 	- `php/config.example.php` → `php/config.php`
 4) Start PHP built-in server from the repo root:
