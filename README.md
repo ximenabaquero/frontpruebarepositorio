@@ -7,24 +7,26 @@ First, run the development server:
 ```bash
 npm run dev
 
-## PHP/MySQL Patient Registration (no frameworks)
+## Backend (Laravel)
 
-This repo also includes a minimal PHP 8+ + MySQL module for registering patients:
+Este frontend trabaja con el backend Laravel del repo `Backend-ColdEsthetic`.
 
-- SQL schema: [php/schema.sql](php/schema.sql)
-- Config template: [php/config.example.php](php/config.example.php) (copy to `php/config.php`)
-- Register page: [php/register_patient.php](php/register_patient.php)
+En desarrollo, Next hace proxy de llamadas al backend vía `/backend/*` (ver `next.config.ts`).
 
-Quick setup:
+### Cómo correr local
 
-1) Create a MySQL database (example: `coldesthetic`).
-2) Run the schema in `php/schema.sql` (includes `patients` and `patient_procedures`).
-3) Copy config:
-	- `php/config.example.php` → `php/config.php`
-4) Start PHP built-in server from the repo root:
-	- `php -S localhost:8080 -t php`
-5) Open:
-	- `http://localhost:8080/register_patient.php`
+1) Backend (Laravel):
+	- Desde `Backend-ColdEsthetic`:
+		- `php artisan migrate`
+		- `php artisan serve --host=127.0.0.1 --port=8000`
+
+2) Frontend (Next):
+	- Desde este proyecto:
+		- `npm install`
+		- `npm run dev`
+
+Si el backend NO está en `http://localhost:8000`, define antes de correr Next:
+	- `LARAVEL_BACKEND_URL=http://127.0.0.1:8001`
 # or
 yarn dev
 # or

@@ -1,0 +1,232 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import MainLayout from "@/layouts/MainLayout";
+
+import RegisterHeaderBar from "@/features/post-login/components/RegisterHeaderBar";
+import RegisterCard from "@/features/post-login/components/RegisterCard";
+import FormAlert from "@/features/post-login/components/FormAlert";
+
+type PatientRow = {
+  id: number;
+  first_name?: string | null;
+  last_name?: string | null;
+  age?: number | null;
+  cellphone?: string | null;
+  referrer_name?: string | null;
+  created_at?: string | null;
+};
+
+type ApiListResponse<T> = {
+  data: T[];
+};
+
+function isApiListResponse<T>(payload: unknown): payload is ApiListResponse<T> {
+  if (!payload || typeof payload !== "object") return false;
+  if (!("data" in payload)) return false;
+  const data = (payload as { data?: unknown }).data;
+  return Array.isArray(data);
+}
+
+function safeString(value: unknown): string {
+  return typeof value === "string" ? value : "";
+}
+
+export default function PatientsPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [authChecked, setAuthChecked] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const [patients, setPatients] = useState<PatientRow[]>([]);
+  const [search, setSearch] = useState("");
+
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "") || "/backend";
+
+  const getStoredToken = (): string | null => {
+    try {
+      return (
+        window.localStorage.getItem("coldesthetic_admin_token") ||
+        window.sessionStorage.getItem("coldesthetic_admin_token")
+      );
+    } catch {
+      return null;
+    }
+  };
+
+  const handleLogout = useCallback(() => {
+    try {
+      window.localStorage.removeItem("coldesthetic_admin_authed");
+      window.localStorage.removeItem("coldesthetic_admin_token");
+      window.sessionStorage.removeItem("coldesthetic_admin_token");
+    } catch {
+      // ignore
+    }
+    router.replace("/login");
+  }, [router]);
+
+  useEffect(() => {
+    try {
+      const token = getStoredToken();
+      if (!token) {
+        const next = searchParams?.get("next") ?? "/patients";
+        router.replace(`/login?next=${encodeURIComponent(next)}`);
+        return;
+      }
+    } finally {
+      setAuthChecked(true);
+    }
+  }, [router, searchParams]);
+
+  const queryString = useMemo(() => {
+    const trimmed = search.trim();
+    return trimmed ? `?search=${encodeURIComponent(trimmed)}` : "";
+  }, [search]);
+
+  useEffect(() => {
+    if (!authChecked) return;
+
+    const controller = new AbortController();
+
+    const load = async () => {
+      const token = getStoredToken();
+      if (!token) return;
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const res = await fetch(`${apiBaseUrl}/api/v1/patients${queryString}`, {
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          signal: controller.signal,
+        });
+
+        if (res.status === 401) {
+          handleLogout();
+          return;
+        }
+
+        const payload = (await res.json().catch(() => null)) as unknown;
+        if (!res.ok) {
+          setError("No se pudo cargar el listado de pacientes.");
+          return;
+        }
+
+        if (Array.isArray(payload)) {
+          setPatients(payload as PatientRow[]);
+        } else if (isApiListResponse<PatientRow>(payload)) {
+          setPatients(payload.data);
+        } else {
+          setPatients([]);
+        }
+      } catch (e) {
+        if (e instanceof DOMException && e.name === "AbortError") return;
+        if (e instanceof Error && e.name === "AbortError") return;
+        setError("Error de red cargando pacientes.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    void load();
+
+    return () => controller.abort();
+  }, [apiBaseUrl, authChecked, handleLogout, queryString]);
+
+  return (
+    <MainLayout>
+      <div className="bg-gradient-to-b from-emerald-50 via-white to-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <div className="max-w-5xl mx-auto">
+            <RegisterHeaderBar
+              onLogout={handleLogout}
+              onPatientsClick={() => router.push("/patients")}
+              onBackToRegisterClick={() => router.push("/register-patient")}
+              active="patients"
+            />
+
+            <h1 className="mt-3 text-2xl sm:text-3xl font-bold text-gray-900">Pacientes</h1>
+            <p className="mt-2 text-sm text-gray-600">
+              Este listado viene del backend Laravel (SQL). También lo puedes ver en MySQL Workbench.
+            </p>
+
+            {!authChecked ? (
+              <div className="mt-6 rounded-3xl border border-gray-100 bg-white/95 backdrop-blur-sm p-6 text-sm text-gray-600 shadow-sm">
+                Verificando acceso...
+              </div>
+            ) : (
+              <RegisterCard title="Historial" subtitle="Pacientes registrados (más recientes primero).">
+                {error ? <FormAlert variant="error" message={error} /> : null}
+
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                  <div className="w-full sm:max-w-md">
+                    <label htmlFor="search" className="block text-sm font-medium text-gray-700">
+                      Buscar
+                    </label>
+                    <input
+                      id="search"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                      placeholder="Nombre, apellido o celular..."
+                    />
+                  </div>
+
+                  <div className="text-sm text-gray-600">
+                    {isLoading ? "Cargando..." : `${patients.length} resultado(s)`}
+                  </div>
+                </div>
+
+                <div className="mt-5 overflow-hidden rounded-2xl border border-gray-100">
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-100">
+                      <thead className="bg-gray-50">
+                        <tr className="text-left text-xs font-semibold text-gray-600">
+                          <th className="px-4 py-3">ID</th>
+                          <th className="px-4 py-3">Paciente</th>
+                          <th className="px-4 py-3">Edad</th>
+                          <th className="px-4 py-3">Celular</th>
+                          <th className="px-4 py-3">Remitente</th>
+                          <th className="px-4 py-3">Fecha</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 bg-white">
+                        {patients.map((p) => {
+                          const fullName = `${safeString(p.first_name)} ${safeString(p.last_name)}`.trim();
+                          return (
+                            <tr key={p.id} className="text-sm text-gray-800">
+                              <td className="px-4 py-3 font-medium text-gray-900">{p.id}</td>
+                              <td className="px-4 py-3">{fullName || "(sin nombre)"}</td>
+                              <td className="px-4 py-3">{p.age ?? "—"}</td>
+                              <td className="px-4 py-3">{p.cellphone || "—"}</td>
+                              <td className="px-4 py-3">{p.referrer_name || "—"}</td>
+                              <td className="px-4 py-3">{p.created_at ? p.created_at.slice(0, 10) : "—"}</td>
+                            </tr>
+                          );
+                        })}
+
+                        {patients.length === 0 && !isLoading ? (
+                          <tr>
+                            <td className="px-4 py-6 text-sm text-gray-500" colSpan={6}>
+                              No hay pacientes para mostrar.
+                            </td>
+                          </tr>
+                        ) : null}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </RegisterCard>
+            )}
+          </div>
+        </div>
+      </div>
+    </MainLayout>
+  );
+}

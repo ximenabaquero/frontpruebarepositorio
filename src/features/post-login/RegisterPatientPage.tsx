@@ -4,94 +4,18 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import MainLayout from "@/layouts/MainLayout";
 
-type ProcedureOption = {
-  id: string;
-  label: string;
-};
+import FormAlert from "./components/FormAlert";
+import RegisterCard from "./components/RegisterCard";
+import RegisterHeaderBar from "./components/RegisterHeaderBar";
+import PatientBasicsFields from "./components/PatientBasicsFields";
+import ProceduresSelector from "./components/ProceduresSelector";
+import ClinicalInfoFields from "./components/ClinicalInfoFields";
+import ContraindicationsFields from "./components/ContraindicationsFields";
+import NotesField from "./components/NotesField";
+import StickySubmitBar from "./components/StickySubmitBar";
 
-type ProcedureGroup = {
-  id: string;
-  label: string;
-  defaultOpen?: boolean;
-  procedureIds: string[];
-};
+import { PROCEDURES } from "./data/procedures";
 
-const PROCEDURES: ProcedureOption[] = [
-  { id: "abdomen_completo", label: "Abdomen completo" },
-  { id: "laterales", label: "Laterales" },
-  { id: "cintura", label: "Cintura" },
-  { id: "espalda_completa", label: "Espalda completa" },
-  { id: "coxis", label: "Coxis" },
-  { id: "brazos", label: "Brazos" },
-  { id: "papada", label: "Papada" },
-  { id: "pierna", label: "Pierna" },
-  { id: "criolipolisis", label: "Criolipólisis" },
-  { id: "radiofrecuencia", label: "Radiofrecuencia" },
-  { id: "cavitacion", label: "Cavitación" },
-  { id: "hifu", label: "HIFU" },
-  { id: "laser_basico", label: "Láser básico" },
-  { id: "laser_infrarrojo", label: "Láser infrarrojo" },
-  { id: "laser", label: "Láser" },
-  { id: "laser_diodo", label: "Láser diodo" },
-  { id: "lipoinyeccion", label: "Lipoinyección" },
-  { id: "faja_postoperatoria", label: "Faja postoperatoria" },
-  { id: "medicamentos", label: "Medicamentos" },
-  { id: "drenaje", label: "Drenaje linfático" },
-  { id: "masaje", label: "Masaje postoperatorio" },
-  { id: "espuma_reafirmante", label: "Espuma reafirmante" },
-  { id: "examenes", label: "Exámenes" },
-  { id: "controles", label: "Controles" },
-];
-
-const PROCEDURE_GROUPS: ProcedureGroup[] = [
-  {
-    id: "zonas",
-    label: "Zonas",
-    defaultOpen: true,
-    procedureIds: [
-      "abdomen_completo",
-      "laterales",
-      "cintura",
-      "espalda_completa",
-      "coxis",
-      "brazos",
-      "papada",
-      "pierna",
-    ],
-  },
-  {
-    id: "laser",
-    label: "Láser",
-    defaultOpen: true,
-    procedureIds: ["laser_basico", "laser_infrarrojo", "laser", "laser_diodo"],
-  },
-  {
-    id: "postop",
-    label: "Post-operatorio",
-    defaultOpen: true,
-    procedureIds: [
-      "faja_postoperatoria",
-      "drenaje",
-      "masaje",
-      "espuma_reafirmante",
-    ],
-  },
-  {
-    id: "otros",
-    label: "Otros",
-    defaultOpen: false,
-    procedureIds: [
-      "criolipolisis",
-      "radiofrecuencia",
-      "cavitacion",
-      "hifu",
-      "lipoinyeccion",
-      "medicamentos",
-      "examenes",
-      "controles",
-    ],
-  },
-];
 
 function parseNumber(value: string): number {
   const trimmed = value.trim();
@@ -174,6 +98,8 @@ export default function RegisterPatientPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [authChecked, setAuthChecked] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
 
   const [weightKg, setWeightKg] = useState("");
   const [heightM, setHeightM] = useState("");
@@ -186,6 +112,29 @@ export default function RegisterPatientPage() {
   const [fajaTalla, setFajaTalla] = useState("");
 
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "") || "/backend";
+
+  const getStoredToken = (): string | null => {
+    try {
+      return (
+        window.localStorage.getItem("coldesthetic_admin_token") ||
+        window.sessionStorage.getItem("coldesthetic_admin_token")
+      );
+    } catch {
+      return null;
+    }
+  };
+
+  const authedOrRedirect = () => {
+    const token = getStoredToken();
+    if (!token) {
+      const next = searchParams?.get("next") ?? "/register-patient";
+      router.replace(`/login?next=${encodeURIComponent(next)}`);
+      return null;
+    }
+    return token;
+  };
 
   const bmiPreview = useMemo(() => {
     const w = parseNumber(weightKg);
@@ -239,16 +188,10 @@ export default function RegisterPatientPage() {
   const piernaZoneSelected = piernaInterna || piernaExterna;
   const fajaSelected = Boolean(selectedProcedures.faja_postoperatoria);
 
-  // When PHP is served from the same domain, "/php/register_patient.php" is a sensible default.
-  // You can override it for dev/hosting via NEXT_PUBLIC_PATIENT_REGISTER_URL.
-  const registerUrl =
-    process.env.NEXT_PUBLIC_PATIENT_REGISTER_URL ?? "/php/register_patient.php";
-
   useEffect(() => {
-    // Minimal UX guard (NOT real security). Replace with real auth when backend is ready.
     try {
-      const authed = window.localStorage.getItem("coldesthetic_admin_authed") === "1";
-      if (!authed) {
+      const token = getStoredToken();
+      if (!token) {
         const next = searchParams?.get("next") ?? "/register-patient";
         router.replace(`/login?next=${encodeURIComponent(next)}`);
         return;
@@ -261,10 +204,238 @@ export default function RegisterPatientPage() {
   const handleLogout = () => {
     try {
       window.localStorage.removeItem("coldesthetic_admin_authed");
+      window.localStorage.removeItem("coldesthetic_admin_token");
+      window.sessionStorage.removeItem("coldesthetic_admin_token");
     } catch {
       // ignore
     }
     router.replace("/login");
+  };
+
+  const jsonOrNull = async <T,>(res: Response): Promise<T | null> => {
+    try {
+      return (await res.json()) as T;
+    } catch {
+      return null;
+    }
+  };
+
+  const apiMessageFrom = (payload: unknown, preferredField?: string): string | null => {
+    if (!payload || typeof payload !== "object") return null;
+    const obj = payload as Record<string, unknown>;
+
+    if (typeof obj.message === "string" && obj.message.trim()) return obj.message;
+
+    const errors = obj.errors;
+    if (!errors || typeof errors !== "object") return null;
+
+    const errorsObj = errors as Record<string, unknown>;
+    const preferred = preferredField ? errorsObj[preferredField] : undefined;
+    const candidate = preferred ?? Object.values(errorsObj)[0];
+
+    if (Array.isArray(candidate) && typeof candidate[0] === "string") {
+      return candidate[0];
+    }
+    return null;
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSubmitError(null);
+    setSubmitSuccess(null);
+
+    const token = authedOrRedirect();
+    if (!token) return;
+
+    if (piernaSelected && !piernaZoneSelected) {
+      setSubmitError("En 'Pierna' debes seleccionar Interna y/o Externa antes de ingresar el precio.");
+      return;
+    }
+
+    if (fajaSelected && fajaTalla.trim() === "") {
+      setSubmitError("En 'Faja postoperatoria' la talla es obligatoria.");
+      return;
+    }
+
+    if (selectedCount <= 0) {
+      setSubmitError("Debes seleccionar al menos un procedimiento.");
+      return;
+    }
+
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+
+    const fullName = String(fd.get("full_name") ?? "").trim();
+    const referrerName = String(fd.get("referrer_name") ?? "").trim();
+
+    const age = Number(String(fd.get("age") ?? "").trim());
+    const biologicalSex = String(fd.get("biological_sex") ?? "Other");
+    const treatmentArea = String(fd.get("treatment_area") ?? "").trim();
+    const notes = String(fd.get("notes") ?? "").trim();
+
+    const w = parseNumber(weightKg);
+    const h = parseNumber(heightM);
+
+    if (!fullName) {
+      setSubmitError("Nombre completo es obligatorio.");
+      return;
+    }
+    if (!referrerName) {
+      setSubmitError("Remitente es obligatorio.");
+      return;
+    }
+    if (!Number.isFinite(age) || age < 0 || age > 150) {
+      setSubmitError("Edad inválida.");
+      return;
+    }
+    if (!Number.isFinite(w) || w <= 0) {
+      setSubmitError("Peso inválido.");
+      return;
+    }
+    if (!Number.isFinite(h) || h <= 0) {
+      setSubmitError("Estatura inválida.");
+      return;
+    }
+
+    const items = PROCEDURES.filter((p) => Boolean(selectedProcedures[p.id])).map((p) => {
+      const price = parseNumber(procedurePrices[p.id] ?? "");
+      return {
+        item_name: p.label,
+        price,
+        meta: {
+          procedure_key: p.id,
+          ...(p.id === "pierna"
+            ? { pierna: { interna: piernaInterna, externa: piernaExterna } }
+            : null),
+          ...(p.id === "faja_postoperatoria" ? { faja: { talla: fajaTalla.trim() } } : null),
+        },
+      };
+    });
+
+    const invalidPrice = items.find((i) => !Number.isFinite(i.price) || i.price < 0);
+    if (invalidPrice) {
+      setSubmitError("Hay procedimientos seleccionados con precio inválido.");
+      return;
+    }
+
+    const evaluationData = {
+      treatment_area: treatmentArea,
+      contraindications: {
+        diabetes: fd.get("diabetes") === "1",
+        hypertension: fd.get("hypertension") === "1",
+        pregnancy: fd.get("pregnancy") === "1",
+        lactation: fd.get("lactation") === "1",
+        implanted_device: fd.get("implanted_device") === "1",
+      },
+      selected_procedures: items,
+      bmi_preview: bmiPreview,
+      bmi_status_preview: bmiStatusPreview,
+    };
+
+    setIsSubmitting(true);
+    try {
+      const patientRes = await fetch(`${apiBaseUrl}/api/v1/patients`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          full_name: fullName,
+          age,
+          biological_sex: biologicalSex,
+          weight: w,
+          height: h,
+          referrer_name: referrerName,
+        }),
+      });
+
+      const patientData = await jsonOrNull<{ data?: { id: number } } & Record<string, unknown>>(
+        patientRes
+      );
+      if (!patientRes.ok || !patientData?.data?.id) {
+        const message = apiMessageFrom(patientData, "referrer_name") || "No se pudo guardar el paciente.";
+        if (patientRes.status === 401) {
+          handleLogout();
+          return;
+        }
+        setSubmitError(String(message));
+        return;
+      }
+
+      const patientId = patientData.data.id;
+      const today = new Date().toISOString().slice(0, 10);
+
+      const procedureRes = await fetch(`${apiBaseUrl}/api/v1/procedures`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          patient_id: patientId,
+          procedure_date: today,
+          items,
+        }),
+      });
+
+      const procedureData = await jsonOrNull<{ data?: { id: number } } & Record<string, unknown>>(
+        procedureRes
+      );
+      if (!procedureRes.ok || !procedureData?.data?.id) {
+        const message = apiMessageFrom(procedureData) || "No se pudo guardar el procedimiento.";
+        if (procedureRes.status === 401) {
+          handleLogout();
+          return;
+        }
+        setSubmitError(String(message));
+        return;
+      }
+
+      const procedureId = procedureData.data.id;
+
+      const evalRes = await fetch(`${apiBaseUrl}/api/v1/medical-evaluations`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          patient_id: patientId,
+          procedure_id: procedureId,
+          notes: notes || null,
+          evaluation_data: evaluationData,
+        }),
+      });
+
+      const evalData = await jsonOrNull<Record<string, unknown>>(evalRes);
+      if (!evalRes.ok) {
+        const message = apiMessageFrom(evalData) || "No se pudo guardar la evaluación médica.";
+        if (evalRes.status === 401) {
+          handleLogout();
+          return;
+        }
+        setSubmitError(String(message));
+        return;
+      }
+
+      setSubmitSuccess("Registro guardado correctamente.");
+      form.reset();
+      setWeightKg("");
+      setHeightM("");
+      setSelectedProcedures({});
+      setProcedurePrices({});
+      setPiernaInterna(false);
+      setPiernaExterna(false);
+      setFajaTalla("");
+    } catch {
+      setSubmitError("Error de red guardando el registro.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const makePriceChangeHandler = (procedureId: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -288,23 +459,18 @@ export default function RegisterPatientPage() {
     });
   };
 
+  const clearSubmitError = () => setSubmitError(null);
+
   return (
     <MainLayout>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="max-w-3xl mx-auto">
-          <div className="flex items-center justify-between gap-4">
-            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700">
-              Uso interno (doctor)
-            </div>
-
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-            >
-              Cerrar sesión
-            </button>
-          </div>
+      <div className="bg-gradient-to-b from-emerald-50 via-white to-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <div className="max-w-3xl mx-auto">
+            <RegisterHeaderBar
+              onLogout={handleLogout}
+              onPatientsClick={() => router.push("/patients")}
+              active="register"
+            />
 
           <h1 className="mt-3 text-2xl sm:text-3xl font-bold text-gray-900">
             Registro clínico del paciente
@@ -314,534 +480,59 @@ export default function RegisterPatientPage() {
           </p>
 
           {!authChecked ? (
-            <div className="mt-6 rounded-2xl border border-gray-100 bg-white/95 backdrop-blur-sm p-6 text-sm text-gray-600">
+            <div className="mt-6 rounded-3xl border border-gray-100 bg-white/95 backdrop-blur-sm p-6 text-sm text-gray-600 shadow-sm">
               Verificando acceso...
             </div>
           ) : (
-            <div className="mt-6 rounded-2xl border border-gray-100 bg-white/95 backdrop-blur-sm p-6">
-              <form
-                method="post"
-                action={registerUrl}
-                className="space-y-5"
-                onSubmit={(e) => {
-                  setSubmitError(null);
-
-                  if (piernaSelected && !piernaZoneSelected) {
-                    e.preventDefault();
-                    setSubmitError("En 'Pierna' debes seleccionar Interna y/o Externa antes de ingresar el precio.");
-                    return;
-                  }
-
-                  if (fajaSelected && fajaTalla.trim() === "") {
-                    e.preventDefault();
-                    setSubmitError("En 'Faja postoperatoria' la talla es obligatoria.");
-                    return;
-                  }
-                }}
-              >
+            <RegisterCard>
+              <form className="space-y-5" onSubmit={handleSubmit}>
                 <div className="text-sm font-semibold text-gray-900">Datos del paciente</div>
 
-                {submitError ? (
-                  <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                    {submitError}
-                  </div>
-                ) : null}
+                {submitError ? <FormAlert variant="error" message={submitError} /> : null}
+                {submitSuccess ? <FormAlert variant="success" message={submitSuccess} /> : null}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label
-                    htmlFor="full_name"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Nombre completo
-                  </label>
-                  <input
-                    id="full_name"
-                    name="full_name"
-                    required
-                    className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-gray-900"
-                    placeholder="Ej. María Pérez"
-                  />
-                </div>
+                <PatientBasicsFields onDirty={clearSubmitError} />
 
-                <div>
-                  <label
-                    htmlFor="age"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Edad
-                  </label>
-                  <input
-                    id="age"
-                    name="age"
-                    type="number"
-                    min={0}
-                    max={150}
-                    required
-                    className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-gray-900"
-                    placeholder="Ej. 34"
-                  />
-                </div>
-              </div>
-
-              <fieldset className="rounded-2xl border border-gray-100 p-4">
-                <legend className="px-2 text-sm font-medium text-gray-700">Procedimientos</legend>
-                <p className="mt-1 text-xs text-gray-500">
-                  Marca el procedimiento y se habilitarán los campos necesarios. Precio en COP.
-                </p>
-
-                <div className="mt-4 grid grid-cols-1 gap-4">
-                  {PROCEDURE_GROUPS.map((group) => {
-                    const groupSelectedCount = group.procedureIds.filter(
-                      (id) => Boolean(selectedProcedures[id])
-                    ).length;
-
-                    return (
-                      <details
-                        key={group.id}
-                        open={group.defaultOpen}
-                        className="rounded-2xl border border-gray-100 bg-white"
-                      >
-                        <summary className="cursor-pointer list-none px-4 py-3">
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="text-sm font-semibold text-gray-900">{group.label}</div>
-                            <div className="text-xs text-gray-500">
-                              {groupSelectedCount > 0
-                                ? `${groupSelectedCount} seleccionado(s)`
-                                : "Ninguno"}
-                            </div>
-                          </div>
-                        </summary>
-
-                        <div className="px-4 pb-4">
-                          <div className="hidden sm:grid sm:grid-cols-[28px_1fr_260px_220px] gap-3 border-y border-gray-100 py-2 text-xs font-semibold text-gray-500">
-                            <div />
-                            <div>Procedimiento</div>
-                            <div>Detalles</div>
-                            <div>Precio (COP)</div>
-                          </div>
-
-                          <div className="divide-y divide-gray-100">
-                            {group.procedureIds.map((procedureId) => {
-                              const procedure = PROCEDURES.find((p) => p.id === procedureId);
-                              if (!procedure) return null;
-
-                              const checked = Boolean(selectedProcedures[procedure.id]);
-                              const priceValue = procedurePrices[procedure.id] ?? "";
-
-                              const isPierna = procedure.id === "pierna";
-                              const isFaja = procedure.id === "faja_postoperatoria";
-                              const piernaPriceDisabled = isPierna && checked && !piernaZoneSelected;
-
-                              return (
-                                <div
-                                  key={procedure.id}
-                                  className="grid grid-cols-1 sm:grid-cols-[28px_1fr_260px_220px] gap-3 py-3"
-                                >
-                                  <div className="pt-1">
-                                    <input
-                                      id={`proc_${procedure.id}`}
-                                      type="checkbox"
-                                      name="procedures[]"
-                                      value={procedure.id}
-                                      checked={checked}
-                                      onChange={(e) => {
-                                        setSubmitError(null);
-                                        const nextChecked = e.target.checked;
-                                        setSelectedProcedures((prev) => ({
-                                          ...prev,
-                                          [procedure.id]: nextChecked,
-                                        }));
-
-                                        if (!nextChecked) {
-                                          setProcedurePrices((prev) => ({
-                                            ...prev,
-                                            [procedure.id]: "",
-                                          }));
-
-                                          if (procedure.id === "pierna") {
-                                            setPiernaInterna(false);
-                                            setPiernaExterna(false);
-                                          }
-                                          if (procedure.id === "faja_postoperatoria") {
-                                            setFajaTalla("");
-                                          }
-                                        }
-                                      }}
-                                      className="h-4 w-4 rounded border-gray-300"
-                                    />
-                                  </div>
-
-                                  <label
-                                    htmlFor={`proc_${procedure.id}`}
-                                    className={`text-sm font-medium ${
-                                      checked ? "text-gray-900" : "text-gray-700"
-                                    }`}
-                                  >
-                                    {procedure.label}
-                                  </label>
-
-                                  <div>
-                                    {!checked ? (
-                                      <div className="text-sm text-gray-400">—</div>
-                                    ) : isPierna ? (
-                                      <div className="flex flex-wrap items-center gap-4">
-                                        <label className="flex items-center gap-2 text-sm text-gray-700">
-                                          <input
-                                            type="checkbox"
-                                            checked={piernaInterna}
-                                            onChange={(e) => {
-                                              setSubmitError(null);
-                                              setPiernaInterna(e.target.checked);
-                                              if (!e.target.checked && !piernaExterna) {
-                                                setProcedurePrices((prev) => ({
-                                                  ...prev,
-                                                  pierna: "",
-                                                }));
-                                              }
-                                            }}
-                                            name="procedure_meta[pierna][interna]"
-                                            value="1"
-                                            className="h-4 w-4 rounded border-gray-300"
-                                          />
-                                          Interna
-                                        </label>
-
-                                        <label className="flex items-center gap-2 text-sm text-gray-700">
-                                          <input
-                                            type="checkbox"
-                                            checked={piernaExterna}
-                                            onChange={(e) => {
-                                              setSubmitError(null);
-                                              setPiernaExterna(e.target.checked);
-                                              if (!e.target.checked && !piernaInterna) {
-                                                setProcedurePrices((prev) => ({
-                                                  ...prev,
-                                                  pierna: "",
-                                                }));
-                                              }
-                                            }}
-                                            name="procedure_meta[pierna][externa]"
-                                            value="1"
-                                            className="h-4 w-4 rounded border-gray-300"
-                                          />
-                                          Externa
-                                        </label>
-
-                                        <input
-                                          type="hidden"
-                                          name="procedure_label[pierna]"
-                                          value={procedure.label}
-                                        />
-                                      </div>
-                                    ) : isFaja ? (
-                                      <div>
-                                        <label
-                                          htmlFor="procedure_talla_faja_postoperatoria"
-                                          className="block text-xs font-medium text-gray-600"
-                                        >
-                                          Talla
-                                        </label>
-                                        <input
-                                          id="procedure_talla_faja_postoperatoria"
-                                          name="procedure_meta[faja_postoperatoria][talla]"
-                                          required={checked}
-                                          value={fajaTalla}
-                                          onChange={(e) => {
-                                            setSubmitError(null);
-                                            setFajaTalla(e.target.value);
-                                          }}
-                                          className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900"
-                                          placeholder="Ej. S / M / L / XL"
-                                        />
-
-                                        <input
-                                          type="hidden"
-                                          name="procedure_label[faja_postoperatoria]"
-                                          value={procedure.label}
-                                        />
-                                      </div>
-                                    ) : (
-                                      <div className="text-sm text-gray-400">—</div>
-                                    )}
-                                  </div>
-
-                                  <div>
-                                    {!checked ? (
-                                      <div className="text-sm text-gray-400">—</div>
-                                    ) : isPierna ? (
-                                      <div>
-                                        <input
-                                          id="procedure_price_pierna"
-                                          name="procedure_price[pierna]"
-                                          inputMode="decimal"
-                                          disabled={piernaPriceDisabled}
-                                          required={checked && piernaZoneSelected}
-                                          value={priceValue}
-                                          onChange={makePriceChangeHandler("pierna")}
-                                          className={`w-full rounded-xl border px-3 py-2 text-sm text-gray-900 ${
-                                            piernaPriceDisabled
-                                              ? "border-gray-100 bg-gray-50 text-gray-400"
-                                              : "border-gray-200 bg-white"
-                                          }`}
-                                          placeholder={
-                                            piernaPriceDisabled
-                                              ? "Selecciona Interna/Externa"
-                                              : "Ej. 150.000"
-                                          }
-                                        />
-                                        {!piernaZoneSelected ? (
-                                          <div className="mt-1 text-xs text-gray-500">
-                                            Selecciona Interna y/o Externa.
-                                          </div>
-                                        ) : null}
-                                      </div>
-                                    ) : isFaja ? (
-                                      <input
-                                        id="procedure_price_faja_postoperatoria"
-                                        name="procedure_price[faja_postoperatoria]"
-                                        inputMode="decimal"
-                                        required={checked}
-                                        value={priceValue}
-                                        onChange={makePriceChangeHandler("faja_postoperatoria")}
-                                        className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900"
-                                        placeholder="Ej. 150.000"
-                                      />
-                                    ) : (
-                                      <div>
-                                        <input
-                                          id={`procedure_price_${procedure.id}`}
-                                          name={`procedure_price[${procedure.id}]`}
-                                          inputMode="decimal"
-                                          required={checked}
-                                          value={priceValue}
-                                          onChange={makePriceChangeHandler(procedure.id)}
-                                          className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900"
-                                          placeholder="Ej. 150.000"
-                                        />
-
-                                        <input
-                                          type="hidden"
-                                          name={`procedure_label[${procedure.id}]`}
-                                          value={procedure.label}
-                                        />
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      </details>
-                    );
-                  })}
-                </div>
-
-                <div className="mt-4 rounded-xl border border-gray-100 bg-gray-50 p-3 text-sm text-gray-700">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div>
-                      Seleccionados: <span className="font-semibold">{selectedCount}</span>
-                    </div>
-                    <div>
-                      Total (COP): <span className="font-semibold">{proceduresTotalCop || formatCop(0)}</span>
-                    </div>
-                  </div>
-                </div>
-              </fieldset>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <label
-                    htmlFor="biological_sex"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Sexo biológico
-                  </label>
-                  <select
-                    id="biological_sex"
-                    name="biological_sex"
-                    defaultValue="Female"
-                    required
-                    className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-gray-900"
-                  >
-                    <option value="Female">Female</option>
-                    <option value="Male">Male</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="weight_kg"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Peso (kg)
-                  </label>
-                  <input
-                    id="weight_kg"
-                    name="weight_kg"
-                    inputMode="decimal"
-                    required
-                    value={weightKg}
-                    onChange={(e) => setWeightKg(e.target.value)}
-                    className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-gray-900"
-                    placeholder="Ej. 68.5"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="height_m"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Estatura (m)
-                  </label>
-                  <input
-                    id="height_m"
-                    name="height_m"
-                    inputMode="decimal"
-                    required
-                    value={heightM}
-                    onChange={(e) => setHeightM(e.target.value)}
-                    className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-gray-900"
-                    placeholder="Ej. 1.65"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label
-                    htmlFor="treatment_area"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Área de tratamiento
-                  </label>
-                  <input
-                    id="treatment_area"
-                    name="treatment_area"
-                    required
-                    className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-gray-900"
-                    placeholder="Ej. Abdomen"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="bmi_preview"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    BMI (preview)
-                  </label>
-                  <input
-                    id="bmi_preview"
-                    value={bmiPreview}
-                    disabled
-                    className="mt-1 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-gray-900"
-                  />
-                  {bmiStatusPreview ? (
-                    <div className="mt-1 text-xs text-gray-600">{bmiStatusPreview}</div>
-                  ) : null}
-                </div>
-              </div>
-
-              <fieldset className="rounded-2xl border border-gray-100 p-4">
-                <legend className="px-2 text-sm font-medium text-gray-700">
-                  Antecedentes / contraindicaciones
-                </legend>
-                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <label className="flex items-center gap-3 text-sm text-gray-700">
-                    <input
-                      type="checkbox"
-                      name="diabetes"
-                      value="1"
-                      className="h-4 w-4 rounded border-gray-300"
-                    />
-                    Diabetes
-                  </label>
-                  <label className="flex items-center gap-3 text-sm text-gray-700">
-                    <input
-                      type="checkbox"
-                      name="hypertension"
-                      value="1"
-                      className="h-4 w-4 rounded border-gray-300"
-                    />
-                    Hipertensión
-                  </label>
-                  <label className="flex items-center gap-3 text-sm text-gray-700">
-                    <input
-                      type="checkbox"
-                      name="pregnancy"
-                      value="1"
-                      className="h-4 w-4 rounded border-gray-300"
-                    />
-                    Embarazo
-                  </label>
-                  <label className="flex items-center gap-3 text-sm text-gray-700">
-                    <input
-                      type="checkbox"
-                      name="lactation"
-                      value="1"
-                      className="h-4 w-4 rounded border-gray-300"
-                    />
-                    Lactancia
-                  </label>
-                  <label className="flex items-center gap-3 text-sm text-gray-700">
-                    <input
-                      type="checkbox"
-                      name="implanted_device"
-                      value="1"
-                      className="h-4 w-4 rounded border-gray-300"
-                    />
-                    Dispositivo implantado
-                  </label>
-                </div>
-              </fieldset>
-
-              <div>
-                <label
-                  htmlFor="notes"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Notas clínicas
-                </label>
-                <textarea
-                  id="notes"
-                  name="notes"
-                  rows={4}
-                  className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-gray-900"
-                  placeholder="Hallazgos, objetivos del tratamiento, observaciones..."
+                <ProceduresSelector
+                  selectedProcedures={selectedProcedures}
+                  procedurePrices={procedurePrices}
+                  setSelectedProcedures={setSelectedProcedures}
+                  setProcedurePrices={setProcedurePrices}
+                  piernaInterna={piernaInterna}
+                  piernaExterna={piernaExterna}
+                  setPiernaInterna={setPiernaInterna}
+                  setPiernaExterna={setPiernaExterna}
+                  fajaTalla={fajaTalla}
+                  setFajaTalla={setFajaTalla}
+                  selectedCount={selectedCount}
+                  proceduresTotalCop={proceduresTotalCop}
+                  formatCop={formatCop}
+                  clearSubmitError={clearSubmitError}
+                  makePriceChangeHandler={makePriceChangeHandler}
                 />
-              </div>
 
-                <div className="sticky bottom-0 z-20 -mx-6 mt-6 border-t border-gray-100 bg-white/95 px-6 py-3 backdrop-blur">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="text-sm text-gray-700">
-                      <div>
-                        Seleccionados: <span className="font-semibold">{selectedCount}</span>
-                      </div>
-                      <div>
-                        Total (COP): <span className="font-semibold">{stickyTotalCop}</span>
-                      </div>
-                    </div>
+                <ClinicalInfoFields
+                  weightKg={weightKg}
+                  heightM={heightM}
+                  bmiPreview={bmiPreview}
+                  bmiStatusPreview={bmiStatusPreview}
+                  onWeightChange={setWeightKg}
+                  onHeightChange={setHeightM}
+                  onDirty={clearSubmitError}
+                />
 
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="submit"
-                        className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
-                      >
-                        Guardar registro
-                      </button>
-                      <span className="hidden text-xs text-gray-500 sm:inline">
-                        El backend define elegibilidad y BMI.
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                <ContraindicationsFields onDirty={clearSubmitError} />
+                <NotesField onDirty={clearSubmitError} />
+
+                <StickySubmitBar
+                  selectedCount={selectedCount}
+                  stickyTotalCop={stickyTotalCop}
+                  isSubmitting={isSubmitting}
+                />
               </form>
-            </div>
+            </RegisterCard>
           )}
+          </div>
         </div>
       </div>
     </MainLayout>

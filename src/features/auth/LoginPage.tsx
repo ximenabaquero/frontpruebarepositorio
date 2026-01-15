@@ -22,6 +22,9 @@ export default function LoginPage() {
     rememberMe: false
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "") || "/backend";
 
   const floatStyles = useMemo<CSSProperties[]>(() => {
     const rand = mulberry32(246810);
@@ -41,23 +44,47 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Simular petición de login
-    setTimeout(() => {
-      setIsLoading(false);
-      console.log("Login attempt:", formData);
-      // Aquí iría tu lógica de autenticación real
-      // Demo guard: mark as authed so internal pages aren't public.
+
+    setErrorMessage(null);
+    try {
+      const res = await fetch(`${apiBaseUrl}/api/v1/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const data = (await res.json().catch(() => null)) as
+        | { token?: string; message?: string }
+        | null;
+
+      if (!res.ok || !data?.token) {
+        setErrorMessage(data?.message || "No se pudo iniciar sesión.");
+        return;
+      }
+
       try {
+        if (formData.rememberMe) {
+          window.localStorage.setItem("coldesthetic_admin_token", data.token);
+        } else {
+          window.sessionStorage.setItem("coldesthetic_admin_token", data.token);
+        }
         window.localStorage.setItem("coldesthetic_admin_authed", "1");
       } catch {
-        // ignore
+        // ignore storage failures
       }
 
       const params = new URLSearchParams(window.location.search);
       const next = params.get("next") || "/register-patient";
       window.location.href = next;
-    }, 1500);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -149,6 +176,12 @@ export default function LoginPage() {
                   </div>
 
                   <form onSubmit={handleSubmit} className="space-y-6">
+                    {errorMessage ? (
+                      <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                        {errorMessage}
+                      </div>
+                    ) : null}
+
                     {/* Email field */}
                     <div className="space-y-2">
                       <label htmlFor="email" className="flex items-center gap-2 text-sm font-medium text-gray-700">
