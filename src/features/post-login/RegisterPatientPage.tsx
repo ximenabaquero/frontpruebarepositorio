@@ -1,196 +1,45 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import MainLayout from "@/layouts/MainLayout";
 
-import FormAlert from "./components/FormAlert";
 import RegisterCard from "./components/RegisterCard";
 import RegisterHeaderBar from "./components/RegisterHeaderBar";
 import PatientBasicsFields from "./components/PatientBasicsFields";
-import ProceduresSelector from "./components/ProceduresSelector";
 import ClinicalInfoFields from "./components/ClinicalInfoFields";
-import ContraindicationsFields from "./components/ContraindicationsFields";
+import ProceduresSelector from "./components/ProceduresSelector";
 import NotesField from "./components/NotesField";
 import StickySubmitBar from "./components/StickySubmitBar";
+import FormAlert from "./components/FormAlert";
+import SidebarSteps from "./components/SideBarSteps";
+import { toast } from "react-hot-toast";
 
-import { PROCEDURES } from "./data/procedures";
+type ProcedureItem = {
+  item_name: string;
+  price: string;
+};
 
-
-function parseNumber(value: string): number {
-  const trimmed = value.trim();
-  if (!trimmed) return Number.NaN;
-
-  // Keep only digits and separators.
-  const raw = trimmed.replace(/[^0-9.,-]/g, "");
-  if (!raw) return Number.NaN;
-
-  const dotCount = (raw.match(/\./g) ?? []).length;
-  const commaCount = (raw.match(/,/g) ?? []).length;
-
-  let normalized = raw;
-
-  // If both are present: assume thousands '.' and decimal ',' (es-CO style)
-  if (dotCount > 0 && commaCount > 0) {
-    normalized = normalized.replace(/\./g, "").replace(/,/g, ".");
-  } else if (dotCount > 1 && commaCount === 0) {
-    // Many dots: treat as thousands separators
-    normalized = normalized.replace(/\./g, "");
-  } else if (commaCount > 1 && dotCount === 0) {
-    // Many commas: treat as thousands separators
-    normalized = normalized.replace(/,/g, "");
-  } else if (dotCount === 1 && commaCount === 0) {
-    // One dot: decide decimal vs thousands by digits after separator
-    const parts = normalized.split(".");
-    if (parts.length === 2 && parts[1].length === 3 && parts[0].length >= 1) {
-      normalized = parts.join("");
-    }
-  } else if (commaCount === 1 && dotCount === 0) {
-    const parts = normalized.split(",");
-    if (parts.length === 2 && parts[1].length === 3 && parts[0].length >= 1) {
-      normalized = parts.join("");
-    } else {
-      normalized = normalized.replace(",", ".");
-    }
-  }
-
-  const n = Number(normalized);
-  return Number.isFinite(n) ? n : Number.NaN;
-}
-
-const COP_FORMATTER = new Intl.NumberFormat("es-CO", {
-  style: "currency",
-  currency: "COP",
-  maximumFractionDigits: 0,
-});
-
-function formatCop(amount: number): string {
-  if (!Number.isFinite(amount)) return "";
-  return COP_FORMATTER.format(Math.round(amount));
-}
-
-function formatCopInput(value: string): string {
-  const digits = value.replace(/\D/g, "");
-  if (!digits) return "";
-  const n = Number(digits);
-  if (!Number.isFinite(n)) return "";
-  return new Intl.NumberFormat("es-CO", { maximumFractionDigits: 0 }).format(n);
-}
-
-function digitsCountBeforeCaret(value: string, caret: number): number {
-  const before = value.slice(0, Math.max(0, caret));
-  return (before.match(/\d/g) ?? []).length;
-}
-
-function caretPosForDigitIndex(formattedValue: string, digitIndex: number): number {
-  if (digitIndex <= 0) return 0;
-  let seen = 0;
-  for (let i = 0; i < formattedValue.length; i += 1) {
-    if (/\d/.test(formattedValue[i])) {
-      seen += 1;
-      if (seen >= digitIndex) return i + 1;
-    }
-  }
-  return formattedValue.length;
-}
+const apiBaseUrl =
+  process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "") || "/backend";
 
 export default function RegisterPatientPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+
   const [authChecked, setAuthChecked] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
 
-  const [weightKg, setWeightKg] = useState("");
-  const [heightM, setHeightM] = useState("");
+  const [currentStep, setCurrentStep] = useState(0);
+  const [stepCompleted, setStepCompleted] = useState<
+    [boolean, boolean, boolean]
+  >([false, false, false]);
 
-  const [selectedProcedures, setSelectedProcedures] = useState<Record<string, boolean>>({});
-  const [procedurePrices, setProcedurePrices] = useState<Record<string, string>>({});
-
-  const [piernaInterna, setPiernaInterna] = useState(false);
-  const [piernaExterna, setPiernaExterna] = useState(false);
-  const [fajaTalla, setFajaTalla] = useState("");
-
-  const [submitError, setSubmitError] = useState<string | null>(null);
-
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "") || "/backend";
-
-  const getStoredToken = (): string | null => {
-    try {
-      return (
-        window.localStorage.getItem("coldesthetic_admin_token") ||
-        window.sessionStorage.getItem("coldesthetic_admin_token")
-      );
-    } catch {
-      return null;
-    }
-  };
-
-  const authedOrRedirect = () => {
-    const token = getStoredToken();
-    if (!token) {
-      const next = searchParams?.get("next") ?? "/register-patient";
-      router.replace(`/login?next=${encodeURIComponent(next)}`);
-      return null;
-    }
-    return token;
-  };
-
-  const bmiPreview = useMemo(() => {
-    const w = parseNumber(weightKg);
-    const h = parseNumber(heightM);
-    if (!Number.isFinite(w) || !Number.isFinite(h) || h <= 0) return "";
-    return (w / (h * h)).toFixed(2);
-  }, [weightKg, heightM]);
-
-  const bmiStatusPreview = useMemo(() => {
-    const w = parseNumber(weightKg);
-    const h = parseNumber(heightM);
-    if (!Number.isFinite(w) || !Number.isFinite(h) || h <= 0) return "";
-    const bmi = w / (h * h);
-    if (bmi < 16.0) return "Delgadez severa (< 16.0)";
-    if (bmi < 17.0) return "Delgadez moderada (16.0–16.9)";
-    if (bmi < 18.5) return "Delgadez leve (17.0–18.4)";
-    if (bmi < 25.0) return "Peso normal (18.5–24.9)";
-    if (bmi < 30.0) return "Sobrepeso (25.0–29.9)";
-    if (bmi < 35.0) return "Obesidad grado I (30.0–34.9)";
-    if (bmi < 40.0) return "Obesidad grado II (35.0–39.9)";
-    return "Obesidad grado III (≥ 40)";
-  }, [weightKg, heightM]);
-
-  const proceduresTotalPreview = useMemo(() => {
-    let total = 0;
-    let anySelected = false;
-    for (const { id } of PROCEDURES) {
-      if (!selectedProcedures[id]) continue;
-      anySelected = true;
-      const value = parseNumber(procedurePrices[id] ?? "");
-      if (!Number.isFinite(value) || value < 0) continue;
-      total += value;
-    }
-    return { anySelected, total };
-  }, [procedurePrices, selectedProcedures]);
-
-  const proceduresTotalCop = useMemo(() => {
-    if (!proceduresTotalPreview.anySelected) return "";
-    return formatCop(proceduresTotalPreview.total);
-  }, [proceduresTotalPreview]);
-
-  const selectedCount = useMemo(() => {
-    return Object.values(selectedProcedures).filter(Boolean).length;
-  }, [selectedProcedures]);
-
-  const stickyTotalCop = useMemo(() => {
-    return formatCop(proceduresTotalPreview.total);
-  }, [proceduresTotalPreview.total]);
-
-  const piernaSelected = Boolean(selectedProcedures.pierna);
-  const piernaZoneSelected = piernaInterna || piernaExterna;
-  const fajaSelected = Boolean(selectedProcedures.faja_postoperatoria);
-
+  // Autenticación
   useEffect(() => {
     try {
-      const token = getStoredToken();
+      const token =
+        window.localStorage.getItem("coldesthetic_admin_token") ||
+        window.sessionStorage.getItem("coldesthetic_admin_token");
       if (!token) {
         const next = searchParams?.get("next") ?? "/register-patient";
         router.replace(`/login?next=${encodeURIComponent(next)}`);
@@ -201,139 +50,181 @@ export default function RegisterPatientPage() {
     }
   }, [router, searchParams]);
 
-  const handleLogout = () => {
-    try {
-      window.localStorage.removeItem("coldesthetic_admin_authed");
-      window.localStorage.removeItem("coldesthetic_admin_token");
-      window.sessionStorage.removeItem("coldesthetic_admin_token");
-    } catch {
-      // ignore
-    }
-    router.replace("/login");
+  // Estados
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
+
+  // Datos paciente
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [age, setAge] = useState("");
+  const [cellphone, setCellphone] = useState("");
+  const [referrerName, setReferrerName] = useState("");
+  const [biologicalSex, setBiologicalSex] = useState("");
+
+  // Evaluación clínica
+  const [weightKg, setWeightKg] = useState("");
+  const [heightM, setHeightM] = useState("");
+  const [medicalBackground, setMedicalBackground] = useState("");
+  const [bmiPreview, setBmiPreview] = useState("");
+  const [bmiStatusPreview, setBmiStatusPreview] = useState("");
+
+  // Procedimientos
+  const [procedureItems, setProcedureItems] = useState<ProcedureItem[]>([]);
+  const [procedureNotes, setProcedureNotes] = useState("");
+
+  const [procedurePrices, setProcedurePrices] = useState<
+    Record<string, string>
+  >({});
+
+  //FORMATEO DE PRECIOS
+  function formatCopInput(value: string): string {
+    const digits = value.replace(/\D/g, "");
+    if (!digits) return "";
+    const n = Number(digits);
+    if (!Number.isFinite(n)) return "";
+    return new Intl.NumberFormat("es-CO", { maximumFractionDigits: 0 }).format(
+      n,
+    );
+  }
+
+  const digitsCountBeforeCaret = (value: string, caret: number) => {
+    const before = value.slice(0, Math.max(0, caret));
+    return (before.match(/\d/g) ?? []).length;
   };
 
-  const jsonOrNull = async <T,>(res: Response): Promise<T | null> => {
-    try {
-      return (await res.json()) as T;
-    } catch {
-      return null;
+  const caretPosForDigitIndex = (
+    formattedValue: string,
+    digitIndex: number,
+  ) => {
+    if (digitIndex <= 0) return 0;
+    let seen = 0;
+    for (let i = 0; i < formattedValue.length; i += 1) {
+      if (/\d/.test(formattedValue[i])) {
+        seen += 1;
+        if (seen >= digitIndex) return i + 1;
+      }
     }
+    return formattedValue.length;
   };
 
-  const apiMessageFrom = (payload: unknown, preferredField?: string): string | null => {
-    if (!payload || typeof payload !== "object") return null;
-    const obj = payload as Record<string, unknown>;
+  const handlePriceChange =
+    (itemName: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      const input = e.currentTarget;
+      const caret = input.selectionStart ?? input.value.length;
+      const digitIndex = digitsCountBeforeCaret(input.value, caret);
+      const formatted = formatCopInput(input.value);
 
-    if (typeof obj.message === "string" && obj.message.trim()) return obj.message;
+      setProcedurePrices((prev) => ({
+        ...prev,
+        [itemName]: formatted,
+      }));
 
-    const errors = obj.errors;
-    if (!errors || typeof errors !== "object") return null;
-
-    const errorsObj = errors as Record<string, unknown>;
-    const preferred = preferredField ? errorsObj[preferredField] : undefined;
-    const candidate = preferred ?? Object.values(errorsObj)[0];
-
-    if (Array.isArray(candidate) && typeof candidate[0] === "string") {
-      return candidate[0];
-    }
-    return null;
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setSubmitError(null);
-    setSubmitSuccess(null);
-
-    const token = authedOrRedirect();
-    if (!token) return;
-
-    if (piernaSelected && !piernaZoneSelected) {
-      setSubmitError("En 'Pierna' debes seleccionar Interna y/o Externa antes de ingresar el precio.");
-      return;
-    }
-
-    if (fajaSelected && fajaTalla.trim() === "") {
-      setSubmitError("En 'Faja postoperatoria' la talla es obligatoria.");
-      return;
-    }
-
-    if (selectedCount <= 0) {
-      setSubmitError("Debes seleccionar al menos un procedimiento.");
-      return;
-    }
-
-    const form = e.currentTarget;
-    const fd = new FormData(form);
-
-    const fullName = String(fd.get("full_name") ?? "").trim();
-    const referrerName = String(fd.get("referrer_name") ?? "").trim();
-
-    const age = Number(String(fd.get("age") ?? "").trim());
-    const biologicalSex = String(fd.get("biological_sex") ?? "Other");
-    const treatmentArea = String(fd.get("treatment_area") ?? "").trim();
-    const notes = String(fd.get("notes") ?? "").trim();
-
-    const w = parseNumber(weightKg);
-    const h = parseNumber(heightM);
-
-    if (!fullName) {
-      setSubmitError("Nombre completo es obligatorio.");
-      return;
-    }
-    if (!referrerName) {
-      setSubmitError("Remitente es obligatorio.");
-      return;
-    }
-    if (!Number.isFinite(age) || age < 0 || age > 150) {
-      setSubmitError("Edad inválida.");
-      return;
-    }
-    if (!Number.isFinite(w) || w <= 0) {
-      setSubmitError("Peso inválido.");
-      return;
-    }
-    if (!Number.isFinite(h) || h <= 0) {
-      setSubmitError("Estatura inválida.");
-      return;
-    }
-
-    const items = PROCEDURES.filter((p) => Boolean(selectedProcedures[p.id])).map((p) => {
-      const price = parseNumber(procedurePrices[p.id] ?? "");
-      return {
-        item_name: p.label,
-        price,
-        meta: {
-          procedure_key: p.id,
-          ...(p.id === "pierna"
-            ? { pierna: { interna: piernaInterna, externa: piernaExterna } }
-            : null),
-          ...(p.id === "faja_postoperatoria" ? { faja: { talla: fajaTalla.trim() } } : null),
-        },
-      };
-    });
-
-    const invalidPrice = items.find((i) => !Number.isFinite(i.price) || i.price < 0);
-    if (invalidPrice) {
-      setSubmitError("Hay procedimientos seleccionados con precio inválido.");
-      return;
-    }
-
-    const evaluationData = {
-      treatment_area: treatmentArea,
-      contraindications: {
-        diabetes: fd.get("diabetes") === "1",
-        hypertension: fd.get("hypertension") === "1",
-        pregnancy: fd.get("pregnancy") === "1",
-        lactation: fd.get("lactation") === "1",
-        implanted_device: fd.get("implanted_device") === "1",
-      },
-      selected_procedures: items,
-      bmi_preview: bmiPreview,
-      bmi_status_preview: bmiStatusPreview,
+      const nextCaret = caretPosForDigitIndex(formatted, digitIndex);
+      requestAnimationFrame(() => {
+        try {
+          input.setSelectionRange(nextCaret, nextCaret);
+        } catch {
+          // ignore
+        }
+      });
     };
 
+  useEffect(() => {
+    // Paso 1: datos básicos mínimos
+    const p1 =
+      firstName.trim() !== "" &&
+      lastName.trim() !== "" &&
+      age.trim() !== "" &&
+      cellphone.trim() !== "" &&
+      biologicalSex.trim() !== "";
+
+    // Paso 2: evaluación clínica mínima
+    const w = parseFloat(weightKg) > 0;
+    const h = parseFloat(heightM) > 0;
+    const p2 = w && h && medicalBackground.trim() !== "";
+
+    // Paso 3: al menos un procedimiento o nota
+    const p3 = procedureItems.length > 0 || procedureNotes.trim().length > 0;
+
+    setStepCompleted([Boolean(p1), Boolean(p2), Boolean(p3)]);
+  }, [
+    firstName,
+    lastName,
+    age,
+    cellphone,
+    biologicalSex,
+    weightKg,
+    heightM,
+    medicalBackground,
+    procedureItems,
+    procedureNotes,
+  ]);
+
+  // BMI en tiempo real
+  useEffect(() => {
+    const weight = parseFloat(weightKg);
+    const height = parseFloat(heightM);
+    if (weight > 0 && height > 0) {
+      const bmi = +(weight / (height * height)).toFixed(2);
+      setBmiPreview(bmi.toString());
+
+      const status =
+        bmi < 16.0
+          ? "Delgadez severa (< 16.0)"
+          : bmi < 17.0
+            ? "Delgadez moderada (16.0–16.9)"
+            : bmi < 18.5
+              ? "Delgadez leve (17.0–18.4)"
+              : bmi < 25.0
+                ? "Peso normal (18.5–24.9)"
+                : bmi < 30.0
+                  ? "Sobrepeso (25.0–29.9)"
+                  : bmi < 35.0
+                    ? "Obesidad grado I (30.0–34.9)"
+                    : bmi < 40.0
+                      ? "Obesidad grado II (35.0–39.9)"
+                      : "Obesidad grado III (≥ 40)";
+
+      setBmiStatusPreview(status);
+    } else {
+      setBmiPreview("");
+      setBmiStatusPreview("");
+    }
+  }, [weightKg, heightM]);
+
+  const handleDirty = () => {
+    setSubmitError(null);
+  };
+
+  const [hasTriedSubmit, setHasTriedSubmit] = useState(false);
+
+  // Submit
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (currentStep !== 2) return;
+    setHasTriedSubmit(true);
+
+    const step3Valid =
+      procedureItems.length > 0 || procedureNotes.trim().length > 0;
+
+    if (!step3Valid) {
+      setSubmitError(
+        "Debe seleccionar al menos un procedimiento o agregar una nota.",
+      );
+      return;
+    }
+
     setIsSubmitting(true);
+
+    const token =
+      window.localStorage.getItem("coldesthetic_admin_token") ||
+      window.sessionStorage.getItem("coldesthetic_admin_token");
+
     try {
+      // Crear paciente
       const patientRes = await fetch(`${apiBaseUrl}/api/v1/patients`, {
         method: "POST",
         headers: {
@@ -342,60 +233,21 @@ export default function RegisterPatientPage() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          full_name: fullName,
-          age,
-          biological_sex: biologicalSex,
-          weight: w,
-          height: h,
+          first_name: firstName,
+          last_name: lastName,
+          age: parseInt(age),
+          cellphone,
           referrer_name: referrerName,
+          biological_sex: biologicalSex,
         }),
       });
 
-      const patientData = await jsonOrNull<{ data?: { id: number } } & Record<string, unknown>>(
-        patientRes
-      );
-      if (!patientRes.ok || !patientData?.data?.id) {
-        const message = apiMessageFrom(patientData, "referrer_name") || "No se pudo guardar el paciente.";
-        if (patientRes.status === 401) {
-          handleLogout();
-          return;
-        }
-        setSubmitError(String(message));
-        return;
-      }
+      if (!patientRes.ok) throw new Error("Error al crear paciente");
 
-      const patientId = patientData.data.id;
-      const today = new Date().toISOString().slice(0, 10);
+      const patientJson = await patientRes.json();
+      const patient_id = patientJson.data.id;
 
-      const procedureRes = await fetch(`${apiBaseUrl}/api/v1/procedures`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          patient_id: patientId,
-          procedure_date: today,
-          items,
-        }),
-      });
-
-      const procedureData = await jsonOrNull<{ data?: { id: number } } & Record<string, unknown>>(
-        procedureRes
-      );
-      if (!procedureRes.ok || !procedureData?.data?.id) {
-        const message = apiMessageFrom(procedureData) || "No se pudo guardar el procedimiento.";
-        if (procedureRes.status === 401) {
-          handleLogout();
-          return;
-        }
-        setSubmitError(String(message));
-        return;
-      }
-
-      const procedureId = procedureData.data.id;
-
+      // Crear evaluación médica
       const evalRes = await fetch(`${apiBaseUrl}/api/v1/medical-evaluations`, {
         method: "POST",
         headers: {
@@ -404,134 +256,234 @@ export default function RegisterPatientPage() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          patient_id: patientId,
-          procedure_id: procedureId,
-          notes: notes || null,
-          evaluation_data: evaluationData,
+          patient_id,
+          weight: parseFloat(weightKg),
+          height: parseFloat(heightM),
+          medical_background: medicalBackground,
         }),
       });
 
-      const evalData = await jsonOrNull<Record<string, unknown>>(evalRes);
       if (!evalRes.ok) {
-        const message = apiMessageFrom(evalData) || "No se pudo guardar la evaluación médica.";
-        if (evalRes.status === 401) {
-          handleLogout();
-          return;
-        }
-        setSubmitError(String(message));
-        return;
+        throw new Error("Error al crear evaluación médica");
       }
 
-      setSubmitSuccess("Registro guardado correctamente.");
-      form.reset();
-      setWeightKg("");
-      setHeightM("");
-      setSelectedProcedures({});
-      setProcedurePrices({});
-      setPiernaInterna(false);
-      setPiernaExterna(false);
-      setFajaTalla("");
-    } catch {
-      setSubmitError("Error de red guardando el registro.");
+      const evalJson = await evalRes.json();
+      const medical_evaluation_id = evalJson.data.id;
+
+      // Crear procedimientos
+      const procRes = await fetch(`${apiBaseUrl}/api/v1/procedures`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          medical_evaluation_id,
+          procedure_date: new Date().toISOString().slice(0, 10),
+          notes: procedureNotes,
+          items: procedureItems.map((item) => ({
+            item_name: item.item_name,
+            price: Number(
+              (procedurePrices[item.item_name] || "").replace(/\D/g, ""),
+            ),
+          })),
+        }),
+      });
+
+      if (!procRes.ok) throw new Error("Error al crear procedimientos");
+
+      setSubmitError(null);
+      setSubmitSuccess("Registro guardado correctamente");
+    } catch (err) {
+      setSubmitError("No se pudo guardar el registro.");
+      toast.error("Hubo un error al guardar el registro");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const makePriceChangeHandler = (procedureId: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e.currentTarget;
-    const caret = input.selectionStart ?? input.value.length;
-    const digitIndex = digitsCountBeforeCaret(input.value, caret);
-    const formatted = formatCopInput(input.value);
-
-    setProcedurePrices((prev) => ({
-      ...prev,
-      [procedureId]: formatted,
-    }));
-
-    const nextCaret = caretPosForDigitIndex(formatted, digitIndex);
-    requestAnimationFrame(() => {
-      try {
-        input.setSelectionRange(nextCaret, nextCaret);
-      } catch {
-        // ignore
-      }
-    });
-  };
-
-  const clearSubmitError = () => setSubmitError(null);
+  if (!authChecked) return null;
 
   return (
     <MainLayout>
       <div className="bg-gradient-to-b from-emerald-50 via-white to-white">
+        {/* CONTAINER GENERAL */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="max-w-3xl mx-auto">
-            <RegisterHeaderBar
-              onLogout={handleLogout}
-              onPatientsClick={() => router.push("/patients")}
-              active="register"
-            />
+          {/* GRID PRINCIPAL */}
+          <div className="grid grid-cols-12 gap-6">
+            {/* SIDEBAR */}
+            <aside className="col-span-12 lg:col-span-4">
+              <SidebarSteps
+                steps={[
+                  {
+                    label: "Datos del paciente",
+                    completed: stepCompleted[0],
+                  },
+                  {
+                    label: "Evaluación clínica",
+                    completed: stepCompleted[1],
+                  },
+                  { label: "Procedimientos", completed: stepCompleted[2] },
+                ]}
+                currentStep={currentStep}
+                onStepClick={setCurrentStep}
+              />
+            </aside>
 
-          <h1 className="mt-3 text-2xl sm:text-3xl font-bold text-gray-900">
-            Registro clínico del paciente
-          </h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Complete la información durante la consulta. El BMI se calcula en el backend y se guarda automáticamente.
-          </p>
-
-          {!authChecked ? (
-            <div className="mt-6 rounded-3xl border border-gray-100 bg-white/95 backdrop-blur-sm p-6 text-sm text-gray-600 shadow-sm">
-              Verificando acceso...
-            </div>
-          ) : (
-            <RegisterCard>
-              <form className="space-y-5" onSubmit={handleSubmit}>
-                <div className="text-sm font-semibold text-gray-900">Datos del paciente</div>
-
-                {submitError ? <FormAlert variant="error" message={submitError} /> : null}
-                {submitSuccess ? <FormAlert variant="success" message={submitSuccess} /> : null}
-
-                <PatientBasicsFields onDirty={clearSubmitError} />
-
-                <ProceduresSelector
-                  selectedProcedures={selectedProcedures}
-                  procedurePrices={procedurePrices}
-                  setSelectedProcedures={setSelectedProcedures}
-                  setProcedurePrices={setProcedurePrices}
-                  piernaInterna={piernaInterna}
-                  piernaExterna={piernaExterna}
-                  setPiernaInterna={setPiernaInterna}
-                  setPiernaExterna={setPiernaExterna}
-                  fajaTalla={fajaTalla}
-                  setFajaTalla={setFajaTalla}
-                  selectedCount={selectedCount}
-                  proceduresTotalCop={proceduresTotalCop}
-                  formatCop={formatCop}
-                  clearSubmitError={clearSubmitError}
-                  makePriceChangeHandler={makePriceChangeHandler}
+            <main className="col-span-12 lg:col-span-8">
+              <div className="w-full">
+                <RegisterHeaderBar
+                  onStatsClick={() => router.push("/stats")}
+                  onImagesClick={() => router.push("/control-images")}
+                  onPatientsClick={() => router.push("/patients")}
+                  active="register"
                 />
 
-                <ClinicalInfoFields
-                  weightKg={weightKg}
-                  heightM={heightM}
-                  bmiPreview={bmiPreview}
-                  bmiStatusPreview={bmiStatusPreview}
-                  onWeightChange={setWeightKg}
-                  onHeightChange={setHeightM}
-                  onDirty={clearSubmitError}
-                />
+                <h1 className="mt-3 text-2xl sm:text-3xl font-bold text-gray-900">
+                  Registro clínico del paciente
+                </h1>
+                <p className="mt-2 text-sm text-gray-600">
+                  Complete y verifique la información antes de guardarla. El
+                  índice de masa corporal (IMC) se registrará automáticamente.
+                </p>
 
-                <ContraindicationsFields onDirty={clearSubmitError} />
-                <NotesField onDirty={clearSubmitError} />
+                {!authChecked ? (
+                  <div className="mt-6 rounded-3xl border border-gray-100 bg-white/95 backdrop-blur-sm p-6 text-sm text-gray-600 shadow-sm">
+                    Verificando acceso...
+                  </div>
+                ) : (
+                  <form className="space-y-5 mt-6" onSubmit={handleSubmit}>
+                    {submitError && (
+                      <FormAlert variant="error" message={submitError} />
+                    )}
+                    {submitSuccess && (
+                      <FormAlert variant="success" message={submitSuccess} />
+                    )}
 
-                <StickySubmitBar
-                  selectedCount={selectedCount}
-                  stickyTotalCop={stickyTotalCop}
-                  isSubmitting={isSubmitting}
-                />
-              </form>
-            </RegisterCard>
-          )}
+                    {/* Paso 1 */}
+                    {currentStep === 0 && (
+                      <RegisterCard
+                        title="Datos del paciente"
+                        subtitle="Información básica del paciente para registro clínico."
+                      >
+                        <PatientBasicsFields
+                          firstName={firstName}
+                          setFirstName={setFirstName}
+                          lastName={lastName}
+                          setLastName={setLastName}
+                          age={age}
+                          setAge={setAge}
+                          cellphone={cellphone}
+                          setCellphone={setCellphone}
+                          referrerName={referrerName}
+                          setReferrerName={setReferrerName}
+                          biologicalSex={biologicalSex}
+                          setBiologicalSex={setBiologicalSex}
+                          onDirty={handleDirty}
+                        />
+                      </RegisterCard>
+                    )}
+
+                    {/* Paso 2 */}
+                    {currentStep === 1 && (
+                      <RegisterCard
+                        title="Evaluación clínica"
+                        subtitle="Peso, estatura, índice de masa corporal (IMC) y antecedentes médicos relevantes."
+                      >
+                        <ClinicalInfoFields
+                          weightKg={weightKg}
+                          heightM={heightM}
+                          bmiPreview={bmiPreview}
+                          bmiStatusPreview={bmiStatusPreview}
+                          medicalBackground={medicalBackground}
+                          onMedicalBackgroundChange={setMedicalBackground}
+                          onWeightChange={setWeightKg}
+                          onHeightChange={setHeightM}
+                          onDirty={handleDirty}
+                        />
+                      </RegisterCard>
+                    )}
+
+                    {/* Paso 3 */}
+                    {currentStep === 2 && (
+                      <RegisterCard
+                        title="Procedimientos"
+                        subtitle="Selecciona los procedimientos y asigna un precio en COP."
+                      >
+                        <ProceduresSelector
+                          procedureItems={procedureItems}
+                          setProcedureItems={setProcedureItems}
+                          procedureNotes={procedureNotes}
+                          setProcedureNotes={setProcedureNotes}
+                          clearSubmitError={handleDirty}
+                          procedurePrices={procedurePrices}
+                          handlePriceChange={handlePriceChange}
+                        />
+
+                        {/* Notas del procedimiento */}
+                        <div className="mt-6">
+                          <NotesField
+                            value={procedureNotes}
+                            onChange={setProcedureNotes}
+                            onDirty={handleDirty}
+                          />
+                        </div>
+
+                        {/* Total COP y procedimientos Seleccionados */}
+                        <StickySubmitBar
+                          selectedCount={
+                            Object.values(procedurePrices).filter((p) => p)
+                              .length
+                          }
+                          stickyTotalCop={Object.values(procedurePrices)
+                            .map((p) => Number(p.replace(/\D/g, "")))
+                            .reduce((a, b) => a + b, 0)
+                            .toLocaleString("es-CO")}
+                          isSubmitting={false}
+                        />
+                      </RegisterCard>
+                    )}
+
+                    {/* Navegación de pasos */}
+                    <div className="flex items-center justify-between pt-2">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setCurrentStep((s) => Math.max(0, s - 1))
+                        }
+                        className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-60"
+                        disabled={currentStep === 0 || isSubmitting}
+                      >
+                        Anterior
+                      </button>
+
+                      {currentStep < 2 ? (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setCurrentStep((s) => Math.min(2, s + 1))
+                          }
+                          className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 disabled:opacity-60"
+                          disabled={isSubmitting}
+                        >
+                          Siguiente
+                        </button>
+                      ) : (
+                        <button
+                          type="submit"
+                          disabled={isSubmitting}
+                          onClick={() => setHasTriedSubmit(true)}
+                          className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white"
+                        >
+                          {isSubmitting ? "Guardando..." : "Guardar registro"}
+                        </button>
+                      )}
+                    </div>
+                  </form>
+                )}
+              </div>
+            </main>
           </div>
         </div>
       </div>

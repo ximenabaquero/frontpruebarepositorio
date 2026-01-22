@@ -1,14 +1,18 @@
 type RegisterHeaderBarProps = {
-  onLogout: () => void;
   onPatientsClick?: () => void;
   onBackToRegisterClick?: () => void;
-  active?: "register" | "patients";
+
+  onStatsClick?: () => void;
+  onImagesClick?: () => void;
+
+  active?: "register" | "patients" | "stats" | "images";
 };
 
 export default function RegisterHeaderBar({
-  onLogout,
   onPatientsClick,
   onBackToRegisterClick,
+  onStatsClick,
+  onImagesClick,
   active = "register",
 }: RegisterHeaderBarProps) {
   return (
@@ -18,7 +22,7 @@ export default function RegisterHeaderBar({
       </div>
 
       <div className="flex items-center gap-2">
-        {onBackToRegisterClick ? (
+        {onBackToRegisterClick && (
           <button
             type="button"
             onClick={onBackToRegisterClick}
@@ -30,9 +34,9 @@ export default function RegisterHeaderBar({
           >
             Registro
           </button>
-        ) : null}
+        )}
 
-        {onPatientsClick ? (
+        {onPatientsClick && (
           <button
             type="button"
             onClick={onPatientsClick}
@@ -44,15 +48,35 @@ export default function RegisterHeaderBar({
           >
             Pacientes
           </button>
-        ) : null}
+        )}
 
-        <button
-          type="button"
-          onClick={onLogout}
-          className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-        >
-          Cerrar sesión
-        </button>
+        {onStatsClick && (
+          <button
+            type="button"
+            onClick={onStatsClick}
+            className={
+              active === "stats"
+                ? "rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800 shadow-sm"
+                : "rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            }
+          >
+            Estadísticas
+          </button>
+        )}
+
+        {onImagesClick && (
+          <button
+            type="button"
+            onClick={onImagesClick}
+            className={
+              active === "images"
+                ? "rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800 shadow-sm"
+                : "rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            }
+          >
+            Imágenes
+          </button>
+        )}
       </div>
     </div>
   );

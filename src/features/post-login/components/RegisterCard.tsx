@@ -7,8 +7,8 @@ type RegisterCardProps = {
 };
 
 export default function RegisterCard({
-  title = "Formulario",
-  subtitle = "Registra paciente, procedimientos y evaluación clínica.",
+  title = "",
+  subtitle = "",
   children,
 }: RegisterCardProps) {
   return (

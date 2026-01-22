@@ -63,7 +63,12 @@ export const PROCEDURE_GROUPS: ProcedureGroup[] = [
     id: "postop",
     label: "Post-operatorio",
     defaultOpen: true,
-    procedureIds: ["faja_postoperatoria", "drenaje", "masaje", "espuma_reafirmante"],
+    procedureIds: [
+      "faja_postoperatoria",
+      "drenaje",
+      "masaje",
+      "espuma_reafirmante",
+    ],
   },
   {
     id: "otros",

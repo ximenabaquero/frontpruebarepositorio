@@ -1,4 +1,4 @@
-type ContraindicationsFieldsProps = {
+/*type ContraindicationsFieldsProps = {
   onDirty: () => void;
 };
 
@@ -60,4 +60,4 @@ export default function ContraindicationsFields({ onDirty }: ContraindicationsFi
       </div>
     </fieldset>
   );
-}
+}*/
