@@ -1,13 +1,54 @@
-export default function ControlImagesPage() {
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import MainLayout from "@/layouts/MainLayout";
+
+import RegisterHeaderBar from "../post-login/components/RegisterHeaderBar";
+
+export default function StatsPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [authChecked, setAuthChecked] = useState(false);
+
+  // Autenticación
+  useEffect(() => {
+    try {
+      const token =
+        window.localStorage.getItem("coldesthetic_admin_token") ||
+        window.sessionStorage.getItem("coldesthetic_admin_token");
+      if (!token) {
+        const next = searchParams?.get("next") ?? "/register-patient";
+        router.replace(`/login?next=${encodeURIComponent(next)}`);
+        return;
+      }
+    } finally {
+      setAuthChecked(true);
+    }
+  }, [router, searchParams]);
+
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-gray-900">
-        Control de imágenes clínicas
-      </h1>
-      <p className="text-sm text-gray-500">
-        Visualización y gestión de imágenes clínicas (antes y después).
-      </p>
-      {/*  */}
-    </div>
+    <MainLayout>
+      <div className="bg-gradient-to-b from-emerald-50 via-white to-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <div className="max-w-5xl mx-auto">
+            <RegisterHeaderBar
+              onBackToRegisterClick={() => router.push("/register-patient")}
+              onImagesClick={() => router.push("/control-images")}
+              onPatientsClick={() => router.push("/patients")}
+              onStatsClick={() => router.push("/stats")}
+              active="images"
+            />
+            <h1 className="mt-3 text-2xl sm:text-3xl font-bold text-gray-900">
+              Gestión de imágenes clínicas
+            </h1>
+            <p className="mt-2 text-sm text-gray-600">
+              Imágenes comparativas de tratamientos realizados.
+            </p>
+          </div>
+        </div>
+      </div>
+    </MainLayout>
   );
 }
