@@ -19,9 +19,7 @@ const fetcher = (url: string) =>
 
 // Formato COP abreviado
 function formatCopInput(value: string | number): string {
-  const digits = String(value).replace(/\D/g, "");
-  if (!digits) return "";
-  const n = Number(digits);
+  const n = Number(value);
   if (!Number.isFinite(n)) return "";
   return new Intl.NumberFormat("es-CO", {
     style: "currency",
