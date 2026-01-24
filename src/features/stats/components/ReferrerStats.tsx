@@ -4,6 +4,8 @@ import {
   UserGroupIcon,
   BanknotesIcon,
   ClipboardDocumentIcon,
+  ClockIcon,
+  WalletIcon,
 } from "@heroicons/react/24/outline";
 
 const fetcher = (url: string) =>
@@ -93,12 +95,12 @@ export default function ReferrerStats() {
                 </p>
 
                 <div className="flex items-center gap-2 text-sm text-gray-700 mb-1">
-                  <UserGroupIcon className="h-4 w-4 text-cyan-600" />
+                  <ClockIcon className="h-4 w-4 text-cyan-600" />
                   {ref.total_patients} Pacientes
                 </div>
 
                 <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <BanknotesIcon className="h-4 w-4 text-cyan-600" />
+                  <WalletIcon className="h-4 w-4 text-cyan-600" />
                   {formatCopInput(ref.total_income)}
                 </div>
               </div>
