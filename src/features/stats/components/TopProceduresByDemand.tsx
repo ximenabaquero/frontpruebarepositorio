@@ -31,7 +31,7 @@ export default function TopProceduresByDemand() {
     return <p className="text-red-500">Error al cargar demanda.</p>;
 
   return (
-    <div className="w-full px-4 sm:px-0 mt-6">
+    <div className="w-full px-4 sm:px-0">
       <div className="rounded-2xl bg-white border shadow-md border-gray-100 p-5">
         {/* Título */}
         <h3 className="text-sm font-semibold text-gray-900 mb-1">

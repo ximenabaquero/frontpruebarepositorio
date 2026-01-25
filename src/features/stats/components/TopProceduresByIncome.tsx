@@ -25,7 +25,7 @@ export default function TopProceduresByIncome() {
   const maxRevenue = Math.max(...data.map((p: any) => Number(p.total_revenue)));
 
   return (
-    <div className="w-full  px-4 sm:px-0 ">
+    <div className="w-full px-4 sm:px-0 ">
       <div className="rounded-2xl bg-white border shadow-md border-gray-100 p-5">
         {/* Título */}
         <h3 className="text-sm font-semibold text-gray-900 mb-1">
