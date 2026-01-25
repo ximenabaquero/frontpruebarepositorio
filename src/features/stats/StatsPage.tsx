@@ -8,6 +8,8 @@ import RegisterHeaderBar from "../post-login/components/RegisterHeaderBar";
 
 import SummaryStats from "./components/SummaryStats";
 import ReferrerStats from "./components/ReferrerStats";
+import TopProceduresByIncome from "./components/TopProceduresByIncome";
+import TopProceduresByDemand from "./components/TopProceduresByDemand";
 
 export default function StatsPage() {
   const router = useRouter();
@@ -46,10 +48,22 @@ export default function StatsPage() {
             <h1 className="mt-3 text-2xl sm:text-3xl font-bold text-gray-900">
               Gestión estadística
             </h1>
-            <p className="mt-2 text-sm text-gray-600 mb-8">
-              Análisis de datos sobre pacientes, ingresos, registros clínicos y
-              procedimientos.
+            <p className="mt-2 text-sm text-gray-600 ">
+              Visualización y análisis de indicadores clave relacionados con
+              pacientes, ingresos, registros clínicos y procedimientos.
             </p>
+
+            {/* Período actual */}
+            <div className="mt-2 inline-flex items-center rounded-lg bg-blue-100 px-4 py-1 text-sm text-blue-900 mb-8">
+              <span className="font-semibold mr-1">Periodo:</span>
+              {(() => {
+                const formatted = new Date().toLocaleDateString("es-ES", {
+                  month: "long",
+                  year: "numeric",
+                });
+                return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+              })()}
+            </div>
 
             {!authChecked ? (
               <div className="mt-6 rounded-3xl border border-gray-100 bg-white/95 backdrop-blur-sm p-6 text-sm text-gray-600 shadow-sm">
@@ -59,6 +73,8 @@ export default function StatsPage() {
               <>
                 <SummaryStats />
                 <ReferrerStats />
+                <TopProceduresByIncome />
+                <TopProceduresByDemand />
               </>
             )}
           </div>

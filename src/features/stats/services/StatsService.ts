@@ -6,6 +6,7 @@ export const endpoints = {
   monthlyIncome: `${apiBaseUrl}/api/v1/stats/income-monthly`,
   weeklyIncome: `${apiBaseUrl}/api/v1/stats/income-weekly`,
   referrerStats: `${apiBaseUrl}/api/v1/stats/referrer-stats`,
-  topProcedures: `${apiBaseUrl}/api/v1/stats/top-procedures`,
+  topByDemand: `${apiBaseUrl}/api/v1/stats/procedures/top-demand`,
+  topByIncome: `${apiBaseUrl}/api/v1/stats/procedures/top-income`,
   incomeByProcedure: `${apiBaseUrl}/api/v1/stats/income-by-procedure`,
 };

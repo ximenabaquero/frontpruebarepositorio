@@ -39,74 +39,76 @@ export default function ReferrerStats() {
     return <p className="text-red-500">Error al cargar remitentes.</p>;
 
   return (
-    <div className="w-full xl:w-[35%] ml-auto px-4 sm:px-0">
+    <div className="w-full xl:w-[30%] ml-auto px-4 sm:px-0">
       {/* CONTENEDOR ÚNICO */}
       <div className="rounded-2xl bg-white border border-white shadow-md divide-y divide-gray-200">
-        {data.map((ref: any) => (
-          <div key={ref.referrer_name} className="p-5">
-            {/* Header */}
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-500/15">
-                <ClipboardDocumentIcon className="h-5 w-5 text-cyan-600" />
+        {Array.isArray(data)
+          ? data.map((ref: any) => (
+              <div key={ref.referrer_name} className="p-5">
+                {/* Header */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-500/15">
+                    <ClipboardDocumentIcon className="h-5 w-5 text-cyan-600" />
+                  </div>
+
+                  {ref.referrer_name ? (
+                    <span
+                      className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                        ref.referrer_name === "Dra. Adele"
+                          ? "bg-pink-100 text-pink-800"
+                          : ref.referrer_name === "Dra. Fernanda"
+                            ? "bg-purple-100 text-purple-800"
+                            : ref.referrer_name === "Dr. Alexander"
+                              ? "bg-teal-100 text-teal-800"
+                              : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      {ref.referrer_name}
+                    </span>
+                  ) : (
+                    "—"
+                  )}
+                </div>
+
+                {/* Stats */}
+                <div className="grid grid-cols-2 divide-x divide-gray-200">
+                  {/* Current Month */}
+                  <div className="pr-4">
+                    <p className="text-[10px] uppercase tracking-wider text-gray-400 mb-2">
+                      Periodo Actual
+                    </p>
+
+                    <div className="flex items-center gap-2 text-sm text-gray-700 mb-1">
+                      <UserGroupIcon className="h-4 w-4 text-cyan-600" />
+                      {ref.month_patients} Pacientes
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm text-gray-700">
+                      <BanknotesIcon className="h-4 w-4 text-cyan-600" />
+                      {formatCopInput(ref.month_income)}
+                    </div>
+                  </div>
+
+                  {/* Historical */}
+                  <div className="pl-4">
+                    <p className="text-[10px] uppercase tracking-wider text-gray-400 mb-2">
+                      Total Histórico
+                    </p>
+
+                    <div className="flex items-center gap-2 text-sm text-gray-700 mb-1">
+                      <ClockIcon className="h-4 w-4 text-cyan-600" />
+                      {ref.total_patients} Pacientes
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm text-gray-700">
+                      <WalletIcon className="h-4 w-4 text-cyan-600" />
+                      {formatCopInput(ref.total_income)}
+                    </div>
+                  </div>
+                </div>
               </div>
-
-              {ref.referrer_name ? (
-                <span
-                  className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                    ref.referrer_name === "Dra. Adele"
-                      ? "bg-pink-100 text-pink-800"
-                      : ref.referrer_name === "Dra. Fernanda"
-                        ? "bg-purple-100 text-purple-800"
-                        : ref.referrer_name === "Dr. Alexander"
-                          ? "bg-teal-100 text-teal-800"
-                          : "bg-gray-100 text-gray-800"
-                  }`}
-                >
-                  {ref.referrer_name}
-                </span>
-              ) : (
-                "—"
-              )}
-            </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-2 divide-x divide-gray-200">
-              {/* Current Month */}
-              <div className="pr-4">
-                <p className="text-[10px] uppercase tracking-wider text-gray-400 mb-2">
-                  Mes Actual
-                </p>
-
-                <div className="flex items-center gap-2 text-sm text-gray-700 mb-1">
-                  <UserGroupIcon className="h-4 w-4 text-cyan-600" />
-                  {ref.month_patients} Pacientes
-                </div>
-
-                <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <BanknotesIcon className="h-4 w-4 text-cyan-600" />
-                  {formatCopInput(ref.month_income)}
-                </div>
-              </div>
-
-              {/* Historical */}
-              <div className="pl-4">
-                <p className="text-[10px] uppercase tracking-wider text-gray-400 mb-2">
-                  Total Histórico
-                </p>
-
-                <div className="flex items-center gap-2 text-sm text-gray-700 mb-1">
-                  <ClockIcon className="h-4 w-4 text-cyan-600" />
-                  {ref.total_patients} Pacientes
-                </div>
-
-                <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <WalletIcon className="h-4 w-4 text-cyan-600" />
-                  {formatCopInput(ref.total_income)}
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
+            ))
+          : null}
       </div>
     </div>
   );
