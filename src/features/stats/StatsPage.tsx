@@ -72,9 +72,17 @@ export default function StatsPage() {
             ) : (
               <>
                 <SummaryStats />
-                <ReferrerStats />
-                <TopProceduresByIncome />
-                <TopProceduresByDemand />
+
+                <div className="flex gap-6 mt-6">
+                  {/* Columna izquierda */}
+                  <div className="flex flex-col gap-6">
+                    <TopProceduresByIncome />
+                    <TopProceduresByDemand />
+                  </div>
+
+                  {/* Columna derecha */}
+                  <ReferrerStats />
+                </div>
               </>
             )}
           </div>

@@ -53,6 +53,7 @@ export default function RegisterPatientPage() {
   // Estados
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
 
   // Datos paciente
@@ -145,8 +146,8 @@ export default function RegisterPatientPage() {
     const h = parseFloat(heightM) > 0;
     const p2 = w && h && medicalBackground.trim() !== "";
 
-    // Paso 3: al menos un procedimiento o nota
-    const p3 = procedureItems.length > 0 || procedureNotes.trim().length > 0;
+    // Paso 3: solo se valida tras intentar guardar
+    const p3 = procedureItems.length > 0 && procedureNotes.trim().length > 0;
 
     setStepCompleted([Boolean(p1), Boolean(p2), Boolean(p3)]);
   }, [
@@ -161,6 +162,23 @@ export default function RegisterPatientPage() {
     procedureItems,
     procedureNotes,
   ]);
+
+  useEffect(() => {
+    if (currentStep === 2) {
+      const step3Valid =
+        procedureItems.length > 0 && procedureNotes.trim().length > 0;
+
+      if (!step3Valid) {
+        setValidationError(
+          "⚠️​ Complete todos los pasos antes de guardar el registro.",
+        );
+      } else {
+        setValidationError(null);
+      }
+    } else {
+      setValidationError(null);
+    }
+  }, [currentStep, procedureItems, procedureNotes]);
 
   // BMI en tiempo real
   useEffect(() => {
@@ -206,17 +224,15 @@ export default function RegisterPatientPage() {
 
     if (currentStep !== 2) return;
     setHasTriedSubmit(true);
-
     const step3Valid =
-      procedureItems.length > 0 || procedureNotes.trim().length > 0;
+      procedureItems.length > 0 && procedureNotes.trim().length > 0;
 
     if (!step3Valid) {
-      setSubmitError(
-        "Debe seleccionar al menos un procedimiento o agregar una nota.",
+      setValidationError(
+        "⚠️​ Complete todos los pasos antes de guardar el registro.",
       );
       return;
     }
-
     setIsSubmitting(true);
 
     const token =
@@ -354,9 +370,14 @@ export default function RegisterPatientPage() {
                   </div>
                 ) : (
                   <form className="space-y-5 mt-6" onSubmit={handleSubmit}>
+                    {validationError && (
+                      <FormAlert variant="warning" message={validationError} />
+                    )}
+
                     {submitError && (
                       <FormAlert variant="error" message={submitError} />
                     )}
+
                     {submitSuccess && (
                       <FormAlert variant="success" message={submitSuccess} />
                     )}
