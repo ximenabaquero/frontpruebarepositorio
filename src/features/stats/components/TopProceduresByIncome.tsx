@@ -25,7 +25,7 @@ export default function TopProceduresByIncome() {
   const maxRevenue = Math.max(...data.map((p: any) => Number(p.total_revenue)));
 
   return (
-    <div className="w-full px-4 sm:px-0 ">
+    <div className="w-full max-w-xs min-w-[280px] px-4 sm:px-0">
       <div className="rounded-2xl bg-white border shadow-md border-gray-100 p-5">
         {/* Título */}
         <h3 className="text-sm font-semibold text-gray-900 mb-1">
@@ -43,16 +43,15 @@ export default function TopProceduresByIncome() {
               maxRevenue > 0 ? (revenue / maxRevenue) * 100 : 0;
 
             return (
-              <div key={proc.item_name}>
-                {/* Nombre + valor */}
-                <div className="flex justify-between items-center text-sm mb-1">
-                  <span className="text-gray-700">{proc.item_name}</span>
-                  <span className="font-medium text-emerald-600">
+              <div key={proc.item_name} className="w-full">
+                <div className="flex justify-between items-center text-sm mb-1 w-full">
+                  <span className="text-gray-700 font-medium">
+                    {proc.item_name}
+                  </span>
+                  <span className="font-medium text-emerald-600 whitespace-nowrap">
                     ${Number(revenue).toLocaleString("es-CO")}
                   </span>
                 </div>
-
-                {/* Barra */}
                 <div className="h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
                   <div
                     className="h-full rounded-full bg-emerald-500"

@@ -39,7 +39,7 @@ export default function ReferrerStats() {
     return <p className="text-red-500">Error al cargar remitentes.</p>;
 
   return (
-    <div className="w-full xl:w-[30%] ml-auto px-4 sm:px-0">
+    <div className="w-full xl:w-[28%] ml-auto px-4 sm:px-0">
       {/* CONTENEDOR ÚNICO */}
       <div className="rounded-2xl bg-white border border-white shadow-md divide-y divide-gray-200">
         {Array.isArray(data)

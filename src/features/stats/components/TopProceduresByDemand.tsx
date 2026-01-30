@@ -31,7 +31,7 @@ export default function TopProceduresByDemand() {
     return <p className="text-red-500">Error al cargar demanda.</p>;
 
   return (
-    <div className="w-full px-4 sm:px-0">
+    <div className="w-full max-w-xs min-w-[280px] px-4 sm:px-0">
       <div className="rounded-2xl bg-white border shadow-md border-gray-100 p-5">
         {/* Título */}
         <h3 className="text-sm font-semibold text-gray-900 mb-1">
@@ -49,24 +49,22 @@ export default function TopProceduresByDemand() {
             return (
               <div
                 key={item.item_name}
-                className="flex items-center justify-between text-sm"
+                className="flex items-start gap-3 text-sm w-full"
               >
-                <div className="flex items-center gap-3">
-                  {/* Número */}
-                  <span
-                    className={`w-6 h-6 flex items-center justify-center rounded-md text-xs font-semibold ${color}`}
-                  >
-                    {index + 1}
-                  </span>
-
-                  {/* Nombre */}
-                  <span className="text-gray-700">{item.item_name}</span>
-                </div>
-
-                {/* Cantidad */}
-                <span className="text-xs text-gray-400">
-                  {item.total_count} citas/mes
+                <span
+                  className={`w-6 h-6 flex items-center justify-center rounded-md text-xs font-semibold ${color}`}
+                >
+                  {index + 1}
                 </span>
+
+                <div className="flex flex-col w-full">
+                  <span className="text-gray-700 font-medium">
+                    {item.item_name}
+                  </span>
+                  <span className="text-xs text-gray-400">
+                    {item.total_count} citas/mes
+                  </span>
+                </div>
               </div>
             );
           })}

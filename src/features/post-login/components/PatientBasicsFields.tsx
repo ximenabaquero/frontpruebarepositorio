@@ -39,6 +39,12 @@ export default function PatientBasicsFields({
     <>
       {/* Nombre y Apellido */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="col-span-2 -mb-2">
+          <p className="text-[10px] uppercase tracking-wider text-gray-400">
+            TODOS LOS CAMPOS SON OBLIGATORIOS **
+          </p>
+        </div>
+
         <div>
           <label
             htmlFor="first_name"
@@ -75,8 +81,8 @@ export default function PatientBasicsFields({
               onDirty();
             }}
             className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 
-                       text-gray-900 shadow-sm placeholder:text-gray-400 
-                       focus:outline-none focus:ring-0 focus:border-gray-300"
+                      text-gray-900 shadow-sm placeholder:text-gray-400 
+                      focus:outline-none focus:ring-0 focus:border-gray-300"
             placeholder="Apellido del paciente"
           />
         </div>
@@ -94,6 +100,7 @@ export default function PatientBasicsFields({
           <input
             id="age"
             type="number"
+            min="1"
             required
             value={age}
             onChange={(e) => {
@@ -101,8 +108,8 @@ export default function PatientBasicsFields({
               onDirty();
             }}
             className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 
-                       text-gray-900 shadow-sm placeholder:text-gray-400 
-                       focus:outline-none focus:ring-0 focus:border-gray-300"
+                      text-gray-900 shadow-sm placeholder:text-gray-400 
+                      focus:outline-none focus:ring-0 focus:border-gray-300"
             placeholder="Edad del paciente"
           />
         </div>
@@ -120,13 +127,23 @@ export default function PatientBasicsFields({
             required
             value={cellphone}
             onChange={(e) => {
-              setCellphone(e.target.value);
+              let value = e.target.value.replace(/\D/g, ""); // solo números
+              if (value.length > 10) value = value.slice(0, 10); // máximo 10 dígitos
+
+              // Formatear como 3-3-4 (ej: 321 252 4565)
+              const formatted = value.replace(
+                /(\d{3})(\d{3})(\d{0,4})/,
+                (_, g1, g2, g3) => (g3 ? `${g1} ${g2} ${g3}` : `${g1} ${g2}`),
+              );
+
+              setCellphone(formatted);
               onDirty();
             }}
             className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 
-                       text-gray-900 shadow-sm placeholder:text-gray-400 
-                       focus:outline-none focus:ring-0 focus:border-gray-300"
-            placeholder="Número de contacto"
+            text-gray-900 shadow-sm placeholder:text-gray-400 
+            focus:outline-none focus:ring-0 focus:border-gray-300"
+            placeholder="Celular del paciente"
+            maxLength={12}
           />
         </div>
       </div>
@@ -151,8 +168,8 @@ export default function PatientBasicsFields({
                 onDirty();
               }}
               className="mt-1 w-full appearance-none rounded-xl border border-gray-200 bg-white 
-                         px-3 py-2 text-sm text-gray-900 shadow-sm 
-                         focus:outline-none focus:ring-0 focus:border-gray-300"
+                        px-3 py-2 text-sm text-gray-900 shadow-sm 
+                        focus:outline-none focus:ring-0 focus:border-gray-300"
             >
               <option value="">Seleccione un profesional</option>
               <option value="Dra. Adele">Dra. Adele</option>
@@ -199,8 +216,8 @@ export default function PatientBasicsFields({
                 onDirty();
               }}
               className="mt-1 w-full appearance-none rounded-xl border border-gray-200 bg-white 
-                         px-3 py-2 text-sm text-gray-900 shadow-sm 
-                         focus:outline-none focus:ring-0 focus:border-gray-300"
+                        px-3 py-2 text-sm text-gray-900 shadow-sm 
+                        focus:outline-none focus:ring-0 focus:border-gray-300"
             >
               <option value="">Seleccione una opción</option>
               <option value="Female">Femenino</option>

@@ -27,6 +27,11 @@ export default function ClinicalInfoFields({
     <>
       {/* Peso y Estatura */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="col-span-2 -mb-2">
+          <p className="text-[10px] uppercase tracking-wider text-gray-400">
+            TODOS LOS CAMPOS SON OBLIGATORIOS **
+          </p>
+        </div>
         <div>
           <label
             htmlFor="weight"
@@ -37,7 +42,9 @@ export default function ClinicalInfoFields({
           <input
             id="weight"
             name="weight"
-            inputMode="decimal"
+            type="number"
+            min="1"
+            step="0.01"
             required
             value={weightKg}
             onChange={(e) => {
@@ -59,7 +66,9 @@ export default function ClinicalInfoFields({
           <input
             id="height"
             name="height"
-            inputMode="decimal"
+            type="number"
+            min="0.1"
+            step="0.01"
             required
             value={heightM}
             onChange={(e) => {
