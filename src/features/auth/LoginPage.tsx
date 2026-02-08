@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+
 import Cookies from "js-cookie";
 import { useAuth } from "./AuthContext";
 
@@ -56,6 +58,7 @@ export default function LoginPage() {
     });
   }, []);
 
+  const router = useRouter();
   const { setUser } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -64,15 +67,10 @@ export default function LoginPage() {
     setErrorMessage(null);
 
     try {
-      // 1️- Pedir CSRF cookie
-      await fetch(`${apiBaseUrl}/sanctum/csrf-cookie`, {
-        credentials: "include",
-      });
-
-      // 2️- Leer token (si no existe, queda "")
+      //Leer token (si no existe, queda "")
       const token = Cookies.get("XSRF-TOKEN") ?? "";
 
-      // 3️- Login
+      //Login
       const res = await fetch(`${apiBaseUrl}/api/v1/login`, {
         method: "POST",
         credentials: "include",
@@ -99,7 +97,8 @@ export default function LoginPage() {
 
       const params = new URLSearchParams(window.location.search);
       const next = params.get("next") || "/register-patient";
-      window.location.href = next;
+
+      router.push(next);
     } catch (error) {
       setErrorMessage("Error de conexión con el servidor.");
     } finally {

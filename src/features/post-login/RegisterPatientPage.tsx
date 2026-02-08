@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import MainLayout from "@/layouts/MainLayout";
+import Cookies from "js-cookie";
 
 import RegisterCard from "./components/RegisterCard";
 import RegisterHeaderBar from "./components/RegisterHeaderBar";
@@ -249,12 +250,15 @@ export default function RegisterPatientPage() {
 
     try {
       // Crear paciente
+      const token = Cookies.get("XSRF-TOKEN") ?? "";
+
       const patientRes = await fetch(`${apiBaseUrl}/api/v1/patients`, {
         method: "POST",
-        credentials: "include", // 👈 esto es lo que manda la cookie
+        credentials: "include", //esto es lo que manda la cookie
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
+          "X-XSRF-TOKEN": token,
         },
         body: JSON.stringify({
           first_name: firstName,
@@ -285,6 +289,7 @@ export default function RegisterPatientPage() {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
+          "X-XSRF-TOKEN": token,
         },
         body: JSON.stringify({
           patient_id,
@@ -313,6 +318,7 @@ export default function RegisterPatientPage() {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
+          "X-XSRF-TOKEN": token,
         },
         body: JSON.stringify({
           medical_evaluation_id,

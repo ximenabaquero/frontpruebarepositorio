@@ -7,6 +7,8 @@ import {
   ReactNode,
 } from "react";
 
+import Cookies from "js-cookie";
+
 type User = { id: number; name: string; email: string };
 
 type AuthContextType = {
@@ -14,29 +16,53 @@ type AuthContextType = {
   setUser: (user: User | null) => void;
   checkSession: () => Promise<void>;
   logout: () => Promise<void>;
+  loading: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   async function checkSession() {
-    const res = await fetch("/backend/api/v1/me", { credentials: "include" });
-    if (res.ok) {
+    try {
+      const res = await fetch("/backend/api/v1/me", {
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        setUser(null);
+        return;
+      }
+
       const data = await res.json();
-      setUser(data);
-    } else {
+      setUser(data?.id ? data : null);
+    } catch {
       setUser(null);
+    } finally {
+      setLoading(false);
     }
   }
 
   async function logout() {
-    await fetch("/backend/api/v1/logout", {
-      method: "POST",
-      credentials: "include",
-    });
-    setUser(null);
+    try {
+      const token = Cookies.get("XSRF-TOKEN") ?? "";
+
+      await fetch("/backend/api/v1/logout", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "X-XSRF-TOKEN": token,
+        },
+      });
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      setUser(null); // limpiar contexto
+    }
   }
 
   useEffect(() => {
@@ -44,7 +70,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, setUser, checkSession, logout }}>
+    <AuthContext.Provider
+      value={{ user, setUser, checkSession, logout, loading }}
+    >
       {children}
     </AuthContext.Provider>
   );

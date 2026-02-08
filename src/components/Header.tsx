@@ -1,39 +1,22 @@
 "use client";
 
 import { Menu, X, Phone } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/features/auth/AuthContext";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isAuthed, setIsAuthed] = useState(false);
   const router = useRouter();
+  const { user, logout, loading } = useAuth();
 
-  useEffect(() => {
-    const readAuth = () => {
-      try {
-        return window.localStorage.getItem("coldesthetic_admin_authed") === "1";
-      } catch {
-        return false;
-      }
-    };
+  if (loading) return null;
 
-    setIsAuthed(readAuth());
-    const onStorage = () => setIsAuthed(readAuth());
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
-
-  const handleLogout = () => {
-    try {
-      window.localStorage.removeItem("coldesthetic_admin_authed");
-    } catch {
-      // ignore
-    }
-    setIsAuthed(false);
-    router.push("/login");
+  const handleLogout = async () => {
+    await logout(); // llama al backend y limpia el estado
+    router.push("/login"); // redirige al login
   };
 
   return (
@@ -63,9 +46,6 @@ export default function Header() {
             </div>
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-6"></nav>
-
           {/* Right Section */}
           <div className="flex items-center gap-4">
             {/* Teléfono */}
@@ -78,37 +58,14 @@ export default function Header() {
               <span className="text-sm font-medium">+57 300 143 4089</span>
             </a>
 
-            {isAuthed ? (
-              <>
-                <Link
-                  href="/patients"
-                  className="hidden sm:flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-emerald-600 transition-colors duration-200"
-                >
-                  <span className="text-sm font-medium">Pacientes</span>
-                </Link>
-
-                <Link
-                  href="/stats"
-                  className="hidden sm:flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-emerald-600 transition-colors duration-200"
-                >
-                  <span className="text-sm font-medium">Estadísticas</span>
-                </Link>
-
-                <Link
-                  href="/control-images"
-                  className="hidden sm:flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-emerald-600 transition-colors duration-200"
-                >
-                  <span className="text-sm font-medium">Imágenes</span>
-                </Link>
-
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-emerald-600 transition-colors duration-200"
-                >
-                  <span className="hidden sm:inline">Cerrar sesión</span>
-                </button>
-              </>
+            {user ? (
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-emerald-600 transition-colors duration-200"
+              >
+                <span className="hidden sm:inline">Cerrar sesión</span>
+              </button>
             ) : (
               <Link
                 href="/login"
@@ -158,44 +115,17 @@ export default function Header() {
                   <span className="font-medium">+57 300 143 4089</span>
                 </a>
 
-                {/* Login en mobile */}
-                {isAuthed ? (
-                  <>
-                    <Link
-                      href="/patients"
-                      className="flex items-center gap-3 text-gray-700 hover:text-emerald-600 font-medium py-2"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      <span>Pacientes</span>
-                    </Link>
-
-                    <Link
-                      href="/stats"
-                      className="flex items-center gap-3 text-gray-700 hover:text-emerald-600 font-medium py-2"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      <span>Estadísticas</span>
-                    </Link>
-
-                    <Link
-                      href="/control-images"
-                      className="flex items-center gap-3 text-gray-700 hover:text-emerald-600 font-medium py-2"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      <span>Imágenes</span>
-                    </Link>
-
-                    <button
-                      type="button"
-                      className="flex items-center gap-3 text-gray-700 hover:text-emerald-600 font-medium py-2"
-                      onClick={() => {
-                        setIsMenuOpen(false);
-                        handleLogout();
-                      }}
-                    >
-                      <span>Cerrar sesión</span>
-                    </button>
-                  </>
+                {user ? (
+                  <button
+                    type="button"
+                    className="flex items-center gap-3 text-gray-700 hover:text-emerald-600 font-medium py-2"
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      handleLogout();
+                    }}
+                  >
+                    <span>Cerrar sesión</span>
+                  </button>
                 ) : (
                   <Link
                     href="/login"

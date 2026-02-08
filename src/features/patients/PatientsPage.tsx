@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import MainLayout from "@/layouts/MainLayout";
+import { useAuth } from "@/features/auth/AuthContext";
 
 import RegisterHeaderBar from "@/features/post-login/components/RegisterHeaderBar";
 import RegisterCard from "@/features/post-login/components/RegisterCard";
@@ -37,6 +38,7 @@ function safeString(value: unknown): string {
 export default function PatientsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
 
   const [authChecked, setAuthChecked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -48,41 +50,15 @@ export default function PatientsPage() {
   const apiBaseUrl =
     process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "") || "/backend";
 
-  const getStoredToken = (): string | null => {
-    try {
-      return (
-        window.localStorage.getItem("coldesthetic_admin_token") ||
-        window.sessionStorage.getItem("coldesthetic_admin_token")
-      );
-    } catch {
-      return null;
-    }
-  };
-
-  const handleLogout = useCallback(() => {
-    try {
-      window.localStorage.removeItem("coldesthetic_admin_authed");
-      window.localStorage.removeItem("coldesthetic_admin_token");
-      window.sessionStorage.removeItem("coldesthetic_admin_token");
-    } catch {
-      // ignore
-    }
-    router.replace("/login");
-  }, [router]);
-
+  //Validar sesión
   useEffect(() => {
-    try {
-      const token = getStoredToken();
-      if (!token) {
-        const next = searchParams?.get("next") ?? "/patients";
-        router.replace(`/login?next=${encodeURIComponent(next)}`);
-        return;
-      }
-    } finally {
-      setAuthChecked(true);
+    if (!user) {
+      const next = searchParams?.get("next") ?? "/patients";
+      router.replace(`/login?next=${encodeURIComponent(next)}`);
+      return;
     }
-  }, [router, searchParams]);
-
+    setAuthChecked(true);
+  }, [user, router, searchParams]);
   const queryString = useMemo(() => {
     const trimmed = search.trim();
     return trimmed ? `?search=${encodeURIComponent(trimmed)}` : "";
@@ -90,36 +66,21 @@ export default function PatientsPage() {
 
   useEffect(() => {
     if (!authChecked) return;
-
     const controller = new AbortController();
-
     const load = async () => {
-      const token = getStoredToken();
-      if (!token) return;
-
       setIsLoading(true);
       setError(null);
-
       try {
         const res = await fetch(`${apiBaseUrl}/api/v1/patients${queryString}`, {
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+          credentials: "include", //usamos cookies
+          headers: { Accept: "application/json" },
           signal: controller.signal,
         });
-
-        if (res.status === 401) {
-          handleLogout();
-          return;
-        }
-
-        const payload = (await res.json().catch(() => null)) as unknown;
         if (!res.ok) {
           setError("No se pudo cargar el listado de pacientes.");
           return;
         }
-
+        const payload = (await res.json().catch(() => null)) as unknown;
         if (Array.isArray(payload)) {
           setPatients(payload as PatientRow[]);
         } else if (isApiListResponse<PatientRow>(payload)) {
@@ -135,11 +96,9 @@ export default function PatientsPage() {
         setIsLoading(false);
       }
     };
-
     void load();
-
     return () => controller.abort();
-  }, [apiBaseUrl, authChecked, handleLogout, queryString]);
+  }, [apiBaseUrl, authChecked, queryString]);
 
   return (
     <MainLayout>
