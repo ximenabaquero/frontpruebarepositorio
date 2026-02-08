@@ -16,12 +16,9 @@ const apiBaseUrl =
 
 const fetcher = (url: string) =>
   fetch(url, {
-    headers: {
-      Accept: "application/json",
-      Authorization: `Bearer ${localStorage.getItem("coldesthetic_admin_token") || sessionStorage.getItem("coldesthetic_admin_token")}`,
-    },
+    credentials: "include", // manda cookies HttpOnly
+    headers: { Accept: "application/json" },
   }).then((res) => res.json());
-
 export default function PatientMedicalHistoryPage() {
   const [currentYear] = useState(new Date().getFullYear());
   const params = useParams();
@@ -34,6 +31,7 @@ export default function PatientMedicalHistoryPage() {
   if (isLoading) {
     return (
       <MainLayout>
+        {" "}
         <p className="text-center py-10">Cargando historial...</p>{" "}
       </MainLayout>
     );
@@ -41,9 +39,11 @@ export default function PatientMedicalHistoryPage() {
   if (error || !data?.data) {
     return (
       <MainLayout>
+        {" "}
         <div className="p-4 bg-red-50 text-red-600 rounded-lg">
+          {" "}
           Error al cargar datos del paciente.{" "}
-        </div>
+        </div>{" "}
       </MainLayout>
     );
   }
@@ -52,7 +52,7 @@ export default function PatientMedicalHistoryPage() {
   const procedures = evaluation.procedures || [];
   const brandName = evaluation.user?.brand_name;
   const referrer = patient.referrer_name;
-  const fecha = new Date(evaluation.created_at).toLocaleDateString("es-ES");
+
   return (
     <MainLayout>
       <div className="bg-gradient-to-b from-emerald-50 via-white to-white">

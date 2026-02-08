@@ -4,29 +4,28 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import MainLayout from "@/layouts/MainLayout";
 
+import { useAuth } from "@/features/auth/AuthContext";
+
 import RegisterHeaderBar from "../post-login/components/RegisterHeaderBar";
 
-export default function StatsPage() {
+export default function ControlImagesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
 
   const [authChecked, setAuthChecked] = useState(false);
 
   // Autenticación
   useEffect(() => {
-    try {
-      const token =
-        window.localStorage.getItem("coldesthetic_admin_token") ||
-        window.sessionStorage.getItem("coldesthetic_admin_token");
-      if (!token) {
-        const next = searchParams?.get("next") ?? "/register-patient";
-        router.replace(`/login?next=${encodeURIComponent(next)}`);
-        return;
-      }
-    } finally {
-      setAuthChecked(true);
+    if (!user) {
+      const next = searchParams?.get("next") ?? "/control-images";
+      router.replace(`/login?next=${encodeURIComponent(next)}`);
+      return;
     }
-  }, [router, searchParams]);
+    setAuthChecked(true);
+  }, [user, router, searchParams]);
+
+  if (!authChecked) return null;
 
   return (
     <MainLayout>

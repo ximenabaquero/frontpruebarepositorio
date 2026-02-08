@@ -54,7 +54,7 @@ export default function RegisterPatientPage() {
 
         // Si responde bien, guardás el usuario en tu estado/contexto
         const user = await res.json();
-        setUser(user); // si usás AuthContext
+        setUser(user);
       } finally {
         setAuthChecked(true);
       }

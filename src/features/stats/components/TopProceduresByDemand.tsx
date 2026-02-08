@@ -3,13 +3,8 @@ import { endpoints } from "../services/StatsService";
 
 const fetcher = (url: string) =>
   fetch(url, {
-    headers: {
-      Accept: "application/json",
-      Authorization: `Bearer ${
-        localStorage.getItem("coldesthetic_admin_token") ||
-        sessionStorage.getItem("coldesthetic_admin_token")
-      }`,
-    },
+    credentials: "include",
+    headers: { Accept: "application/json" },
   }).then((res) => res.json());
 
 // Colores para los números
