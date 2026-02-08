@@ -17,6 +17,8 @@ type AuthContextType = {
   checkSession: () => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
+  authChecked: boolean;
+  isLoggingOut: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,6 +26,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   async function checkSession() {
     try {
@@ -42,13 +46,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
     } finally {
       setLoading(false);
+      setAuthChecked(true);
     }
   }
 
   async function logout() {
     try {
+      setIsLoggingOut(true);
       const token = Cookies.get("XSRF-TOKEN") ?? "";
-
       await fetch("/backend/api/v1/logout", {
         method: "POST",
         credentials: "include",
@@ -61,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       console.error("Logout error:", err);
     } finally {
-      setUser(null); // limpiar contexto
+      setUser(null);
     }
   }
 
@@ -71,7 +76,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, setUser, checkSession, logout, loading }}
+      value={{
+        user,
+        setUser,
+        checkSession,
+        logout,
+        loading,
+        authChecked,
+        isLoggingOut,
+      }}
     >
       {children}
     </AuthContext.Provider>
