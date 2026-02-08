@@ -14,6 +14,7 @@ import StickySubmitBar from "./components/StickySubmitBar";
 import FormAlert from "./components/FormAlert";
 import SidebarSteps from "./components/SideBarSteps";
 import { toast } from "react-hot-toast";
+import { useAuth } from "../auth/AuthContext";
 
 type ProcedureItem = {
   item_name: string;
@@ -34,20 +35,31 @@ export default function RegisterPatientPage() {
     [boolean, boolean, boolean]
   >([false, false, false]);
 
+  const { setUser } = useAuth();
+
   // Autenticación
   useEffect(() => {
-    try {
-      const token =
-        window.localStorage.getItem("coldesthetic_admin_token") ||
-        window.sessionStorage.getItem("coldesthetic_admin_token");
-      if (!token) {
-        const next = searchParams?.get("next") ?? "/register-patient";
-        router.replace(`/login?next=${encodeURIComponent(next)}`);
-        return;
+    async function checkAuth() {
+      try {
+        const res = await fetch(`${apiBaseUrl}/api/v1/me`, {
+          credentials: "include", // 👈 usa la cookie HttpOnly
+        });
+
+        if (!res.ok) {
+          const next = searchParams?.get("next") ?? "/register-patient";
+          router.replace(`/login?next=${encodeURIComponent(next)}`);
+          return;
+        }
+
+        // Si responde bien, guardás el usuario en tu estado/contexto
+        const user = await res.json();
+        setUser(user); // si usás AuthContext
+      } finally {
+        setAuthChecked(true);
       }
-    } finally {
-      setAuthChecked(true);
     }
+
+    checkAuth();
   }, [router, searchParams]);
 
   // Estados
@@ -235,18 +247,14 @@ export default function RegisterPatientPage() {
     }
     setIsSubmitting(true);
 
-    const token =
-      window.localStorage.getItem("coldesthetic_admin_token") ||
-      window.sessionStorage.getItem("coldesthetic_admin_token");
-
     try {
       // Crear paciente
       const patientRes = await fetch(`${apiBaseUrl}/api/v1/patients`, {
         method: "POST",
+        credentials: "include", // 👈 esto es lo que manda la cookie
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           first_name: firstName,
@@ -258,18 +266,25 @@ export default function RegisterPatientPage() {
         }),
       });
 
-      if (!patientRes.ok) throw new Error("Error al crear paciente");
+      console.log("CREATE PATIENT status:", patientRes.status);
+
+      if (!patientRes.ok) {
+        console.log("CREATE PATIENT failed");
+        throw new Error("Error al crear paciente");
+      }
 
       const patientJson = await patientRes.json();
+      console.log("CREATE PATIENT response:", patientJson);
+
       const patient_id = patientJson.data.id;
 
       // Crear evaluación médica
       const evalRes = await fetch(`${apiBaseUrl}/api/v1/medical-evaluations`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           patient_id,
@@ -279,20 +294,25 @@ export default function RegisterPatientPage() {
         }),
       });
 
+      console.log("CREATE EVAL status:", evalRes.status);
+
       if (!evalRes.ok) {
+        console.log("CREATE EVAL failed");
         throw new Error("Error al crear evaluación médica");
       }
 
       const evalJson = await evalRes.json();
+      console.log("CREATE EVAL response:", evalJson);
+
       const medical_evaluation_id = evalJson.data.id;
 
       // Crear procedimientos
       const procRes = await fetch(`${apiBaseUrl}/api/v1/procedures`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           medical_evaluation_id,
@@ -307,11 +327,17 @@ export default function RegisterPatientPage() {
         }),
       });
 
-      if (!procRes.ok) throw new Error("Error al crear procedimientos");
+      console.log("CREATE PROCEDURES status:", procRes.status);
+
+      if (!procRes.ok) {
+        console.log("CREATE PROCEDURES failed");
+        throw new Error("Error al crear procedimientos");
+      }
 
       setSubmitError(null);
       setSubmitSuccess("Registro guardado correctamente");
     } catch (err) {
+      console.error("SUBMIT ERROR:", err);
       setSubmitError("No se pudo guardar el registro.");
       toast.error("Hubo un error al guardar el registro");
     } finally {

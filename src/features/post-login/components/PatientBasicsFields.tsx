@@ -220,9 +220,9 @@ export default function PatientBasicsFields({
                         focus:outline-none focus:ring-0 focus:border-gray-300"
             >
               <option value="">Seleccione una opción</option>
-              <option value="Female">Femenino</option>
-              <option value="Male">Masculino</option>
-              <option value="Other">Otro</option>
+              <option value="Femenino">Femenino</option>
+              <option value="Masculino">Masculino</option>
+              <option value="Otro">Otro</option>
             </select>
 
             <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">

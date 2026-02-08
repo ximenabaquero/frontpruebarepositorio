@@ -1,15 +1,17 @@
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import './globals.css';
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
 // ¿TIENES ESTAS IMPORTACIONES?
 // import Header from '@/components/Header';
 // import Footer from '@/components/Footer';
+import { AuthProvider } from "@/features/auth/AuthContext";
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Coldesthetic - Estética Médica Avanzada',
-  description: 'Lipólisis láser sin cirugía, resultados desde la primera sesión',
+  title: "Coldesthetic - Estética Médica Avanzada",
+  description:
+    "Lipólisis láser sin cirugía, resultados desde la primera sesión",
 };
 
 export default function RootLayout({
@@ -22,9 +24,9 @@ export default function RootLayout({
       <body className={inter.className}>
         {/* ¿TIENES HEADER Y FOOTER AQUÍ? */}
         {/* <Header /> */}
-        <main className="min-h-screen">
-          {children}
-        </main>
+        <AuthProvider>
+          <main className="min-h-screen">{children}</main>
+        </AuthProvider>
         {/* <Footer /> */}
       </body>
     </html>
