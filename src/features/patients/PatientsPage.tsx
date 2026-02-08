@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import MainLayout from "@/layouts/MainLayout";
-import { useAuth } from "@/features/auth/AuthContext";
 
 import RegisterHeaderBar from "@/features/post-login/components/RegisterHeaderBar";
 import RegisterCard from "@/features/post-login/components/RegisterCard";
 import FormAlert from "@/features/post-login/components/FormAlert";
 import { Eye } from "lucide-react";
+
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 type PatientRow = {
   id: number;
@@ -37,10 +38,6 @@ function safeString(value: unknown): string {
 
 export default function PatientsPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const { user } = useAuth();
-
-  const [authChecked, setAuthChecked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,22 +47,12 @@ export default function PatientsPage() {
   const apiBaseUrl =
     process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "") || "/backend";
 
-  //Validar sesión
-  useEffect(() => {
-    if (!user) {
-      const next = searchParams?.get("next") ?? "/patients";
-      router.replace(`/login?next=${encodeURIComponent(next)}`);
-      return;
-    }
-    setAuthChecked(true);
-  }, [user, router, searchParams]);
   const queryString = useMemo(() => {
     const trimmed = search.trim();
     return trimmed ? `?search=${encodeURIComponent(trimmed)}` : "";
   }, [search]);
 
   useEffect(() => {
-    if (!authChecked) return;
     const controller = new AbortController();
     const load = async () => {
       setIsLoading(true);
@@ -98,35 +85,31 @@ export default function PatientsPage() {
     };
     void load();
     return () => controller.abort();
-  }, [apiBaseUrl, authChecked, queryString]);
+  }, [apiBaseUrl, queryString]);
 
   return (
-    <MainLayout>
-      <div className="bg-gradient-to-b from-emerald-50 via-white to-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="max-w-5xl mx-auto">
-            <RegisterHeaderBar
-              onStatsClick={() => router.push("/stats")}
-              onImagesClick={() => router.push("/control-images")}
-              onPatientsClick={() => router.push("/patients")}
-              onBackToRegisterClick={() => router.push("/register-patient")}
-              active="patients"
-            />
+    <ProtectedRoute>
+      <MainLayout>
+        <div className="bg-gradient-to-b from-emerald-50 via-white to-white">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <div className="max-w-5xl mx-auto">
+              <RegisterHeaderBar
+                onStatsClick={() => router.push("/stats")}
+                onImagesClick={() => router.push("/control-images")}
+                onPatientsClick={() => router.push("/patients")}
+                onBackToRegisterClick={() => router.push("/register-patient")}
+                active="patients"
+              />
 
-            <h1 className="mt-3 text-2xl sm:text-3xl font-bold text-gray-900">
-              Pacientes
-            </h1>
-            <p className="mt-2 text-sm text-gray-600">
-              Este listado corresponde al registro central de pacientes del
-              sistema clínico. La información se actualiza automáticamente y
-              refleja los datos más recientes disponibles.
-            </p>
+              <h1 className="mt-3 text-2xl sm:text-3xl font-bold text-gray-900">
+                Pacientes
+              </h1>
+              <p className="mt-2 text-sm text-gray-600">
+                Este listado corresponde al registro central de pacientes del
+                sistema clínico. La información se actualiza automáticamente y
+                refleja los datos más recientes disponibles.
+              </p>
 
-            {!authChecked ? (
-              <div className="mt-6 rounded-3xl border border-gray-100 bg-white/95 backdrop-blur-sm p-6 text-sm text-gray-600 shadow-sm">
-                Verificando acceso...
-              </div>
-            ) : (
               <RegisterCard
                 title="Historial clínico"
                 subtitle="Pacientes registrados, ordenados por fecha de ingreso (más recientes primero)."
@@ -239,10 +222,10 @@ export default function PatientsPage() {
                   </div>
                 </div>
               </RegisterCard>
-            )}
+            </div>
           </div>
         </div>
-      </div>
-    </MainLayout>
+      </MainLayout>
+    </ProtectedRoute>
   );
 }

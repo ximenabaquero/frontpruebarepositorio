@@ -15,7 +15,8 @@ import StickySubmitBar from "./components/StickySubmitBar";
 import FormAlert from "./components/FormAlert";
 import SidebarSteps from "./components/SideBarSteps";
 import { toast } from "react-hot-toast";
-import { useAuth } from "../auth/AuthContext";
+
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 type ProcedureItem = {
   item_name: string;
@@ -29,39 +30,10 @@ export default function RegisterPatientPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [authChecked, setAuthChecked] = useState(false);
-
   const [currentStep, setCurrentStep] = useState(0);
   const [stepCompleted, setStepCompleted] = useState<
     [boolean, boolean, boolean]
   >([false, false, false]);
-
-  const { setUser } = useAuth();
-
-  // Autenticación
-  useEffect(() => {
-    async function checkAuth() {
-      try {
-        const res = await fetch(`${apiBaseUrl}/api/v1/me`, {
-          credentials: "include", // 👈 usa la cookie HttpOnly
-        });
-
-        if (!res.ok) {
-          const next = searchParams?.get("next") ?? "/register-patient";
-          router.replace(`/login?next=${encodeURIComponent(next)}`);
-          return;
-        }
-
-        // Si responde bien, guardás el usuario en tu estado/contexto
-        const user = await res.json();
-        setUser(user);
-      } finally {
-        setAuthChecked(true);
-      }
-    }
-
-    checkAuth();
-  }, [router, searchParams]);
 
   // Estados
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -351,56 +323,50 @@ export default function RegisterPatientPage() {
     }
   };
 
-  if (!authChecked) return null;
-
   return (
-    <MainLayout>
-      <div className="bg-gradient-to-b from-emerald-50 via-white to-white">
-        {/* CONTAINER GENERAL */}
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          {/* GRID PRINCIPAL */}
-          <div className="grid grid-cols-12 gap-6">
-            {/* SIDEBAR */}
-            <aside className="col-span-12 lg:col-span-4">
-              <SidebarSteps
-                steps={[
-                  {
-                    label: "Datos del paciente",
-                    completed: stepCompleted[0],
-                  },
-                  {
-                    label: "Evaluación clínica",
-                    completed: stepCompleted[1],
-                  },
-                  { label: "Procedimientos", completed: stepCompleted[2] },
-                ]}
-                currentStep={currentStep}
-                onStepClick={setCurrentStep}
-              />
-            </aside>
-
-            <main className="col-span-12 lg:col-span-8">
-              <div className="w-full">
-                <RegisterHeaderBar
-                  onStatsClick={() => router.push("/stats")}
-                  onImagesClick={() => router.push("/control-images")}
-                  onPatientsClick={() => router.push("/patients")}
-                  active="register"
+    <ProtectedRoute>
+      <MainLayout>
+        <div className="bg-gradient-to-b from-emerald-50 via-white to-white">
+          {/* CONTAINER GENERAL */}
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            {/* GRID PRINCIPAL */}
+            <div className="grid grid-cols-12 gap-6">
+              {/* SIDEBAR */}
+              <aside className="col-span-12 lg:col-span-4">
+                <SidebarSteps
+                  steps={[
+                    {
+                      label: "Datos del paciente",
+                      completed: stepCompleted[0],
+                    },
+                    {
+                      label: "Evaluación clínica",
+                      completed: stepCompleted[1],
+                    },
+                    { label: "Procedimientos", completed: stepCompleted[2] },
+                  ]}
+                  currentStep={currentStep}
+                  onStepClick={setCurrentStep}
                 />
+              </aside>
 
-                <h1 className="mt-3 text-2xl sm:text-3xl font-bold text-gray-900">
-                  Registro clínico del paciente
-                </h1>
-                <p className="mt-2 text-sm text-gray-600">
-                  Complete y verifique la información antes de guardarla. El
-                  índice de masa corporal (IMC) se registrará automáticamente.
-                </p>
+              <main className="col-span-12 lg:col-span-8">
+                <div className="w-full">
+                  <RegisterHeaderBar
+                    onStatsClick={() => router.push("/stats")}
+                    onImagesClick={() => router.push("/control-images")}
+                    onPatientsClick={() => router.push("/patients")}
+                    active="register"
+                  />
 
-                {!authChecked ? (
-                  <div className="mt-6 rounded-3xl border border-gray-100 bg-white/95 backdrop-blur-sm p-6 text-sm text-gray-600 shadow-sm">
-                    Verificando acceso...
-                  </div>
-                ) : (
+                  <h1 className="mt-3 text-2xl sm:text-3xl font-bold text-gray-900">
+                    Registro clínico del paciente
+                  </h1>
+                  <p className="mt-2 text-sm text-gray-600">
+                    Complete y verifique la información antes de guardarla. El
+                    índice de masa corporal (IMC) se registrará automáticamente.
+                  </p>
+
                   <form className="space-y-5 mt-6" onSubmit={handleSubmit}>
                     {validationError && (
                       <FormAlert variant="warning" message={validationError} />
@@ -534,12 +500,12 @@ export default function RegisterPatientPage() {
                       )}
                     </div>
                   </form>
-                )}
-              </div>
-            </main>
+                </div>
+              </main>
+            </div>
           </div>
         </div>
-      </div>
-    </MainLayout>
+      </MainLayout>
+    </ProtectedRoute>
   );
 }
