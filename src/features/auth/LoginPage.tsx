@@ -64,10 +64,15 @@ export default function LoginPage() {
     setErrorMessage(null);
 
     try {
-      //Leer token (si no existe, queda "")
+      // Paso 1: pedir CSRF cookie
+      await fetch(`${apiBaseUrl}/sanctum/csrf-cookie`, {
+        credentials: "include",
+      });
+
+      // Paso 2: leer token
       const token = Cookies.get("XSRF-TOKEN") ?? "";
 
-      //Login
+      // Paso 3: login
       const res = await fetch(`${apiBaseUrl}/api/v1/login`, {
         method: "POST",
         credentials: "include",
@@ -94,7 +99,6 @@ export default function LoginPage() {
 
       const params = new URLSearchParams(window.location.search);
       const next = params.get("next") || "/register-patient";
-
       router.push(next);
     } catch (error) {
       setErrorMessage("Error de conexión con el servidor.");
