@@ -310,8 +310,8 @@ export default function PatientMedicalHistoryPage() {
 
                 {/* FOOTER */}
                 <div className="border-t border-gray-200 text-center text-[10px] text-gray-400 py-4">
-                  Registro clínico del paciente | © {currentYear} Coldesthetic.
-                  Todos los derechos reservados.
+                  Coldesthetic • Historia Clínica © {currentYear} | Documento
+                  confidencial - Uso exclusivo del personal médico autorizado
                 </div>
               </div>
             </div>

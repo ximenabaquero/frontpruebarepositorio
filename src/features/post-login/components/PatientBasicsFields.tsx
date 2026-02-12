@@ -1,3 +1,5 @@
+import ValidatedInput from "./ValidatedInput";
+
 type PatientBasicsFieldsProps = {
   firstName: string;
   setFirstName: (v: string) => void;
@@ -45,107 +47,71 @@ export default function PatientBasicsFields({
           </p>
         </div>
 
-        <div>
-          <label
-            htmlFor="first_name"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Primer Nombre
-          </label>
-          <input
-            id="first_name"
-            required
-            value={firstName}
-            onChange={(e) => {
-              setFirstName(e.target.value);
-              onDirty();
-            }}
-            className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-            placeholder="Nombre del paciente"
-          />
-        </div>
+        <ValidatedInput
+          id="first_name"
+          label="Nombre(s)"
+          placeholder="Nombre(s) del paciente"
+          value={firstName}
+          onChange={(val) => {
+            setFirstName(val);
+            onDirty();
+          }}
+          required
+          maxLength={100}
+        />
 
-        <div>
-          <label
-            htmlFor="last_name"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Primer Apellido
-          </label>
-          <input
-            id="last_name"
-            required
-            value={lastName}
-            onChange={(e) => {
-              setLastName(e.target.value);
-              onDirty();
-            }}
-            className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 
-                      text-gray-900 shadow-sm placeholder:text-gray-400 
-                      focus:outline-none focus:ring-0 focus:border-gray-300"
-            placeholder="Apellido del paciente"
-          />
-        </div>
+        <ValidatedInput
+          id="last_name"
+          label="Apellido(s)"
+          placeholder="Apellido(s) del paciente"
+          value={lastName}
+          onChange={(val) => {
+            setLastName(val);
+            onDirty();
+          }}
+          required
+          maxLength={100}
+        />
       </div>
 
       {/* Edad y Celular */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-        <div>
-          <label
-            htmlFor="age"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Edad
-          </label>
-          <input
-            id="age"
-            type="number"
-            min="1"
-            required
-            value={age}
-            onChange={(e) => {
-              setAge(e.target.value);
-              onDirty();
-            }}
-            className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 
-                      text-gray-900 shadow-sm placeholder:text-gray-400 
-                      focus:outline-none focus:ring-0 focus:border-gray-300"
-            placeholder="Edad del paciente"
-          />
-        </div>
+        <ValidatedInput
+          id="age"
+          label="Edad"
+          type="number"
+          placeholder="Edad del paciente"
+          value={age}
+          onChange={(val) => {
+            setAge(val);
+            onDirty();
+          }}
+          required
+          min={14}
+          max={120}
+        />
 
-        <div>
-          <label
-            htmlFor="cellphone"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Celular
-          </label>
-          <input
-            id="cellphone"
-            type="tel"
-            required
-            value={cellphone}
-            onChange={(e) => {
-              let value = e.target.value.replace(/\D/g, ""); // solo números
-              if (value.length > 10) value = value.slice(0, 10); // máximo 10 dígitos
+        <ValidatedInput
+          id="cellphone"
+          label="Celular"
+          type="tel"
+          placeholder="Celular del paciente"
+          value={cellphone}
+          onChange={(val) => {
+            let value = val.replace(/\D/g, "");
+            if (value.length > 10) value = value.slice(0, 10);
 
-              // Formatear como 3-3-4 (ej: 321 252 4565)
-              const formatted = value.replace(
-                /(\d{3})(\d{3})(\d{0,4})/,
-                (_, g1, g2, g3) => (g3 ? `${g1} ${g2} ${g3}` : `${g1} ${g2}`),
-              );
+            const formatted = value.replace(
+              /(\d{3})(\d{3})(\d{0,4})/,
+              (_, g1, g2, g3) => (g3 ? `${g1} ${g2} ${g3}` : `${g1} ${g2}`),
+            );
 
-              setCellphone(formatted);
-              onDirty();
-            }}
-            className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 
-            text-gray-900 shadow-sm placeholder:text-gray-400 
-            focus:outline-none focus:ring-0 focus:border-gray-300"
-            placeholder="Celular del paciente"
-            maxLength={12}
-          />
-        </div>
+            setCellphone(formatted);
+            onDirty();
+          }}
+          required
+          maxLength={15}
+        />
       </div>
 
       {/* Remitente */}

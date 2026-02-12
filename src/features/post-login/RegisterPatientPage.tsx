@@ -27,7 +27,6 @@ const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
 
 export default function RegisterPatientPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const [currentStep, setCurrentStep] = useState(0);
   const [stepCompleted, setStepCompleted] = useState<

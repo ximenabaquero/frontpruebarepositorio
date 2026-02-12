@@ -1,3 +1,5 @@
+import ValidatedInput from "./ValidatedInput";
+
 type ClinicalInfoFieldsProps = {
   weightKg: string;
   heightM: string;
@@ -32,53 +34,36 @@ export default function ClinicalInfoFields({
             TODOS LOS CAMPOS SON OBLIGATORIOS **
           </p>
         </div>
-        <div>
-          <label
-            htmlFor="weight"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Peso (kg)
-          </label>
-          <input
-            id="weight"
-            name="weight"
-            type="number"
-            min="1"
-            step="0.01"
-            required
-            value={weightKg}
-            onChange={(e) => {
-              onDirty();
-              onWeightChange(e.target.value);
-            }}
-            className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-            placeholder="Peso del paciente"
-          />
-        </div>
 
-        <div>
-          <label
-            htmlFor="height"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Estatura (m)
-          </label>
-          <input
-            id="height"
-            name="height"
-            type="number"
-            min="0.1"
-            step="0.01"
-            required
-            value={heightM}
-            onChange={(e) => {
-              onDirty();
-              onHeightChange(e.target.value);
-            }}
-            className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-            placeholder="Estatura del paciente"
-          />
-        </div>
+        <ValidatedInput
+          id="weight"
+          label="Peso (kg)"
+          type="number"
+          placeholder="Peso del paciente"
+          value={weightKg}
+          onChange={(val) => {
+            onWeightChange(val);
+            onDirty();
+          }}
+          required
+          min={2}
+          max={400}
+        />
+
+        <ValidatedInput
+          id="height"
+          label="Estatura (m)"
+          type="number"
+          placeholder="Estatura del paciente"
+          value={heightM}
+          onChange={(val) => {
+            onHeightChange(val);
+            onDirty();
+          }}
+          required
+          min={1.2}
+          max={2.5}
+        />
       </div>
 
       {/* BMI y Estado del BMI */}
