@@ -1,5 +1,7 @@
-export const apiBaseUrl =
-  process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "") || "/backend";
+export const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(
+  /\/+$/,
+  "",
+);
 
 export const endpoints = {
   summary: `${apiBaseUrl}/api/v1/stats/summary`,

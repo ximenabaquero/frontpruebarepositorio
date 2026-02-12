@@ -23,8 +23,7 @@ type ProcedureItem = {
   price: string;
 };
 
-const apiBaseUrl =
-  process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "") || "/backend";
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
 
 export default function RegisterPatientPage() {
   const router = useRouter();

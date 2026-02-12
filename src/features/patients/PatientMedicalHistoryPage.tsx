@@ -13,8 +13,7 @@ import BackButton from "./components/BackButton";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
 
-const apiBaseUrl =
-  process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "") || "/backend";
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
 
 const fetcher = (url: string) =>
   fetch(url, {

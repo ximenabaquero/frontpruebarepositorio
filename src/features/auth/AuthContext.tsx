@@ -28,11 +28,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [authChecked, setAuthChecked] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const API = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   async function checkSession() {
     try {
-      const res = await fetch("/backend/api/v1/me", {
+      const res = await fetch(`${API}/api/v1/me`, {
         credentials: "include",
+        headers: {
+          Accept: "application/json",
+        },
       });
 
       if (!res.ok) {
@@ -54,7 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setIsLoggingOut(true);
       const token = Cookies.get("XSRF-TOKEN") ?? "";
-      await fetch("/backend/api/v1/logout", {
+      await fetch(`${API}/api/v1/logout`, {
         method: "POST",
         credentials: "include",
         headers: {

@@ -1,4 +1,4 @@
-import type { NextConfig } from "next";
+/*mport type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   async rewrites() {
@@ -14,4 +14,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default nextConfig;*/

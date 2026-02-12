@@ -44,8 +44,7 @@ export default function PatientsPage() {
   const [patients, setPatients] = useState<PatientRow[]>([]);
   const [search, setSearch] = useState("");
 
-  const apiBaseUrl =
-    process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "") || "/backend";
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
 
   const queryString = useMemo(() => {
     const trimmed = search.trim();
