@@ -23,7 +23,6 @@ export default function ProceduresSelector({
   procedureNotes,
   setProcedureNotes,
   clearSubmitError,
-  procedurePrices,
   handlePriceChange,
 }: ProceduresSelectorProps) {
   const isSelected = (label: string) =>
@@ -31,14 +30,6 @@ export default function ProceduresSelector({
 
   const getPrice = (label: string) =>
     procedureItems.find((item) => item.item_name === label)?.price ?? "";
-
-  const updatePrice = (label: string, raw: string) => {
-    setProcedureItems((prev) =>
-      prev.map((item) =>
-        item.item_name === label ? { ...item, price: raw } : item,
-      ),
-    );
-  };
 
   const toggleItem = (label: string) => {
     clearSubmitError();
@@ -81,6 +72,17 @@ export default function ProceduresSelector({
     });
   };
 
+  const getGroupCount = (groupProcedureIds: string[]) => {
+    return groupProcedureIds.reduce((count, procedureId) => {
+      const procedure = PROCEDURES.find((p) => p.id === procedureId);
+      if (!procedure) return count;
+
+      return procedureItems.some((item) => item.item_name === procedure.label)
+        ? count + 1
+        : count;
+    }, 0);
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4">
@@ -91,10 +93,23 @@ export default function ProceduresSelector({
             className="rounded-2xl bg-white shadow-sm ring-1 ring-gray-100"
           >
             <summary className="cursor-pointer list-none px-4 py-3 bg-emerald-50/50 hover:bg-emerald-50 rounded-t-2xl transition-colors">
-              <div className="flex items-center justify-between gap-3">
-                <div className="text-sm font-semibold text-gray-900">
+              <div className="flex items-center justify-between">
+                {/* Nombre del grupo */}
+                <span className="text-sm font-semibold text-gray-900">
                   {group.label}
-                </div>
+                </span>
+
+                {/* Badge contador en esquina derecha */}
+                {getGroupCount(group.procedureIds) > 0 && (
+                  <span
+                    className="flex items-center justify-center 
+                       min-w-[24px] h-6 px-2
+                       rounded-full bg-emerald-600 
+                       text-white text-xs font-bold shadow-sm"
+                  >
+                    {getGroupCount(group.procedureIds)}
+                  </span>
+                )}
               </div>
             </summary>
 
@@ -208,12 +223,11 @@ export default function ProceduresSelector({
                       ) : (
                         <div className="text-sm text-gray-400">—</div>
                       )}
-
                       {/* PRECIO */}
                       {checked ? (
                         <input
                           type="text"
-                          value={procedurePrices[procedure.label] || ""}
+                          value={priceValue}
                           onChange={handlePriceChange(procedure.label)}
                           disabled={disablePrice}
                           className={`rounded-xl border px-3 py-2 text-sm ${

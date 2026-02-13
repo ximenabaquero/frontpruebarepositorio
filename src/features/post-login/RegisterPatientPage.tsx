@@ -62,61 +62,37 @@ export default function RegisterPatientPage() {
     Record<string, string>
   >({});
 
-  //FORMATEO DE PRECIOS
-  function formatCopInput(value: string): string {
-    const digits = value.replace(/\D/g, "");
-    if (!digits) return "";
-    const n = Number(digits);
-    if (!Number.isFinite(n)) return "";
-    return new Intl.NumberFormat("es-CO", { maximumFractionDigits: 0 }).format(
-      n,
-    );
-  }
-
-  const digitsCountBeforeCaret = (value: string, caret: number) => {
-    const before = value.slice(0, Math.max(0, caret));
-    return (before.match(/\d/g) ?? []).length;
-  };
-
-  const caretPosForDigitIndex = (
-    formattedValue: string,
-    digitIndex: number,
-  ) => {
-    if (digitIndex <= 0) return 0;
-    let seen = 0;
-    for (let i = 0; i < formattedValue.length; i += 1) {
-      if (/\d/.test(formattedValue[i])) {
-        seen += 1;
-        if (seen >= digitIndex) return i + 1;
-      }
-    }
-    return formattedValue.length;
-  };
-
   const handlePriceChange =
     (itemName: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-      const input = e.currentTarget;
-      const caret = input.selectionStart ?? input.value.length;
-      const digitIndex = digitsCountBeforeCaret(input.value, caret);
-      const formatted = formatCopInput(input.value);
+      let value = e.target.value;
 
-      setProcedurePrices((prev) => ({
-        ...prev,
-        [itemName]: formatted,
-      }));
+      //eliminar todo lo que no sea número
+      value = value.replace(/[^\d]/g, "");
 
-      const nextCaret = caretPosForDigitIndex(formatted, digitIndex);
-      requestAnimationFrame(() => {
-        try {
-          input.setSelectionRange(nextCaret, nextCaret);
-        } catch {
-          // ignore
-        }
-      });
+      if (!value) {
+        setProcedureItems((prev) =>
+          prev.map((item) =>
+            item.item_name === itemName ? { ...item, price: "" } : item,
+          ),
+        );
+        return;
+      }
+
+      const numeric = Number(value);
+
+      if (numeric < 0) return;
+
+      const formatted = numeric.toLocaleString("es-CO");
+
+      setProcedureItems((prev) =>
+        prev.map((item) =>
+          item.item_name === itemName ? { ...item, price: formatted } : item,
+        ),
+      );
     };
 
   useEffect(() => {
-    // Paso 1: datos básicos mínimos
+    // Paso 1: datos básicos
     const p1 =
       firstName.trim() !== "" &&
       lastName.trim() !== "" &&
@@ -321,6 +297,15 @@ export default function RegisterPatientPage() {
     }
   };
 
+  const selectedCount = procedureItems.length;
+
+  const stickyTotalCop = procedureItems
+    .reduce((total, item) => {
+      const numeric = Number(item.price?.replace(/\D/g, "")) || 0;
+      return total + numeric;
+    }, 0)
+    .toLocaleString("es-CO");
+
   return (
     <ProtectedRoute>
       <MainLayout>
@@ -449,14 +434,8 @@ export default function RegisterPatientPage() {
 
                         {/* Total COP y procedimientos Seleccionados */}
                         <StickySubmitBar
-                          selectedCount={
-                            Object.values(procedurePrices).filter((p) => p)
-                              .length
-                          }
-                          stickyTotalCop={Object.values(procedurePrices)
-                            .map((p) => Number(p.replace(/\D/g, "")))
-                            .reduce((a, b) => a + b, 0)
-                            .toLocaleString("es-CO")}
+                          selectedCount={selectedCount}
+                          stickyTotalCop={stickyTotalCop}
                           isSubmitting={false}
                         />
                       </RegisterCard>

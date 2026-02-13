@@ -143,8 +143,21 @@ export default function PatientBasicsFields({
               <option value="Dr. Alexander">Dr. Alexander</option>
             </select>
 
-            <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
-              ▼
+            {/* Icono flecha moderno */}
+            <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-gray-400 group-focus-within:text-blue-500 transition-colors">
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
             </div>
           </div>
         </div>
@@ -191,8 +204,21 @@ export default function PatientBasicsFields({
               <option value="Otro">Otro</option>
             </select>
 
-            <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
-              ▼
+            {/* Icono flecha moderno */}
+            <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-gray-400 group-focus-within:text-blue-500 transition-colors">
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
             </div>
           </div>
         </div>
