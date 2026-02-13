@@ -272,9 +272,7 @@ export default function RegisterPatientPage() {
           notes: procedureNotes,
           items: procedureItems.map((item) => ({
             item_name: item.item_name,
-            price: Number(
-              (procedurePrices[item.item_name] || "").replace(/\D/g, ""),
-            ),
+            price: Number((item.price || "").replace(/\D/g, "")),
           })),
         }),
       });
