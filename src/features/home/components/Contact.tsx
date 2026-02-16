@@ -32,10 +32,10 @@ const socialLinks = [
   },
   {
     name: 'Instagram',
-    href: 'https://www.instagram.com/perfe_stetic?igsh=MXNuMzI2ZmwxenJtbw==',
+    href: 'https://www.instagram.com/coldesthetic/',
     icon: <Instagram className="w-6 h-6 md:w-7 md:h-7" />,
     color: 'bg-gradient-to-br from-emerald-500 to-blue-600',
-    description: '@perfe_stetic',
+    description: '@coldesthetic',
     gradient: 'from-emerald-400 to-blue-600'
   }
 ];
@@ -240,7 +240,7 @@ export default function Contact() {
                 </a>
                 
                 <a
-                  href="https://www.instagram.com/perfe_stetic"
+                  href="https://www.instagram.com/coldesthetic/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-12 h-12 rounded-full bg-gradient-to-r from-emerald-100 to-blue-100 flex items-center justify-center hover:from-emerald-200 hover:to-blue-200 transition-colors"

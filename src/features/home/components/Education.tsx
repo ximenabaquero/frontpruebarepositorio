@@ -132,44 +132,120 @@ export default function Education() {
               ref={(el) => {
                 cardsRef.current[index] = el;
               }}
-              className="group relative"
-            >
-              {/* Hover Border Effect */}
-              <div className={`absolute -inset-0.5 bg-gradient-to-r ${topic.gradient} rounded-2xl md:rounded-3xl blur opacity-0 group-hover:opacity-30 transition duration-500`}></div>
-              
-              {/* Card */}
-              <div className={`relative h-full bg-white/95 backdrop-blur-sm rounded-2xl md:rounded-3xl border border-gray-100 p-6 md:p-8 shadow-lg hover:shadow-xl transition-all duration-500 ${
+              className={`relative h-[420px] md:h-[450px] ${
                 visibleCards[index] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}
-              style={{ transitionDelay: `${index * 150}ms` }}>
+              style={{ 
+                transitionDelay: `${index * 150}ms`,
+                transition: 'opacity 0.5s, transform 0.5s',
+                perspective: '1500px'
+              }}
+            >
+              {/* Flip Card Container */}
+              <div className="flip-card-inner group relative w-full h-full cursor-pointer">
                 
-                {/* Icon Container */}
-                <div className={`mb-6 md:mb-8 inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br ${topic.gradient} shadow-lg group-hover:scale-105 transition-transform duration-300`}>
-                  <div className="text-white">
-                    {topic.icon}
+                {/* FRONT SIDE - Pregunta */}
+                <div className="flip-card-front absolute w-full h-full">
+                  {/* Glow effect on hover */}
+                  <div className={`absolute -inset-1 bg-gradient-to-r ${topic.gradient} rounded-3xl blur-xl opacity-0 group-hover:opacity-20 transition-opacity duration-700`}></div>
+                  
+                  <div className="relative w-full h-full bg-white rounded-3xl border-2 border-gray-100 shadow-xl overflow-hidden">
+                    {/* Decorative gradient bar top */}
+                    <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${topic.gradient}`}></div>
+                    
+                    {/* Content */}
+                    <div className="p-8 h-full flex flex-col">
+                      {/* Tag */}
+                      <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-50 to-blue-50 rounded-xl border border-emerald-100 mb-6 self-start">
+                        <Heart className="w-4 h-4 text-emerald-600" />
+                        <span className="text-xs font-bold tracking-wide text-emerald-700 uppercase">
+                          {topic.tag}
+                        </span>
+                      </div>
+
+                      {/* Icon Container - Centered */}
+                      <div className="flex justify-center mb-6">
+                        <div className={`inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br ${topic.gradient} shadow-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500`}>
+                          <div className="text-white scale-125">
+                            {topic.icon}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Title (Pregunta) - Centered */}
+                      <h3 className="text-2xl font-bold text-gray-900 text-center leading-tight mb-auto">
+                        {topic.title}
+                      </h3>
+
+                      {/* Hint para voltear - Mejorado */}
+                      <div className="mt-auto pt-6 border-t border-gray-100">
+                        <div className="flex items-center justify-center gap-2 text-emerald-600 group-hover:text-emerald-700 transition-colors">
+                          <span className="text-sm font-semibold">Ver respuesta</span>
+                          <div className="relative">
+                            <div className="absolute inset-0 bg-emerald-400 rounded-full blur-sm opacity-0 group-hover:opacity-50 transition-opacity"></div>
+                            <ArrowRight className="w-5 h-5 relative group-hover:translate-x-1 transition-transform" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Decorative corner accent */}
+                    <div className={`absolute bottom-0 right-0 w-32 h-32 bg-gradient-to-tl ${topic.gradient} opacity-5 rounded-tl-[100px]`}></div>
                   </div>
                 </div>
 
-                {/* Tag */}
-                <div className="inline-flex items-center gap-2 px-3 py-1 md:px-4 md:py-1.5 bg-gradient-to-r from-emerald-50 to-blue-50 rounded-full border border-emerald-100 mb-4">
-                  <Heart className="w-3 h-3 text-emerald-500" />
-                  <span className="text-xs font-bold tracking-wider text-emerald-700">
-                    {topic.tag}
-                  </span>
+                {/* BACK SIDE - Respuesta */}
+                <div className="flip-card-back absolute w-full h-full">
+                  {/* Glow effect */}
+                  <div className={`absolute -inset-1 bg-gradient-to-r ${topic.gradient} rounded-3xl blur-xl opacity-30`}></div>
+                  
+                  <div className={`relative w-full h-full bg-gradient-to-br from-white via-emerald-50/30 to-blue-50/30 rounded-3xl border-2 border-emerald-200 shadow-2xl overflow-hidden`}>
+                    {/* Decorative gradient bar top */}
+                    <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${topic.gradient}`}></div>
+                    
+                    {/* Pattern background */}
+                    <div className="absolute inset-0 opacity-5">
+                      <div className="absolute inset-0" style={{
+                        backgroundImage: 'radial-gradient(circle at 2px 2px, rgb(16 185 129) 1px, transparent 0)',
+                        backgroundSize: '40px 40px'
+                      }}></div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="relative p-8 h-full flex flex-col">
+                      {/* Tag en reverso */}
+                      <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur-sm rounded-xl border border-emerald-200 shadow-sm mb-6 self-start">
+                        <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${topic.gradient} animate-pulse`}></div>
+                        <span className="text-xs font-bold tracking-wide text-emerald-700 uppercase">
+                          Respuesta
+                        </span>
+                      </div>
+
+                      {/* Body (Respuesta) - Mejorado */}
+                      <div className="flex-1 flex items-center">
+                        <p className="text-gray-800 leading-relaxed text-base font-medium">
+                          {topic.body}
+                        </p>
+                      </div>
+
+                      {/* Footer con icono */}
+                      <div className="mt-6 pt-6 border-t border-emerald-200/50 flex items-center justify-between">
+                        <div className="text-xs text-emerald-700 font-semibold flex items-center gap-2">
+                          <Sparkles className="w-4 h-4" />
+                          <span>Información verificada</span>
+                        </div>
+                        <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br ${topic.gradient} shadow-lg`}>
+                          <div className="text-white">
+                            {topic.icon}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Decorative corner accent */}
+                    <div className={`absolute top-0 left-0 w-24 h-24 bg-gradient-to-br ${topic.gradient} opacity-10 rounded-br-[80px]`}></div>
+                  </div>
                 </div>
-
-                {/* Title */}
-                <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-4 leading-tight">
-                  {topic.title}
-                </h3>
-
-                {/* Body */}
-                <p className="text-gray-600 leading-relaxed mb-6">
-                  {topic.body}
-                </p>
-
-                {/* Decorative Divider */}
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-emerald-500 to-blue-600 group-hover:w-2/3 transition-all duration-500 rounded-full"></div>
               </div>
             </div>
           ))}
@@ -224,7 +300,7 @@ export default function Education() {
         </div>
       </div>
 
-      {/* Floating animation CSS */}
+      {/* Floating animation and Flip Card CSS */}
       <style jsx>{`
         @keyframes float {
           0%, 100% { transform: translateY(0px) rotate(0deg); }
@@ -232,6 +308,38 @@ export default function Education() {
         }
         .animate-float {
           animation: float 6s ease-in-out infinite;
+        }
+
+        /* Flip Card Styles - Professional Version */
+        .flip-card-inner {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+          transform-style: preserve-3d;
+        }
+
+        .flip-card-inner:hover {
+          transform: rotateY(180deg);
+        }
+
+        .flip-card-front,
+        .flip-card-back {
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+          -moz-backface-visibility: hidden;
+          position: absolute;
+          width: 100%;
+          height: 100%;
+        }
+
+        .flip-card-back {
+          transform: rotateY(180deg);
+        }
+
+        /* Smooth shadow transition on flip */
+        .flip-card-inner:hover .flip-card-front {
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
       `}</style>
     </section>
