@@ -1,8 +1,23 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import useSWR from "swr";
 import Image from "next/image";
 import { Star, CheckCircle, Target, Camera } from 'lucide-react';
+
+const fetcher = (url: string) =>
+  fetch(url, { credentials: "include" }).then((res) => res.json());
+
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
+
+interface ClinicalImage {
+  id: number;
+  title: string;
+  description: string | null;
+  before_image: string;
+  after_image: string;
+  created_at: string;
+}
 
 function mulberry32(seed: number) {
   return function () {
@@ -13,38 +28,30 @@ function mulberry32(seed: number) {
   };
 }
 
-const beforeAfterGallery = [
-  {
-    id: 1,
-    before: "/antes-despues/imagen1-antes.jpg",
-    after: "/antes-despues/imagen1-despues.jpg",
-    area: "Moldeamiento Corporal",
-    duration: "Reducción de grasa localizada",
-    result: "4.5 cm menos",
-    gradient: "from-emerald-400 to-blue-500",
-  },
-  {
-    id: 2,
-    before: "/antes-despues/imagen2-antes.jpg",
-    after: "/antes-despues/imagen2-despues.jpg",
-    area: "Esculpido de Cintura",
-    duration: "Reducción de abdomen",
-    result: "6.2 cm menos",
-    gradient: "from-blue-400 to-emerald-500",
-  },
-  {
-    id: 3,
-    before: "/antes-despues/imagen3-antes.jpg",
-    after: "/antes-despues/imagen3-despues.jpg",
-    area: "Firmeza Cutánea",
-    duration: "Reducción y reafirmación",
-    result: "Piel 82% más firme",
-    gradient: "from-blue-400 to-emerald-500",
-  },
+const gradients = [
+  "from-emerald-400 to-blue-500",
+  "from-blue-400 to-emerald-500",
+  "from-emerald-500 to-blue-400",
 ];
 
 export default function Gallery() {
-  const [visible, setVisible] = useState<boolean[]>(() => beforeAfterGallery.map(() => false));
+  const { data: images, error, isLoading } = useSWR<ClinicalImage[]>(
+    `${apiBaseUrl}/api/v1/clinical-images`,
+    fetcher
+  );
+
+  const getImageUrl = (path: string) => {
+    if (path.startsWith("http")) return path;
+    return `${apiBaseUrl}/storage/${path}`;
+  };
+
+  const [visible, setVisible] = useState<boolean[]>([]);
+
+  useEffect(() => {
+    if (images) {
+      setVisible(images.map(() => false));
+    }
+  }, [images]);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
 
   const floatStyles = useMemo<CSSProperties[]>(() => {
@@ -123,9 +130,33 @@ export default function Gallery() {
           </p>
         </div>
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="text-center py-12">
+            <p className="text-gray-500">Cargando imágenes...</p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="text-center py-12">
+            <p className="text-red-500">Error al cargar las imágenes</p>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {images && images.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500">No hay imágenes disponibles</p>
+          </div>
+        )}
+
         {/* Gallery Grid */}
+        {images && images.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-10 mb-16 md:mb-20 px-4 sm:px-0">
-          {beforeAfterGallery.map((item, index) => (
+          {images.map((item, index) => {
+            const gradient = gradients[index % gradients.length];
+            return (
             <div
               key={item.id}
               data-index={index}
@@ -135,7 +166,7 @@ export default function Gallery() {
               className="group relative"
             >
               {/* Hover Border Effect */}
-              <div className={`absolute -inset-0.5 bg-gradient-to-r ${item.gradient} rounded-2xl md:rounded-3xl blur opacity-0 group-hover:opacity-30 transition duration-500`}></div>
+              <div className={`absolute -inset-0.5 bg-gradient-to-r ${gradient} rounded-2xl md:rounded-3xl blur opacity-0 group-hover:opacity-30 transition duration-500`}></div>
               
               {/* Card */}
               <div className={`relative h-full bg-white/95 backdrop-blur-sm rounded-2xl md:rounded-3xl border border-gray-100 p-5 md:p-6 shadow-lg hover:shadow-xl transition-all duration-500 ${
@@ -147,25 +178,19 @@ export default function Gallery() {
                 <div className="mb-6 md:mb-7">
                   {/* Area title with icon - AHORA EN LÍNEA */}
                   <div className="flex items-center justify-start mb-4 gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br ${item.gradient}`}>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br ${gradient}`}>
                       <Target className="w-5 h-5 text-white" />
                     </div>
                     <div>
                       <h3 className="text-xl md:text-2xl font-bold text-gray-900 leading-tight">
-                        {item.area}
+                        {item.title}
                       </h3>
-                      <p className="text-sm md:text-base text-gray-600 mt-1">
-                        {item.duration}
-                      </p>
+                      {item.description && (
+                        <p className="text-sm md:text-base text-gray-600 mt-1">
+                          {item.description}
+                        </p>
+                      )}
                     </div>
-                  </div>
-                  
-                  {/* Result Badge - SEPARADO CLARAMENTE */}
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-50 to-blue-50 rounded-full border border-emerald-100 shadow-sm">
-                    <Star className="w-4 h-4 text-emerald-500" />
-                    <span className="text-sm font-bold text-emerald-700">
-                      {item.result}
-                    </span>
                   </div>
                 </div>
 
@@ -181,8 +206,8 @@ export default function Gallery() {
                       </div>
                       <div className="relative overflow-hidden rounded-xl md:rounded-2xl h-44 md:h-52 shadow-inner bg-gradient-to-br from-gray-100 to-gray-200">
                         <Image
-                          src={item.before}
-                          alt={`Antes - ${item.area}`}
+                          src={getImageUrl(item.before_image)}
+                          alt={`Antes - ${item.title}`}
                           width={300}
                           height={416}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -201,8 +226,8 @@ export default function Gallery() {
                       </div>
                       <div className="relative overflow-hidden rounded-xl md:rounded-2xl h-44 md:h-52 shadow-inner bg-gradient-to-br from-emerald-50 to-blue-50">
                         <Image
-                          src={item.after}
-                          alt={`Después - ${item.area}`}
+                          src={getImageUrl(item.after_image)}
+                          alt={`Después - ${item.title}`}
                           width={300}
                           height={416}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -236,8 +261,10 @@ export default function Gallery() {
                 <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-emerald-500 to-blue-600 group-hover:w-2/3 transition-all duration-500 rounded-full"></div>
               </div>
             </div>
-          ))}
+          );
+          })}
         </div>
+        )}
 
         {/* CTA Section */}
         <div className="relative max-w-4xl mx-auto px-4 sm:px-0">
