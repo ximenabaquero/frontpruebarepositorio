@@ -35,9 +35,9 @@ const benefits: Benefit[] = [
     gradient: "from-blue-400 to-emerald-500",
   },
   {
-    title: "Recuperación rápida",
-    description: "Procedimientos sin incapacidad ni dolor post, para retomar tus actividades el mismo día.",
-    tag: "Sin downtime",
+    title: "Recuperación controlada",
+    description: "Procedimiento mínimamente invasivo con recuperación guiada. Retoma tus actividades progresivamente.",
+    tag: "Recuperación guiada",
     lucideIcon: <Clock className="w-5 h-5 sm:w-6 sm:h-6" />,
     gradient: "from-emerald-400 to-blue-500",
   },

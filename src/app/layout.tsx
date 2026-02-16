@@ -11,7 +11,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Coldesthetic - Estética Médica Avanzada",
   description:
-    "Lipólisis láser sin cirugía, resultados desde la primera sesión",
+    "Lipólisis láser asistida. Procedimiento mínimamente invasivo para reducción de grasa localizada con tecnología médica certificada",
 };
 
 export default function RootLayout({
