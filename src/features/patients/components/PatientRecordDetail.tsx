@@ -21,13 +21,22 @@ const fetcher = (url: string) =>
     headers: { Accept: "application/json" },
   }).then((res) => res.json());
 
-export default function PatientRecordDetail() {
+interface Props {
+  patientId: number;
+  evaluationId: number;
+}
+
+export default function PatientRecordDetail({
+  patientId,
+  evaluationId,
+}: Props) {
   const [currentYear] = useState(new Date().getFullYear());
-  const params = useParams();
-  const id = params?.id as string;
+
   const router = useRouter();
   const { data, error, isLoading } = useSWR(
-    `${apiBaseUrl}/api/v1/medical-evaluation/patient/${id}`,
+    evaluationId
+      ? `${apiBaseUrl}/api/v1/medical-evaluations/${evaluationId}`
+      : null,
     fetcher,
   );
 
@@ -52,7 +61,7 @@ export default function PatientRecordDetail() {
   const patient = evaluation.patient;
   const procedures = evaluation.procedures || [];
   const brandName = evaluation.user?.brand_name;
-  const referrer = patient.referrer_name;
+  const referrer = evaluation.referrer_name;
 
   return (
     <AuthGuard>
@@ -131,13 +140,15 @@ export default function PatientRecordDetail() {
                         Fecha
                       </p>
                       <p className="font-medium">
-                        {new Date(evaluation.created_at).toLocaleString(
-                          "es-ES",
-                          {
+                        {(() => {
+                          const fecha = new Date(
+                            evaluation.created_at,
+                          ).toLocaleString("es-ES", {
                             dateStyle: "medium",
                             timeStyle: "short",
-                          },
-                        )}
+                          });
+                          return fecha.charAt(0).toUpperCase() + fecha.slice(1);
+                        })()}
                       </p>
                     </div>
                   </div>
@@ -155,22 +166,33 @@ export default function PatientRecordDetail() {
                       </h3>
                     </div>
 
-                    <div className="grid grid-cols-4 gap-6 rounded-xl border border-gray-200 bg-white p-4 text-sm">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-6 rounded-xl border border-gray-200 bg-white p-4 text-sm">
                       <div>
                         <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wide mb-1">
                           Nombre completo
                         </p>
-
                         <p className="font-medium text-gray-800">
                           {patient.first_name} {patient.last_name}
                         </p>
                       </div>
+
                       <div>
                         <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wide mb-1">
-                          Celular
+                          Cédula
                         </p>
                         <p className="font-medium text-gray-800">
-                          {patient.cellphone}
+                          {patient.cedula}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wide mb-1">
+                          Fecha de nacimiento
+                        </p>
+                        <p className="font-medium text-gray-800">
+                          {new Date(patient.date_of_birth).toLocaleDateString(
+                            "es-ES",
+                          )}
                         </p>
                       </div>
                       <div>
@@ -178,7 +200,7 @@ export default function PatientRecordDetail() {
                           Edad
                         </p>
                         <p className="font-medium text-gray-800">
-                          {patient.age} años
+                          {evaluation.patient_age_at_evaluation} años
                         </p>
                       </div>
                       <div>
@@ -187,6 +209,15 @@ export default function PatientRecordDetail() {
                         </p>
                         <p className="font-medium text-gray-800">
                           {patient.biological_sex}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wide mb-1">
+                          Celular
+                        </p>
+                        <p className="font-medium text-gray-800">
+                          {patient.cellphone}
                         </p>
                       </div>
                     </div>
