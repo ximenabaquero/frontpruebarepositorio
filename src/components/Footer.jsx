@@ -1,51 +1,74 @@
 "use client";
 
-import { Heart, MapPin, Phone, Mail, Clock, MessageCircle, Facebook, Instagram, ArrowUp } from 'lucide-react';
-import { useState } from 'react';
+import {
+  Heart,
+  MapPin,
+  Phone,
+  Mail,
+  Clock,
+  MessageCircle,
+  Facebook,
+  Instagram,
+  ArrowUp,
+} from "lucide-react";
+import { useState } from "react";
 
 const quickLinks = [
-  { name: 'Inicio', href: '#inicio' },
-  { name: 'Servicios', href: '#servicios' },
-  { name: 'Resultados', href: '#resultados' },
-  { name: 'Testimonios', href: '#testimonios' },
-  { name: 'Educación', href: '#educacion' },
-  { name: 'Contacto', href: '#contacto' },
+  { name: "Inicio", href: "#inicio" },
+  { name: "Servicios", href: "#servicios" },
+  { name: "Resultados", href: "#resultados" },
+  { name: "Testimonios", href: "#testimonios" },
+  { name: "Educación", href: "#educacion" },
+  { name: "Contacto", href: "#contacto" },
 ];
 
 const services = [
-  { name: 'Lipólisis Láser' },
-  { name: 'Tensamax' },
-  { name: 'Ácido Hialurónico' },
-  { name: 'Hilos Tensores' },
-  { name: 'Plasma Rico en Plaquetas' },
-  { name: 'Botox' },
+  { name: "Lipólisis Láser" },
+  { name: "Tensamax" },
+  { name: "Ácido Hialurónico" },
+  { name: "Hilos Tensores" },
+  { name: "Plasma Rico en Plaquetas" },
+  { name: "Botox" },
 ];
 
 const contactInfo = [
-  { icon: <Phone className="w-4 h-4" />, text: '+57 (300) 143-4089', href: 'tel:+573001434089' },
-  { icon: <Mail className="w-4 h-4" />, text: 'info@coldesthetic.com', href: 'mailto:info@coldesthetic.com' },
-  { icon: <MapPin className="w-4 h-4" />, text: 'Bogotá, Colombia', href: '#' },
-  { icon: <Clock className="w-4 h-4" />, text: 'Lun-Vie: 9AM - 7PM | Sáb: 9AM - 2PM', href: '#' },
+  {
+    icon: <Phone className="w-4 h-4" />,
+    text: "+57 (300) 143-4089",
+    href: "tel:+573001434089",
+  },
+  {
+    icon: <Mail className="w-4 h-4" />,
+    text: "info@coldesthetic.com",
+    href: "mailto:info@coldesthetic.com",
+  },
+  { icon: <MapPin className="w-4 h-4" />, text: "Bogotá, Colombia", href: "#" },
+  {
+    icon: <Clock className="w-4 h-4" />,
+    text: "Lun-Vie: 9AM - 7PM | Sáb: 9AM - 2PM",
+    href: "#",
+  },
 ];
 
 const socialLinks = [
-  { 
-    icon: <MessageCircle className="w-5 h-5" />, 
-    href: 'https://wa.me/573001434089',
-    color: 'bg-emerald-500 hover:bg-emerald-600',
-    name: 'WhatsApp'
+  {
+    icon: <MessageCircle className="w-5 h-5" />,
+    href: "https://wa.me/573001434089",
+    color: "bg-emerald-500 hover:bg-emerald-600",
+    name: "WhatsApp",
   },
-  { 
-    icon: <Facebook className="w-5 h-5" />, 
-    href: 'https://facebook.com/coldesthetic',
-    color: 'bg-blue-600 hover:bg-blue-700',
-    name: 'Facebook'
+  {
+    icon: <Facebook className="w-5 h-5" />,
+    href: "https://facebook.com/coldesthetic",
+    color: "bg-blue-600 hover:bg-blue-700",
+    name: "Facebook",
   },
-  { 
-    icon: <Instagram className="w-5 h-5" />, 
-    href: 'https://www.instagram.com/coldesthetic',
-    color: 'bg-gradient-to-r from-emerald-500 to-blue-600 hover:from-emerald-600 hover:to-blue-700',
-    name: 'Instagram'
+  {
+    icon: <Instagram className="w-5 h-5" />,
+    href: "https://www.instagram.com/coldesthetic",
+    color:
+      "bg-gradient-to-r from-emerald-500 to-blue-600 hover:from-emerald-600 hover:to-blue-700",
+    name: "Instagram",
   },
 ];
 
@@ -53,17 +76,20 @@ export default function Footer() {
   const [currentYear] = useState(new Date().getFullYear());
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
     <footer className="relative bg-gradient-to-br from-gray-900 to-gray-800 text-white overflow-hidden">
       {/* Background pattern */}
       <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
-          backgroundSize: '40px 40px',
-        }} />
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
+            backgroundSize: "40px 40px",
+          }}
+        />
       </div>
 
       {/* Top gradient accent */}
@@ -72,7 +98,6 @@ export default function Footer() {
       {/* Main footer content */}
       <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 md:gap-12 mb-10 md:mb-16">
-          
           {/* Brand & Description */}
           <div className="space-y-6">
             <div className="flex items-center gap-3">
@@ -83,14 +108,17 @@ export default function Footer() {
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-300 to-blue-300 bg-clip-text text-transparent">
                   Coldesthetic
                 </h2>
-                <p className="text-sm text-gray-300">Estética Médica Avanzada</p>
+                <p className="text-sm text-gray-300">
+                  Estética Médica Avanzada
+                </p>
               </div>
             </div>
-            
+
             <p className="text-gray-300 leading-relaxed text-sm md:text-base">
-              Especialistas en lipólisis láser sin cirugía, con tecnología avanzada y resultados visibles desde la primera sesión.
+              Especialistas en lipólisis láser sin cirugía, con tecnología
+              avanzada y resultados visibles desde la primera sesión.
             </p>
-            
+
             {/* Social media */}
             <div className="flex gap-3">
               {socialLinks.map((social, index) => (
@@ -123,7 +151,9 @@ export default function Footer() {
                     className="text-gray-300 hover:text-white transition-colors duration-300 flex items-center gap-2 group"
                   >
                     <ArrowUp className="w-3 h-3 rotate-90 text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <span className="group-hover:translate-x-1 transition-transform">{link.name}</span>
+                    <span className="group-hover:translate-x-1 transition-transform">
+                      {link.name}
+                    </span>
                   </a>
                 </li>
               ))}
@@ -169,7 +199,9 @@ export default function Footer() {
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-800 to-gray-700 flex items-center justify-center flex-shrink-0 group-hover:bg-gradient-to-br group-hover:from-emerald-500 group-hover:to-blue-600 transition-all">
                       {info.icon}
                     </div>
-                    <span className="text-sm md:text-base leading-relaxed">{info.text}</span>
+                    <span className="text-sm md:text-base leading-relaxed">
+                      {info.text}
+                    </span>
                   </a>
                 </li>
               ))}
@@ -182,8 +214,12 @@ export default function Footer() {
           <div className="bg-gradient-to-r from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-gray-700/50">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="text-center md:text-left">
-                <h3 className="text-xl font-bold mb-2">¿Lista para comenzar?</h3>
-                <p className="text-gray-300">Recibe asesoría personalizada sin compromiso</p>
+                <h3 className="text-xl font-bold mb-2">
+                  ¿Lista para comenzar?
+                </h3>
+                <p className="text-gray-300">
+                  Recibe asesoría personalizada sin compromiso
+                </p>
               </div>
               <a
                 href="https://wa.me/573001434089"
@@ -206,10 +242,11 @@ export default function Footer() {
               © {currentYear} Coldesthetic. Todos los derechos reservados.
             </p>
             <p className="text-gray-500 text-xs mt-1">
-              Diseñado con <Heart className="w-3 h-3 inline text-emerald-400" /> para tu bienestar
+              Diseñado con <Heart className="w-3 h-3 inline text-emerald-400" />{" "}
+              para tu bienestar
             </p>
           </div>
-          
+
           <button
             onClick={scrollToTop}
             className="group flex items-center gap-2 text-gray-300 hover:text-white transition-colors duration-300"

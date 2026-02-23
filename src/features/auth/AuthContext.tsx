@@ -1,4 +1,5 @@
 "use client";
+
 import {
   createContext,
   useContext,
@@ -6,10 +7,15 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-
 import Cookies from "js-cookie";
 
-type User = { id: number; name: string; email: string };
+type User = {
+  id: number;
+  name: string;
+  email: string;
+  role: "ADMIN" | "REMITENTE";
+  status: "active" | "inactive" | "fired";
+};
 
 type AuthContextType = {
   user: User | null;
@@ -28,6 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [authChecked, setAuthChecked] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+
   const API = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   async function checkSession() {
@@ -44,8 +51,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const data = await res.json();
-      setUser(data?.id ? data : null);
+      const data: User = await res.json();
+      setUser(data);
     } catch {
       setUser(null);
     } finally {
@@ -57,7 +64,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function logout() {
     try {
       setIsLoggingOut(true);
+
       const token = Cookies.get("XSRF-TOKEN") ?? "";
+
       await fetch(`${API}/api/v1/logout`, {
         method: "POST",
         credentials: "include",
@@ -71,6 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error("Logout error:", err);
     } finally {
       setUser(null);
+      //setIsLoggingOut(false);
     }
   }
 

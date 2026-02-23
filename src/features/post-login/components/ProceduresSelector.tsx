@@ -41,12 +41,10 @@ export default function ProceduresSelector({
 
       // limpiar notas automáticas
       if (label.includes("Faja")) {
-        setProcedureNotes((prev) =>
-          prev.replace(/Faja talla:.*(\n)?/, "").trim(),
-        );
+        setProcedureNotes((prev) => prev.replace(/Faja talla:.*(\n\n)?/, ""));
       }
       if (label.includes("Pierna")) {
-        setProcedureNotes((prev) => prev.replace(/Pierna:.*(\n)?/, "").trim());
+        setProcedureNotes((prev) => prev.replace(/Pierna:.*(\n\n)?/, ""));
       }
     } else {
       setProcedureItems((prev) => [...prev, { item_name: label, price: "" }]);
@@ -55,8 +53,13 @@ export default function ProceduresSelector({
 
   const handleFajaChange = (value: string) => {
     setProcedureNotes((prev) => {
-      const clean = prev.replace(/Faja talla:.*(\n)?/, "");
-      return `${clean}\nFaja talla: ${value}`.trim();
+      const clean = prev.replace(/Faja talla:.*(\n\n)?/, "");
+
+      if (!clean) {
+        return `Faja talla: ${value}`;
+      }
+
+      return `Faja talla: ${value}\n\n${clean}`;
     });
   };
 
@@ -67,8 +70,15 @@ export default function ProceduresSelector({
     else if (externa) note = "Pierna: externa";
 
     setProcedureNotes((prev) => {
-      const clean = prev.replace(/Pierna:.*(\n)?/, "");
-      return note ? `${clean}\n${note}`.trim() : clean.trim();
+      const clean = prev.replace(/Pierna:.*(\n\n)?/, "");
+
+      if (!note) return clean;
+
+      if (!clean) {
+        return note;
+      }
+
+      return `${note}\n\n${clean}`;
     });
   };
 
