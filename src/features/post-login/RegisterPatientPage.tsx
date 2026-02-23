@@ -16,7 +16,7 @@ import FormAlert from "./components/FormAlert";
 import SidebarSteps from "./components/SideBarSteps";
 import { toast } from "react-hot-toast";
 
-import ProtectedRoute from "@/components/ProtectedRoute";
+import AuthGuard from "@/components/AuthGuard";
 
 type ProcedureItem = {
   item_name: string;
@@ -42,9 +42,9 @@ export default function RegisterPatientPage() {
   // Datos paciente
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [age, setAge] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [cedula, setCedula] = useState("");
   const [cellphone, setCellphone] = useState("");
-  const [referrerName, setReferrerName] = useState("");
   const [biologicalSex, setBiologicalSex] = useState("");
 
   // Evaluación clínica
@@ -96,7 +96,8 @@ export default function RegisterPatientPage() {
     const p1 =
       firstName.trim() !== "" &&
       lastName.trim() !== "" &&
-      age.trim() !== "" &&
+      dateOfBirth.trim() !== "" &&
+      cedula.trim() !== "" &&
       cellphone.trim() !== "" &&
       biologicalSex.trim() !== "";
 
@@ -112,7 +113,8 @@ export default function RegisterPatientPage() {
   }, [
     firstName,
     lastName,
-    age,
+    dateOfBirth,
+    cedula,
     cellphone,
     biologicalSex,
     weightKg,
@@ -209,9 +211,9 @@ export default function RegisterPatientPage() {
         body: JSON.stringify({
           first_name: firstName,
           last_name: lastName,
-          age: parseInt(age),
+          date_of_birth: dateOfBirth,
+          cedula,
           cellphone,
-          referrer_name: referrerName,
           biological_sex: biologicalSex,
         }),
       });
@@ -247,8 +249,16 @@ export default function RegisterPatientPage() {
 
       console.log("CREATE EVAL status:", evalRes.status);
 
+      if (evalRes.status === 401) {
+        throw new Error("Sesión expirada. Inicia sesión nuevamente.");
+      }
+
+      if (evalRes.status === 403) {
+        const errJson = await evalRes.json();
+        throw new Error(errJson.message || "Cuenta no activa.");
+      }
+
       if (!evalRes.ok) {
-        console.log("CREATE EVAL failed");
         throw new Error("Error al crear evaluación médica");
       }
 
@@ -288,7 +298,9 @@ export default function RegisterPatientPage() {
       setSubmitSuccess("Registro guardado correctamente");
     } catch (err) {
       console.error("SUBMIT ERROR:", err);
-      setSubmitError("No se pudo guardar el registro.");
+      setSubmitError(
+        err instanceof Error ? err.message : "No se pudo guardar el registro.",
+      );
       toast.error("Hubo un error al guardar el registro");
     } finally {
       setIsSubmitting(false);
@@ -305,7 +317,7 @@ export default function RegisterPatientPage() {
     .toLocaleString("es-CO");
 
   return (
-    <ProtectedRoute>
+    <AuthGuard>
       <MainLayout>
         <div className="bg-gradient-to-b from-emerald-50 via-white to-white">
           {/* CONTAINER GENERAL */}
@@ -372,12 +384,12 @@ export default function RegisterPatientPage() {
                           setFirstName={setFirstName}
                           lastName={lastName}
                           setLastName={setLastName}
-                          age={age}
-                          setAge={setAge}
+                          dateOfBirth={dateOfBirth}
+                          setDateOfBirth={setDateOfBirth}
+                          cedula={cedula}
+                          setCedula={setCedula}
                           cellphone={cellphone}
                           setCellphone={setCellphone}
-                          referrerName={referrerName}
-                          setReferrerName={setReferrerName}
                           biologicalSex={biologicalSex}
                           setBiologicalSex={setBiologicalSex}
                           onDirty={handleDirty}
@@ -481,6 +493,6 @@ export default function RegisterPatientPage() {
           </div>
         </div>
       </MainLayout>
-    </ProtectedRoute>
+    </AuthGuard>
   );
 }

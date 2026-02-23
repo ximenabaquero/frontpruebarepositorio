@@ -9,15 +9,15 @@ import RegisterCard from "@/features/post-login/components/RegisterCard";
 import FormAlert from "@/features/post-login/components/FormAlert";
 import { Eye } from "lucide-react";
 
-import ProtectedRoute from "@/components/ProtectedRoute";
+import AuthGuard from "@/components/AuthGuard";
 
 type PatientRow = {
   id: number;
   first_name?: string | null;
   last_name?: string | null;
-  age?: number | null;
+  cedula?: string | null;
   cellphone?: string | null;
-  referrer_name?: string | null;
+  date_of_birth?: string | null;
   created_at?: string | null;
 };
 
@@ -87,7 +87,7 @@ export default function PatientsPage() {
   }, [apiBaseUrl, queryString]);
 
   return (
-    <ProtectedRoute>
+    <AuthGuard>
       <MainLayout>
         <div className="bg-gradient-to-b from-emerald-50 via-white to-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -128,7 +128,7 @@ export default function PatientsPage() {
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
                       className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                      placeholder="Ingrese nombre, apellido o número de contacto."
+                      placeholder="Buscar por nombre, apellido, celular o cédula"
                     />
                   </div>
 
@@ -144,12 +144,10 @@ export default function PatientsPage() {
                     <table className="min-w-full divide-y divide-gray-100">
                       <thead className="bg-gray-50">
                         <tr className="text-left text-xs font-semibold text-gray-600">
-                          <th className="px-4 py-3">ID</th>
                           <th className="px-4 py-3">Paciente</th>
-                          <th className="px-4 py-3">Edad</th>
+                          <th className="px-4 py-3">Cédula</th>
                           <th className="px-4 py-3">Celular</th>
-                          <th className="px-4 py-3">Remitente</th>
-                          <th className="px-4 py-3">Fecha</th>
+                          <th className="px-4 py-3">Fecha de registro</th>
                           <th className="px-4 py-3 text-center">Ver</th>
                         </tr>
                       </thead>
@@ -159,34 +157,12 @@ export default function PatientsPage() {
                             `${safeString(p.first_name)} ${safeString(p.last_name)}`.trim();
                           return (
                             <tr key={p.id} className="text-sm text-gray-800">
-                              <td className="px-4 py-3 font-medium text-gray-900">
-                                {p.id}
-                              </td>
                               <td className="px-4 py-3">
                                 {fullName || "(sin nombre)"}
                               </td>
-                              <td className="px-4 py-3">{p.age ?? "—"}</td>
+                              <td className="px-4 py-3">{p.cedula || "—"}</td>
                               <td className="px-4 py-3">
                                 {p.cellphone || "—"}
-                              </td>
-                              <td className="px-4 py-3">
-                                {p.referrer_name ? (
-                                  <span
-                                    className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                                      p.referrer_name === "Dra. Adele"
-                                        ? "bg-pink-100 text-pink-800"
-                                        : p.referrer_name === "Dra. Fernanda"
-                                          ? "bg-purple-100 text-purple-800"
-                                          : p.referrer_name === "Dr. Alexander"
-                                            ? "bg-teal-100 text-teal-800"
-                                            : "bg-gray-100 text-gray-800"
-                                    }`}
-                                  >
-                                    {p.referrer_name}
-                                  </span>
-                                ) : (
-                                  "—"
-                                )}
                               </td>
                               <td className="px-4 py-3">
                                 {p.created_at ? p.created_at.slice(0, 10) : "—"}
@@ -194,10 +170,10 @@ export default function PatientsPage() {
                               <td className="px-4 py-3 text-center">
                                 <button
                                   onClick={() =>
-                                    router.push(`/patients/${p.id}`)
+                                    router.push(`/patients/${p.id}/history`)
                                   }
                                   className="inline-flex items-center justify-center rounded-lg p-2 text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 transition"
-                                  title="Ver registro médico"
+                                  title="Historial clínico"
                                 >
                                   <Eye size={18} />
                                 </button>
@@ -205,7 +181,6 @@ export default function PatientsPage() {
                             </tr>
                           );
                         })}
-
                         {patients.length === 0 && !isLoading ? (
                           <tr>
                             <td
@@ -225,6 +200,6 @@ export default function PatientsPage() {
           </div>
         </div>
       </MainLayout>
-    </ProtectedRoute>
+    </AuthGuard>
   );
 }

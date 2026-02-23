@@ -7,7 +7,6 @@ import {
   Eye,
   EyeOff,
   Shield,
-  Zap,
   Home,
   User,
   ArrowRight,
@@ -62,15 +61,14 @@ export default function LoginPage() {
     setErrorMessage(null);
 
     try {
-      // Paso 1: pedir CSRF cookie
+      // 1️⃣ Pedir cookie CSRF
       await fetch(`${apiBaseUrl}/sanctum/csrf-cookie`, {
         credentials: "include",
       });
 
-      // Paso 2: leer token
       const token = Cookies.get("XSRF-TOKEN") ?? "";
 
-      // Paso 3: login
+      // 2️⃣ Login
       const res = await fetch(`${apiBaseUrl}/api/v1/login`, {
         method: "POST",
         credentials: "include",
@@ -92,7 +90,7 @@ export default function LoginPage() {
         return;
       }
 
-      // Guardar usuario en contexto global
+      // Guardar usuario completo (incluye role y status)
       setUser(data.user);
 
       const params = new URLSearchParams(window.location.search);

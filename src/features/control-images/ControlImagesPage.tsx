@@ -7,7 +7,7 @@ import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 import MainLayout from "@/layouts/MainLayout";
 import RegisterHeaderBar from "../post-login/components/RegisterHeaderBar";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import AuthGuard from "@/components/AuthGuard";
 import { endpoints } from "./services/ClinicalImagesService";
 import type { ClinicalImage } from "./types/ClinicalImage";
 
@@ -16,10 +16,12 @@ const fetcher = (url: string) =>
 
 export default function ControlImagesPage() {
   const router = useRouter();
-  const { data: images, error, isLoading, mutate } = useSWR<ClinicalImage[]>(
-    endpoints.list,
-    fetcher
-  );
+  const {
+    data: images,
+    error,
+    isLoading,
+    mutate,
+  } = useSWR<ClinicalImage[]>(endpoints.list, fetcher);
 
   const [isUploading, setIsUploading] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -42,7 +44,7 @@ export default function ControlImagesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!title || (!editingId && (!beforeImage || !afterImage))) {
       toast.error("Por favor completa todos los campos requeridos");
       return;
@@ -58,10 +60,8 @@ export default function ControlImagesPage() {
       if (beforeImage) formData.append("before_image", beforeImage);
       if (afterImage) formData.append("after_image", afterImage);
 
-      const url = editingId 
-        ? endpoints.update(editingId) 
-        : endpoints.create;
-      
+      const url = editingId ? endpoints.update(editingId) : endpoints.create;
+
       const method = editingId ? "PUT" : "POST";
 
       const response = await fetch(url, {
@@ -123,7 +123,7 @@ export default function ControlImagesPage() {
   };
 
   return (
-    <ProtectedRoute>
+    <AuthGuard>
       <MainLayout>
         <div className="bg-gradient-to-b from-emerald-50 via-white to-white min-h-screen">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -135,7 +135,7 @@ export default function ControlImagesPage() {
                 onStatsClick={() => router.push("/stats")}
                 active="images"
               />
-              
+
               {/* Header */}
               <div className="mt-6 flex justify-between items-center">
                 <div>
@@ -195,7 +195,9 @@ export default function ControlImagesPage() {
                         <input
                           type="file"
                           accept="image/jpeg,image/jpg,image/png,image/webp"
-                          onChange={(e) => setBeforeImage(e.target.files?.[0] || null)}
+                          onChange={(e) =>
+                            setBeforeImage(e.target.files?.[0] || null)
+                          }
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                           required={!editingId}
                         />
@@ -208,7 +210,9 @@ export default function ControlImagesPage() {
                         <input
                           type="file"
                           accept="image/jpeg,image/jpg,image/png,image/webp"
-                          onChange={(e) => setAfterImage(e.target.files?.[0] || null)}
+                          onChange={(e) =>
+                            setAfterImage(e.target.files?.[0] || null)
+                          }
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                           required={!editingId}
                         />
@@ -318,6 +322,6 @@ export default function ControlImagesPage() {
           </div>
         </div>
       </MainLayout>
-    </ProtectedRoute>
+    </AuthGuard>
   );
 }

@@ -1,3 +1,5 @@
+import { useAuth } from "@/features/auth/AuthContext";
+
 type RegisterHeaderBarProps = {
   onPatientsClick?: () => void;
   onBackToRegisterClick?: () => void;
@@ -15,6 +17,7 @@ export default function RegisterHeaderBar({
   onImagesClick,
   active = "register",
 }: RegisterHeaderBarProps) {
+  const { user } = useAuth();
   return (
     <div className="flex items-center justify-between gap-4">
       <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100/70 px-4 py-2 text-sm font-semibold text-emerald-800 ring-1 ring-emerald-200">
@@ -50,7 +53,8 @@ export default function RegisterHeaderBar({
           </button>
         )}
 
-        {onStatsClick && (
+        {/* SOLO ADMIN VE ESTADÍSTICAS */}
+        {user?.role === "ADMIN" && onStatsClick && (
           <button
             type="button"
             onClick={onStatsClick}
