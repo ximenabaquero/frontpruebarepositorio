@@ -1,4 +1,4 @@
-/*import PatientRecordDetail from "@/features/patients/components/PatientRecordDetail";
+import PatientRecordDetail from "@/features/patients/components/PatientRecordDetail";
 
 interface Props {
   params: {
@@ -14,4 +14,4 @@ export default function Page({ params }: Props) {
   return (
     <PatientRecordDetail patientId={patientId} evaluationId={evaluationId} />
   );
-}*/
+}
