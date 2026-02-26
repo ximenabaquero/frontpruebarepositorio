@@ -1,12 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import MainLayout from "@/layouts/MainLayout";
 import { useRouter } from "next/navigation";
 import RegisterHeaderBar from "../post-login/components/RegisterHeaderBar";
 import BackButton from "../../components/BackButton";
+import { PlusIcon } from "@heroicons/react/24/outline";
 
 import PatientInfo from "./components/PatientInfo";
 import PatientRecordsList from "./components/PatientRecordsList";
+import NewRecordModal from "./components/NewRecordModal";
 
 import AuthGuard from "@/components/AuthGuard";
 
@@ -16,6 +19,8 @@ interface Props {
 
 export default function PatientMedicalHistoryPage({ patientId }: Props) {
   const router = useRouter();
+  const [showNewRecord, setShowNewRecord] = useState(false);
+  const [recordsKey, setRecordsKey] = useState(0);
 
   return (
     <AuthGuard>
@@ -28,6 +33,7 @@ export default function PatientMedicalHistoryPage({ patientId }: Props) {
                 onImagesClick={() => router.push("/control-images")}
                 onPatientsClick={() => router.push("/patients")}
                 onBackToRegisterClick={() => router.push("/register-patient")}
+                onRemitentesClick={() => router.push("/admin/remitentes")}
                 active="patients"
               />
 
@@ -43,6 +49,13 @@ export default function PatientMedicalHistoryPage({ patientId }: Props) {
 
               <div className="mt-4 flex justify-between items-center mb-6">
                 <BackButton />
+                <button
+                  onClick={() => setShowNewRecord(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition shadow-sm"
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  Nuevo registro
+                </button>
               </div>
 
               <div className="space-y-6">
@@ -50,12 +63,20 @@ export default function PatientMedicalHistoryPage({ patientId }: Props) {
                 <h3 className="flex items-center gap-2 text-lg font-semibold text-gray-800">
                   Registros Médicos
                 </h3>
-                <PatientRecordsList patientId={Number(patientId)} />
+                <PatientRecordsList key={recordsKey} patientId={Number(patientId)} />
               </div>
             </div>
           </div>
         </div>
       </MainLayout>
+
+      {showNewRecord && (
+        <NewRecordModal
+          patientId={Number(patientId)}
+          onClose={() => setShowNewRecord(false)}
+          onSuccess={() => setRecordsKey((k) => k + 1)}
+        />
+      )}
     </AuthGuard>
   );
 }

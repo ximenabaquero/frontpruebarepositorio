@@ -221,8 +221,18 @@ export default function RegisterPatientPage() {
       console.log("CREATE PATIENT status:", patientRes.status);
 
       if (!patientRes.ok) {
-        console.log("CREATE PATIENT failed");
-        throw new Error("Error al crear paciente");
+        const errBody = await patientRes.json().catch(() => null);
+        console.log("CREATE PATIENT failed", patientRes.status, errBody);
+        const detail =
+          errBody?.message ||
+          (errBody?.errors
+            ? Object.values(errBody.errors as Record<string, string[]>)
+                .flat()
+                .join(" ")
+            : null) ||
+          errBody?.error ||
+          "Error al crear paciente";
+        throw new Error(detail);
       }
 
       const patientJson = await patientRes.json();
@@ -259,7 +269,18 @@ export default function RegisterPatientPage() {
       }
 
       if (!evalRes.ok) {
-        throw new Error("Error al crear evaluación médica");
+        const errBody = await evalRes.json().catch(() => null);
+        console.log("CREATE EVAL failed", evalRes.status, errBody);
+        const detail =
+          errBody?.message ||
+          (errBody?.errors
+            ? Object.values(errBody.errors as Record<string, string[]>)
+                .flat()
+                .join(" ")
+            : null) ||
+          errBody?.error ||
+          "Error al crear evaluación médica";
+        throw new Error(detail);
       }
 
       const evalJson = await evalRes.json();
@@ -290,8 +311,18 @@ export default function RegisterPatientPage() {
       console.log("CREATE PROCEDURES status:", procRes.status);
 
       if (!procRes.ok) {
-        console.log("CREATE PROCEDURES failed");
-        throw new Error("Error al crear procedimientos");
+        const errBody = await procRes.json().catch(() => null);
+        console.log("CREATE PROCEDURES failed", procRes.status, errBody);
+        const detail =
+          errBody?.message ||
+          (errBody?.errors
+            ? Object.values(errBody.errors as Record<string, string[]>)
+                .flat()
+                .join(" ")
+            : null) ||
+          errBody?.error ||
+          "Error al crear procedimientos";
+        throw new Error(detail);
       }
 
       setSubmitError(null);
@@ -349,6 +380,8 @@ export default function RegisterPatientPage() {
                     onStatsClick={() => router.push("/stats")}
                     onImagesClick={() => router.push("/control-images")}
                     onPatientsClick={() => router.push("/patients")}
+                    onBackToRegisterClick={() => router.push("/register-patient")}
+                    onRemitentesClick={() => router.push("/admin/remitentes")}
                     active="register"
                   />
 

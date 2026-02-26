@@ -1,19 +1,25 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import MainLayout from "@/layouts/MainLayout";
+import { ChevronDown, ChevronUp, BarChart2 } from "lucide-react";
 
 import RegisterHeaderBar from "../post-login/components/RegisterHeaderBar";
 import SummaryStats from "./components/SummaryStats";
 import ReferrerStats from "./components/ReferrerStats";
 import TopProceduresByIncome from "./components/TopProceduresByIncome";
 import TopProceduresByDemand from "./components/TopProceduresByDemand";
+import MonthlyIncomeChart from "./components/MonthlyIncomeChart";
+import WeeklyIncomeChart from "./components/WeeklyIncomeChart";
+import IncomeByProcedureType from "./components/IncomeByProcedureType";
 
 import AuthGuard from "@/components/AuthGuard";
 import RoleGuard from "@/components/RoleGuard";
 
 export default function StatsPage() {
   const router = useRouter();
+  const [showByType, setShowByType] = useState(false);
 
   return (
     <AuthGuard>
@@ -27,6 +33,7 @@ export default function StatsPage() {
                   onImagesClick={() => router.push("/control-images")}
                   onPatientsClick={() => router.push("/patients")}
                   onStatsClick={() => router.push("/stats")}
+                  onRemitentesClick={() => router.push("/admin/remitentes")}
                   active="stats"
                 />
 
@@ -52,6 +59,31 @@ export default function StatsPage() {
 
                 <SummaryStats />
 
+                {/* ─── Income charts ─── */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
+                  <MonthlyIncomeChart />
+                  <WeeklyIncomeChart />
+                </div>
+
+                {/* ─── Ingresos por tipo de procedimiento (toggle) ─── */}
+                <div className="mt-4">
+                  <button
+                    onClick={() => setShowByType((v) => !v)}
+                    className="inline-flex items-center gap-2 rounded-xl border border-purple-200 bg-white px-5 py-2.5 text-sm font-semibold text-purple-700 shadow-sm hover:bg-purple-50 transition"
+                  >
+                    <BarChart2 size={16} />
+                    Ingresos por tipo de procedimiento
+                    {showByType ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+                  </button>
+
+                  {showByType && (
+                    <div className="mt-3">
+                      <IncomeByProcedureType />
+                    </div>
+                  )}
+                </div>
+
+                {/* ─── Bottom section ─── */}
                 <div className="flex gap-6 mt-6">
                   <div className="flex flex-col gap-6">
                     <TopProceduresByIncome />
