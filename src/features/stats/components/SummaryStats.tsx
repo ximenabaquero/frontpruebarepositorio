@@ -89,30 +89,18 @@ export default function SummaryStats() {
         <div key={stat.label} className="group relative">
           <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-400 to-green-500 rounded-2xl md:rounded-3xl blur opacity-0 group-hover:opacity-30 transition duration-500"></div>
 
-          <div className="relative block bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-100 p-5 shadow-lg hover:shadow-xl transition-all duration-500 h-full">
-            {/* Caso especial Balance Total */}
-            {stat.label === "Balance Total" ? (
-              <>
-                <div className="flex justify-between items-start">
-                  <h3 className="text-[10px] uppercase tracking-wider text-gray-400 mb-4">
-                    {stat.label}
-                  </h3>
-                </div>
-                <p className="text-2xl font-bold text-gray-900 break-words leading-tight tracking-tight w-full overflow-hidden text-ellipsis">
-                  {stat.value}
-                </p>
-              </>
-            ) : (
-              <>
-                <h3 className="text-[10px] uppercase tracking-wider text-gray-400 mb-2">
-                  {stat.label}
-                </h3>
-                <p className="text-2xl font-bold text-gray-900 break-words leading-tight tracking-tight w-full overflow-hidden text-ellipsis">
-                  {stat.value}
-                </p>
-                {renderVariation(stat.label, stat.variation)}
-              </>
-            )}
+          <div className="relative flex flex-col justify-between bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-100 p-5 shadow-lg hover:shadow-xl transition-all duration-500 h-full min-h-[110px]">
+            <div>
+              <h3 className="text-[10px] uppercase tracking-wider text-gray-400 mb-2">
+                {stat.label}
+              </h3>
+              <p className="text-2xl font-bold text-gray-900 break-words leading-tight tracking-tight w-full overflow-hidden text-ellipsis">
+                {stat.value}
+              </p>
+            </div>
+            <div className="mt-2 min-h-[18px]">
+              {renderVariation(stat.label, stat.variation)}
+            </div>
 
             <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-emerald-500 to-blue-600 group-hover:w-2/3 transition-all duration-500 rounded-full"></div>
           </div>

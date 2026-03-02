@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import SignatureCanvas from "react-signature-canvas";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 import { XMarkIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
@@ -19,7 +20,7 @@ interface Props {
 }
 
 export default function NewRecordModal({ patientId, onClose, onSuccess }: Props) {
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Step 1 — Evaluación clínica
@@ -36,6 +37,10 @@ export default function NewRecordModal({ patientId, onClose, onSuccess }: Props)
     { item_name: "", price: "" },
   ]);
 
+  // Step 3 — Firma
+  const sigCanvasRef = useRef<SignatureCanvas>(null);
+  const [signatureEmpty, setSignatureEmpty] = useState(true);
+
   // BMI preview
   const bmiValue =
     parseFloat(weight) > 0 && parseFloat(height) > 0
@@ -50,21 +55,24 @@ export default function NewRecordModal({ patientId, onClose, onSuccess }: Props)
       prev.map((item, idx) => (idx === i ? { ...item, [field]: val } : item)),
     );
 
+  const clearSignature = () => {
+    sigCanvasRef.current?.clear();
+    setSignatureEmpty(true);
+  };
+
   async function handleSubmit() {
-    if (
-      !notes.trim() ||
-      !procedureDate ||
-      items.some((it) => !it.item_name.trim() || !it.price)
-    ) {
-      toast.error("Completa todos los campos del procedimiento");
+    if (signatureEmpty || sigCanvasRef.current?.isEmpty()) {
+      toast.error("La paciente debe firmar antes de confirmar");
       return;
     }
+
+    const patientSignature = sigCanvasRef.current!.toDataURL("image/png");
 
     setIsSubmitting(true);
     const token = Cookies.get("XSRF-TOKEN") ?? "";
 
     try {
-      // 1. Crear evaluación médica
+      // 1. Crear evaluación médica con firma
       const evalRes = await fetch(`${apiBaseUrl}/api/v1/medical-evaluations`, {
         method: "POST",
         credentials: "include",
@@ -78,6 +86,7 @@ export default function NewRecordModal({ patientId, onClose, onSuccess }: Props)
           weight: parseFloat(weight),
           height: parseFloat(height),
           medical_background: medicalBackground,
+          patient_signature: patientSignature,
         }),
       });
 
@@ -114,7 +123,7 @@ export default function NewRecordModal({ patientId, onClose, onSuccess }: Props)
         throw new Error(err.message ?? "Error al crear procedimiento");
       }
 
-      toast.success("Registro clínico creado correctamente");
+      toast.success("Registro clínico creado y confirmado con firma");
       onSuccess();
       onClose();
     } catch (error: unknown) {
@@ -124,8 +133,9 @@ export default function NewRecordModal({ patientId, onClose, onSuccess }: Props)
     }
   }
 
+  const progressPercent = step === 1 ? "33%" : step === 2 ? "66%" : "100%";
+
   return (
-    /* Backdrop blur */
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
       onClick={(e) => e.target === e.currentTarget && onClose()}
@@ -138,8 +148,12 @@ export default function NewRecordModal({ patientId, onClose, onSuccess }: Props)
               Nuevo registro clínico
             </h2>
             <p className="text-xs text-gray-500 mt-0.5">
-              Paso {step} de 2 —{" "}
-              {step === 1 ? "Evaluación clínica" : "Procedimiento y precios"}
+              Paso {step} de 3 —{" "}
+              {step === 1
+                ? "Evaluación clínica"
+                : step === 2
+                  ? "Procedimiento y precios"
+                  : "Firma de la paciente"}
             </p>
           </div>
           <button
@@ -154,13 +168,13 @@ export default function NewRecordModal({ patientId, onClose, onSuccess }: Props)
         <div className="h-1 bg-gray-100">
           <div
             className="h-1 bg-emerald-500 transition-all duration-300"
-            style={{ width: step === 1 ? "50%" : "100%" }}
+            style={{ width: progressPercent }}
           />
         </div>
 
         {/* Body */}
         <div className="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
-          {step === 1 ? (
+          {step === 1 && (
             <>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -219,7 +233,9 @@ export default function NewRecordModal({ patientId, onClose, onSuccess }: Props)
                 />
               </div>
             </>
-          ) : (
+          )}
+
+          {step === 2 && (
             <>
               <div>
                 <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
@@ -266,9 +282,7 @@ export default function NewRecordModal({ patientId, onClose, onSuccess }: Props)
                       <input
                         type="text"
                         value={item.item_name}
-                        onChange={(e) =>
-                          updateItem(i, "item_name", e.target.value)
-                        }
+                        onChange={(e) => updateItem(i, "item_name", e.target.value)}
                         className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none"
                         placeholder="Nombre del procedimiento"
                       />
@@ -295,11 +309,52 @@ export default function NewRecordModal({ patientId, onClose, onSuccess }: Props)
               </div>
             </>
           )}
+
+          {step === 3 && (
+            <div className="space-y-4">
+              <div className="rounded-lg bg-amber-50 border border-amber-100 px-4 py-3">
+                <p className="text-xs text-amber-700 font-medium">
+                  La paciente debe leer y firmar a continuación para confirmar
+                  su consentimiento con el registro clínico.
+                </p>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                    Firma de la paciente *
+                  </label>
+                  <button
+                    type="button"
+                    onClick={clearSignature}
+                    className="text-xs text-gray-400 hover:text-gray-600 underline"
+                  >
+                    Limpiar
+                  </button>
+                </div>
+
+                <div className="border-2 border-dashed border-gray-300 rounded-xl overflow-hidden bg-gray-50 hover:border-emerald-400 transition-colors">
+                  <SignatureCanvas
+                    ref={sigCanvasRef}
+                    penColor="#1f2937"
+                    canvasProps={{
+                      className: "w-full",
+                      style: { width: "100%", height: "180px" },
+                    }}
+                    onEnd={() => setSignatureEmpty(false)}
+                  />
+                </div>
+                <p className="text-xs text-gray-400 mt-1 text-center">
+                  Firme dentro del recuadro con el dedo o el cursor
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer */}
         <div className="px-6 py-4 border-t border-gray-100 flex justify-between gap-3">
-          {step === 1 ? (
+          {step === 1 && (
             <>
               <button
                 onClick={onClose}
@@ -326,7 +381,9 @@ export default function NewRecordModal({ patientId, onClose, onSuccess }: Props)
                 Siguiente →
               </button>
             </>
-          ) : (
+          )}
+
+          {step === 2 && (
             <>
               <button
                 onClick={() => setStep(1)}
@@ -335,11 +392,38 @@ export default function NewRecordModal({ patientId, onClose, onSuccess }: Props)
                 ← Atrás
               </button>
               <button
+                onClick={() => {
+                  if (
+                    !notes.trim() ||
+                    !procedureDate ||
+                    items.some((it) => !it.item_name.trim() || !it.price)
+                  ) {
+                    toast.error("Completa todos los campos del procedimiento");
+                    return;
+                  }
+                  setStep(3);
+                }}
+                className="px-5 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium"
+              >
+                Siguiente →
+              </button>
+            </>
+          )}
+
+          {step === 3 && (
+            <>
+              <button
+                onClick={() => setStep(2)}
+                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition"
+              >
+                ← Atrás
+              </button>
+              <button
                 onClick={handleSubmit}
-                disabled={isSubmitting}
+                disabled={isSubmitting || signatureEmpty}
                 className="px-5 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium disabled:opacity-50"
               >
-                {isSubmitting ? "Guardando..." : "Guardar registro"}
+                {isSubmitting ? "Guardando..." : "Confirmar y guardar"}
               </button>
             </>
           )}
