@@ -174,19 +174,14 @@ Abrir [http://localhost:3000](http://localhost:3000).
 
 ---
 
-## Sobre el proyecto
+## Equipo
 
-XIMCA es un proyecto colaborativo desarrollado junto a una socia para clientes reales del sector de medicina estética en Colombia.
+XIMCA es un proyecto construido en colaboración para clientes reales del sector de medicina estética en Colombia. Ambas participamos en frontend y backend; cada una lideró un área distinta.
 
-**Mis responsabilidades en el frontend:**
-
-- Definición de la arquitectura del proyecto (App Router, organización por features/dominios)
-- Sistema de autenticación con estado global y protección de rutas por sesión y rol
-- Formulario multi-paso de registro clínico con validación en tiempo real y cálculos automáticos
-- Dashboard de estadísticas con componentes de visualización de datos
-- CRUD de imágenes clínicas con previsualización
-- Landing page pública responsiva
-- Diseño de sistema de UI con Tailwind CSS y tokens de color personalizados
+| | Liderazgo | Participación |
+|---|---|---|
+| **[@tu-usuario](https://github.com/ximenabaquero)** | Frontend — arquitectura, componentes, UI/UX, autenticación, formularios y estadísticas | Colaboración en backend |
+| **[@usuario-socia]([https://github.com/usuario-socia](https://github.com/karol-cc))** | Backend — API REST, base de datos, lógica de negocio, seguridad | Colaboración en frontend |
 
 ---
 
