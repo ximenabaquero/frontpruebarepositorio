@@ -181,7 +181,7 @@ XIMCA es un proyecto construido en colaboración para clientes reales del sector
 | | Liderazgo | Participación |
 |---|---|---|
 | **[@ximenabaquero](https://github.com/ximenabaquero)** | Frontend — arquitectura, componentes, UI/UX, autenticación, formularios y estadísticas | Colaboración en backend |
-| **[@karol-cc]([https://github.com/usuario-socia](https://github.com/karol-cc))** | Backend — API REST, base de datos, lógica de negocio, seguridad | Colaboración en frontend |
+| **[@karol-cc]((https://github.com/karol-cc))** | Backend — API REST, base de datos, lógica de negocio, seguridad | Colaboración en frontend |
 
 ---
 
