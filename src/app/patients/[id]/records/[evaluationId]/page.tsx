@@ -1,17 +1,18 @@
 import PatientRecordDetail from "@/features/patients/components/PatientRecordDetail";
 
 interface Props {
-  params: {
+  params: Promise<{
     id: string;
     evaluationId: string;
-  };
+  }>;
 }
 
-export default function Page({ params }: Props) {
-  const patientId = Number(params.id);
-  const evaluationId = Number(params.evaluationId);
+export default async function Page({ params }: Props) {
+  const { id, evaluationId } = await params;
+  const patientId = Number(id);
+  const evaluationIdNum = Number(evaluationId);
 
   return (
-    <PatientRecordDetail patientId={patientId} evaluationId={evaluationId} />
+    <PatientRecordDetail patientId={patientId} evaluationId={evaluationIdNum} />
   );
 }

@@ -52,10 +52,12 @@ export default function StatsPage() {
 
                 <SummaryStats />
 
-                <div className="flex gap-6 mt-6">
-                  <div className="flex flex-col gap-6">
-                    <TopProceduresByIncome />
-                    <TopProceduresByDemand />
+                <div className="flex flex-col gap-8 mt-6">
+                  <div className="flex gap-6">
+                    <div className="flex flex-col gap-6">
+                      <TopProceduresByIncome />
+                      <TopProceduresByDemand />
+                    </div>
                   </div>
 
                   <ReferrerStats />

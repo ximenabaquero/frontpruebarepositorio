@@ -1,6 +1,6 @@
 import PatientMedicalHistoryPage from "@/features/patients/PatientMedicalHistoryPage";
 
-export default async function Page({ params }: { params: { id: string } }) {
-  const { id } = await Promise.resolve(params);
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   return <PatientMedicalHistoryPage patientId={id} />;
 }

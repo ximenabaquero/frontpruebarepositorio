@@ -97,6 +97,7 @@ export default function PatientsPage() {
                 onImagesClick={() => router.push("/control-images")}
                 onPatientsClick={() => router.push("/patients")}
                 onBackToRegisterClick={() => router.push("/register-patient")}
+                onRemitentesClick={() => router.push("/admin/remitentes")}
                 active="patients"
               />
 
