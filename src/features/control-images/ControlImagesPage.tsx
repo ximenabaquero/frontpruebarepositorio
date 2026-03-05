@@ -9,6 +9,7 @@ import Image from "next/image";
 import MainLayout from "@/layouts/MainLayout";
 import RegisterHeaderBar from "../post-login/components/RegisterHeaderBar";
 import AuthGuard from "@/components/AuthGuard";
+import ConfirmModal from "@/components/ConfirmModal";
 import { endpoints } from "./services/ClinicalImagesService";
 import type { ClinicalImage } from "./types/ClinicalImage";
 import {
@@ -34,6 +35,10 @@ export default function ControlImagesPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [confirmModal, setConfirmModal] = useState<{
+    message: string;
+    onConfirm: () => void;
+  } | null>(null);
 
   // Form state
   const [title, setTitle] = useState("");
@@ -123,22 +128,27 @@ export default function ControlImagesPage() {
     setShowModal(true);
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm("¿Seguro que deseas eliminar esta imagen?")) return;
-    const token = Cookies.get("XSRF-TOKEN") ?? "";
-    try {
-      const response = await fetch(endpoints.delete(id), {
-        method: "DELETE",
-        headers: { "X-XSRF-TOKEN": token },
-        credentials: "include",
-      });
-      if (!response.ok) throw new Error("Error al eliminar");
-      toast.success("Imagen eliminada");
-      mutate();
-    } catch (error) {
-      toast.error("Error al eliminar");
-      console.error(error);
-    }
+  const handleDelete = (id: number) => {
+    setConfirmModal({
+      message: "Esta acción eliminará la imagen permanentemente.",
+      onConfirm: async () => {
+        setConfirmModal(null);
+        const token = Cookies.get("XSRF-TOKEN") ?? "";
+        try {
+          const response = await fetch(endpoints.delete(id), {
+            method: "DELETE",
+            headers: { "X-XSRF-TOKEN": token },
+            credentials: "include",
+          });
+          if (!response.ok) throw new Error("Error al eliminar");
+          toast.success("Imagen eliminada");
+          mutate();
+        } catch (error) {
+          toast.error("Error al eliminar");
+          console.error(error);
+        }
+      },
+    });
   };
 
   const getImageUrl = (path: string) => {
@@ -495,6 +505,16 @@ export default function ControlImagesPage() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={!!confirmModal}
+        title="¿Seguro que deseas eliminar esta imagen?"
+        message={confirmModal?.message ?? ""}
+        confirmLabel="Eliminar"
+        variant="danger"
+        onConfirm={() => confirmModal?.onConfirm()}
+        onCancel={() => setConfirmModal(null)}
+      />
     </AuthGuard>
   );
 }

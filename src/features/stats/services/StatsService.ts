@@ -11,4 +11,6 @@ export const endpoints = {
   topByDemand: `${apiBaseUrl}/api/v1/stats/procedures/top-demand`,
   topByIncome: `${apiBaseUrl}/api/v1/stats/procedures/top-income`,
   incomeByProcedure: `${apiBaseUrl}/api/v1/stats/income-by-procedure`,
+  conversionRate: `${apiBaseUrl}/api/v1/stats/conversion-rate`,
+  patientsMonthly: `${apiBaseUrl}/api/v1/stats/patients-monthly`,
 };

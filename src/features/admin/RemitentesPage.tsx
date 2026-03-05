@@ -9,6 +9,7 @@ import MainLayout from "@/layouts/MainLayout";
 import RegisterHeaderBar from "../post-login/components/RegisterHeaderBar";
 import AuthGuard from "@/components/AuthGuard";
 import RoleGuard from "@/components/RoleGuard";
+import ConfirmModal from "@/components/ConfirmModal";
 import {
   PlusIcon,
   PencilSquareIcon,
@@ -88,6 +89,12 @@ export default function RemitentesPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [form, setForm] = useState<FormData>(emptyForm);
+  const [confirmModal, setConfirmModal] = useState<{
+    message: string;
+    variant: "danger" | "warning" | "default";
+    confirmLabel: string;
+    onConfirm: () => void;
+  } | null>(null);
 
   const openCreate = () => {
     setEditingId(null);
@@ -170,44 +177,46 @@ export default function RemitentesPage() {
     }
   };
 
-  const changeStatus = async (
+  const changeStatus = (
     id: number,
     action: "activar" | "inactivar" | "despedir",
     label: string,
   ) => {
-    if (
-      !confirm(
-        `¿Seguro que deseas ${label.toLowerCase()} a este remitente?`,
-      )
-    )
-      return;
+    const variant = action === "despedir" ? "danger" : action === "inactivar" ? "warning" : "default";
+    setConfirmModal({
+      message: `¿Seguro que deseas ${label.toLowerCase()} a este remitente?`,
+      variant,
+      confirmLabel: label,
+      onConfirm: async () => {
+        setConfirmModal(null);
+        const token = Cookies.get("XSRF-TOKEN") ?? "";
+        try {
+          const res = await fetch(
+            `${apiBaseUrl}/api/v1/remitentes/${id}/${action}`,
+            {
+              method: "PATCH",
+              credentials: "include",
+              headers: {
+                Accept: "application/json",
+                "X-XSRF-TOKEN": token,
+              },
+            },
+          );
 
-    const token = Cookies.get("XSRF-TOKEN") ?? "";
-    try {
-      const res = await fetch(
-        `${apiBaseUrl}/api/v1/remitentes/${id}/${action}`,
-        {
-          method: "PATCH",
-          credentials: "include",
-          headers: {
-            Accept: "application/json",
-            "X-XSRF-TOKEN": token,
-          },
-        },
-      );
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(
+              (err as { message?: string }).message ?? "Error al cambiar estado",
+            );
+          }
 
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(
-          (err as { message?: string }).message ?? "Error al cambiar estado",
-        );
-      }
-
-      toast.success(`Remitente ${label.toLowerCase()} correctamente`);
-      mutate();
-    } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : "Error inesperado");
-    }
+          toast.success(`Remitente ${label.toLowerCase()} correctamente`);
+          mutate();
+        } catch (e: unknown) {
+          toast.error(e instanceof Error ? e.message : "Error inesperado");
+        }
+      },
+    });
   };
 
   return (
@@ -532,6 +541,15 @@ export default function RemitentesPage() {
             </div>
           </div>
         )}
+
+        <ConfirmModal
+          isOpen={!!confirmModal}
+          message={confirmModal?.message ?? ""}
+          variant={confirmModal?.variant ?? "default"}
+          confirmLabel={confirmModal?.confirmLabel ?? "Confirmar"}
+          onConfirm={() => confirmModal?.onConfirm()}
+          onCancel={() => setConfirmModal(null)}
+        />
       </RoleGuard>
     </AuthGuard>
   );
