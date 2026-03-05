@@ -186,5 +186,5 @@ XIMCA es un proyecto construido en colaboración para clientes reales del sector
 ---
 
 <div align="center">
-<sub>Desarrollado con ❤️ para el sector de medicina estética en Colombia.</sub>
+<sub>Desarrollado con ❤️ para Colesthetic.</sub>
 </div>
