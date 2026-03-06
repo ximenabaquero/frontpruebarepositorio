@@ -43,6 +43,7 @@ export default function RegisterPatientPage() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
+  const [documentType, setDocumentType] = useState("");
   const [cedula, setCedula] = useState("");
   const [cellphone, setCellphone] = useState("");
   const [biologicalSex, setBiologicalSex] = useState("");
@@ -97,6 +98,7 @@ export default function RegisterPatientPage() {
       firstName.trim() !== "" &&
       lastName.trim() !== "" &&
       dateOfBirth.trim() !== "" &&
+      documentType.trim() !== "" &&
       cedula.trim() !== "" &&
       cellphone.trim() !== "" &&
       biologicalSex.trim() !== "";
@@ -114,6 +116,7 @@ export default function RegisterPatientPage() {
     firstName,
     lastName,
     dateOfBirth,
+    documentType,
     cedula,
     cellphone,
     biologicalSex,
@@ -212,6 +215,7 @@ export default function RegisterPatientPage() {
           first_name: firstName,
           last_name: lastName,
           date_of_birth: dateOfBirth,
+          document_type: documentType,
           cedula,
           cellphone,
           biological_sex: biologicalSex,
@@ -347,6 +351,9 @@ export default function RegisterPatientPage() {
     }, 0)
     .toLocaleString("es-CO");
 
+  const allStepsCompleted =
+    stepCompleted[0] && stepCompleted[1] && stepCompleted[2];
+
   return (
     <AuthGuard>
       <MainLayout>
@@ -380,7 +387,9 @@ export default function RegisterPatientPage() {
                     onStatsClick={() => router.push("/stats")}
                     onImagesClick={() => router.push("/control-images")}
                     onPatientsClick={() => router.push("/patients")}
-                    onBackToRegisterClick={() => router.push("/register-patient")}
+                    onBackToRegisterClick={() =>
+                      router.push("/register-patient")
+                    }
                     onRemitentesClick={() => router.push("/admin/remitentes")}
                     active="register"
                   />
@@ -419,6 +428,8 @@ export default function RegisterPatientPage() {
                           setLastName={setLastName}
                           dateOfBirth={dateOfBirth}
                           setDateOfBirth={setDateOfBirth}
+                          documentType={documentType}
+                          setDocumentType={setDocumentType}
                           cedula={cedula}
                           setCedula={setCedula}
                           cellphone={cellphone}
@@ -491,7 +502,7 @@ export default function RegisterPatientPage() {
                         onClick={() =>
                           setCurrentStep((s) => Math.max(0, s - 1))
                         }
-                        className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-60"
+                        className="rounded-xl overflow-visible border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-60"
                         disabled={currentStep === 0 || isSubmitting}
                       >
                         Anterior
@@ -511,9 +522,14 @@ export default function RegisterPatientPage() {
                       ) : (
                         <button
                           type="submit"
-                          disabled={isSubmitting}
+                          disabled={isSubmitting || !allStepsCompleted}
                           onClick={() => setHasTriedSubmit(true)}
-                          className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white"
+                          className={`rounded-xl px-4 py-2 text-sm font-semibold text-white transition-all duration-200
+    ${
+      allStepsCompleted
+        ? "bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-700 hover:to-teal-600 shadow-sm cursor-pointer"
+        : "bg-emerald-200 cursor-not-allowed"
+    }`}
                         >
                           {isSubmitting ? "Guardando..." : "Guardar registro"}
                         </button>

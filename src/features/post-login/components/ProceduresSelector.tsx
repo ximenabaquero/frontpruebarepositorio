@@ -105,7 +105,7 @@ export default function ProceduresSelector({
             <summary className="cursor-pointer list-none px-4 py-3 bg-emerald-50/50 hover:bg-emerald-50 rounded-t-2xl transition-colors">
               <div className="flex items-center justify-between">
                 {/* Nombre del grupo */}
-                <span className="text-sm font-semibold text-gray-900">
+                <span className="text-sm font-semibold text-emerald-900">
                   {group.label}
                 </span>
 
@@ -113,9 +113,9 @@ export default function ProceduresSelector({
                 {getGroupCount(group.procedureIds) > 0 && (
                   <span
                     className="flex items-center justify-center 
-                       min-w-[24px] h-6 px-2
-                       rounded-full bg-emerald-600 
-                       text-white text-xs font-bold shadow-sm"
+                      min-w-[24px] h-6 px-2
+                      rounded-full bg-emerald-600 
+                      text-white text-xs font-bold shadow-sm"
                   >
                     {getGroupCount(group.procedureIds)}
                   </span>

@@ -18,7 +18,11 @@ import PatientsMonthlyChart from "./components/PatientsMonthlyChart";
 
 import AuthGuard from "@/components/AuthGuard";
 import RoleGuard from "@/components/RoleGuard";
-import { UserGroupIcon, ChartBarIcon, SparklesIcon } from "@heroicons/react/24/outline";
+import {
+  UserGroupIcon,
+  ChartBarIcon,
+  SparklesIcon,
+} from "@heroicons/react/24/outline";
 
 type Tab = "general" | "remitentes";
 
@@ -38,6 +42,7 @@ export default function StatsPage() {
                   onImagesClick={() => router.push("/control-images")}
                   onPatientsClick={() => router.push("/patients")}
                   onStatsClick={() => router.push("/stats")}
+                  onRemitentesClick={() => router.push("/admin/remitentes")}
                   active="stats"
                 />
 
@@ -121,16 +126,22 @@ export default function StatsPage() {
                     <div className="mt-8">
                       <div className="flex items-center gap-2 mb-3">
                         <SparklesIcon className="w-5 h-5 text-violet-400" />
-                        <h2 className="text-base font-semibold text-gray-900">Predicciones</h2>
+                        <h2 className="text-base font-semibold text-gray-900">
+                          Predicciones
+                        </h2>
                         <span className="ml-1 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-violet-100 text-violet-600 rounded-full">
                           Próximamente
                         </span>
                       </div>
                       <div className="rounded-2xl border-2 border-dashed border-violet-200 bg-violet-50/40 p-8 flex flex-col items-center text-center gap-3">
                         <SparklesIcon className="w-10 h-10 text-violet-300" />
-                        <p className="text-sm font-medium text-violet-700">Análisis predictivo basado en tendencias</p>
+                        <p className="text-sm font-medium text-violet-700">
+                          Análisis predictivo basado en tendencias
+                        </p>
                         <p className="text-xs text-violet-400 max-w-sm">
-                          Pronto podrás ver proyecciones de ingresos, demanda de procedimientos y comportamiento de pacientes basadas en tus datos históricos.
+                          Pronto podrás ver proyecciones de ingresos, demanda de
+                          procedimientos y comportamiento de pacientes basadas
+                          en tus datos históricos.
                         </p>
                       </div>
                     </div>

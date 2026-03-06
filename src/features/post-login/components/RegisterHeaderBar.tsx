@@ -18,6 +18,13 @@ export default function RegisterHeaderBar({
   active = "register",
 }: RegisterHeaderBarProps) {
   const { user } = useAuth();
+
+  const activeBtn =
+    "rounded-lg px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold shrink-0 transition-all duration-200 bg-gradient-to-r from-emerald-600 to-teal-500 text-white shadow-md shadow-emerald-200";
+
+  const inactiveBtn =
+    "rounded-lg px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold shrink-0 transition-all duration-200 border border-gray-200 bg-white text-gray-600 hover:border-emerald-200 hover:text-emerald-700 hover:shadow-md hover:shadow-emerald-100";
+
   return (
     <div className="flex flex-wrap items-center justify-between gap-2">
       <div className="hidden sm:inline-flex items-center gap-2 rounded-full bg-emerald-100/70 px-4 py-2 text-sm font-semibold text-emerald-800 ring-1 ring-emerald-200">
@@ -29,11 +36,7 @@ export default function RegisterHeaderBar({
           <button
             type="button"
             onClick={onBackToRegisterClick}
-            className={
-              active === "register"
-                ? "rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-emerald-800 shadow-sm shrink-0"
-                : "rounded-xl border border-gray-200 bg-white px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 shrink-0"
-            }
+            className={active === "register" ? activeBtn : inactiveBtn}
           >
             Registro
           </button>
@@ -43,26 +46,17 @@ export default function RegisterHeaderBar({
           <button
             type="button"
             onClick={onPatientsClick}
-            className={
-              active === "patients"
-                ? "rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-emerald-800 shadow-sm shrink-0"
-                : "rounded-xl border border-gray-200 bg-white px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 shrink-0"
-            }
+            className={active === "patients" ? activeBtn : inactiveBtn}
           >
             Pacientes
           </button>
         )}
 
-        {/* SOLO ADMIN VE ESTADÍSTICAS */}
         {user?.role === "ADMIN" && onStatsClick && (
           <button
             type="button"
             onClick={onStatsClick}
-            className={
-              active === "stats"
-                ? "rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-emerald-800 shadow-sm shrink-0"
-                : "rounded-xl border border-gray-200 bg-white px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 shrink-0"
-            }
+            className={active === "stats" ? activeBtn : inactiveBtn}
           >
             Estadísticas
           </button>
@@ -72,26 +66,17 @@ export default function RegisterHeaderBar({
           <button
             type="button"
             onClick={onImagesClick}
-            className={
-              active === "images"
-                ? "rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-emerald-800 shadow-sm shrink-0"
-                : "rounded-xl border border-gray-200 bg-white px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 shrink-0"
-            }
+            className={active === "images" ? activeBtn : inactiveBtn}
           >
             Imágenes
           </button>
         )}
 
-        {/* SOLO ADMIN VE REMITENTES */}
         {user?.role === "ADMIN" && onRemitentesClick && (
           <button
             type="button"
             onClick={onRemitentesClick}
-            className={
-              active === "remitentes"
-                ? "rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-emerald-800 shadow-sm shrink-0"
-                : "rounded-xl border border-gray-200 bg-white px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 shrink-0"
-            }
+            className={active === "remitentes" ? activeBtn : inactiveBtn}
           >
             Remitentes
           </button>

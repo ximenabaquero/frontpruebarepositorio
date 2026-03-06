@@ -16,6 +16,7 @@ type PatientRow = {
   first_name?: string | null;
   last_name?: string | null;
   cedula?: string | null;
+  document_type?: string | null;
   cellphone?: string | null;
   date_of_birth?: string | null;
   created_at?: string | null;
@@ -85,6 +86,35 @@ export default function PatientsPage() {
     void load();
     return () => controller.abort();
   }, [apiBaseUrl, queryString]);
+  function DocumentTypeBadge({ type }: { type?: string | null }) {
+    const styles: Record<string, string> = {
+      "Cédula de Ciudadanía":
+        "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
+      "Cédula de Extranjería": "bg-blue-50 text-blue-700 ring-1 ring-blue-200",
+      Pasaporte: "bg-violet-50 text-violet-700 ring-1 ring-violet-200",
+      "Tarjeta de Identidad":
+        "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
+    };
+
+    const short: Record<string, string> = {
+      "Cédula de Ciudadanía": "C.C.",
+      "Cédula de Extranjería": "C.E.",
+      Pasaporte: "PAS.",
+      "Tarjeta de Identidad": "T.I.",
+    };
+
+    const label = type ?? "—";
+    const cls =
+      styles[label] ?? "bg-gray-50 text-gray-600 ring-1 ring-gray-200";
+
+    return (
+      <span
+        className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${cls}`}
+      >
+        {short[label] ?? label}
+      </span>
+    );
+  }
 
   return (
     <AuthGuard>
@@ -146,7 +176,8 @@ export default function PatientsPage() {
                       <thead className="bg-gray-50">
                         <tr className="text-left text-xs font-semibold text-gray-600">
                           <th className="px-4 py-3">Paciente</th>
-                          <th className="px-4 py-3">Cédula</th>
+                          <th className="px-4 py-3">N° de documento</th>
+                          <th className="px-4 py-3">Tipo</th>
                           <th className="px-4 py-3">Celular</th>
                           <th className="px-4 py-3">Fecha de registro</th>
                           <th className="px-4 py-3 text-center">Ver</th>
@@ -155,19 +186,30 @@ export default function PatientsPage() {
                       <tbody className="divide-y divide-gray-100 bg-white">
                         {patients.map((p) => {
                           const fullName =
-                            `${safeString(p.first_name)} ${safeString(p.last_name)}`.trim();
+                            `${safeString(p.first_name)} ${safeString(p.last_name)}`
+                              .trim()
+                              .replace(/\b\w/g, (c) => c.toUpperCase());
+
                           return (
                             <tr key={p.id} className="text-sm text-gray-800">
                               <td className="px-4 py-3">
                                 {fullName || "(sin nombre)"}
                               </td>
+
                               <td className="px-4 py-3">{p.cedula || "—"}</td>
+
+                              <td className="px-4 py-3">
+                                <DocumentTypeBadge type={p.document_type} />
+                              </td>
+
                               <td className="px-4 py-3">
                                 {p.cellphone || "—"}
                               </td>
+
                               <td className="px-4 py-3">
                                 {p.created_at ? p.created_at.slice(0, 10) : "—"}
                               </td>
+
                               <td className="px-4 py-3 text-center">
                                 <button
                                   onClick={() =>
@@ -186,7 +228,7 @@ export default function PatientsPage() {
                           <tr>
                             <td
                               className="px-4 py-6 text-sm text-gray-500"
-                              colSpan={6}
+                              colSpan={7}
                             >
                               No hay pacientes para mostrar.
                             </td>

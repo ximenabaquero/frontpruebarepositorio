@@ -80,10 +80,12 @@ const emptyForm: FormData = {
 
 export default function RemitentesPage() {
   const router = useRouter();
-  const { data: remitentes, isLoading, error, mutate } = useSWR<Remitente[]>(
-    `${apiBaseUrl}/api/v1/remitentes`,
-    fetcher,
-  );
+  const {
+    data: remitentes,
+    isLoading,
+    error,
+    mutate,
+  } = useSWR<Remitente[]>(`${apiBaseUrl}/api/v1/remitentes`, fetcher);
 
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -122,7 +124,13 @@ export default function RemitentesPage() {
   };
 
   const handleSave = async () => {
-    if (!form.name || !form.first_name || !form.last_name || !form.email || !form.cellphone) {
+    if (
+      !form.name ||
+      !form.first_name ||
+      !form.last_name ||
+      !form.email ||
+      !form.cellphone
+    ) {
       toast.error("Completa todos los campos obligatorios");
       return;
     }
@@ -182,7 +190,12 @@ export default function RemitentesPage() {
     action: "activar" | "inactivar" | "despedir",
     label: string,
   ) => {
-    const variant = action === "despedir" ? "danger" : action === "inactivar" ? "warning" : "default";
+    const variant =
+      action === "despedir"
+        ? "danger"
+        : action === "inactivar"
+          ? "warning"
+          : "default";
     setConfirmModal({
       message: `¿Seguro que deseas ${label.toLowerCase()} a este remitente?`,
       variant,
@@ -206,7 +219,8 @@ export default function RemitentesPage() {
           if (!res.ok) {
             const err = await res.json().catch(() => ({}));
             throw new Error(
-              (err as { message?: string }).message ?? "Error al cambiar estado",
+              (err as { message?: string }).message ??
+                "Error al cambiar estado",
             );
           }
 
@@ -231,7 +245,8 @@ export default function RemitentesPage() {
                   onImagesClick={() => router.push("/control-images")}
                   onPatientsClick={() => router.push("/patients")}
                   onStatsClick={() => router.push("/stats")}
-                  active="register"
+                  onRemitentesClick={() => router.push("/admin/remitentes")}
+                  active="remitentes"
                 />
 
                 {/* Header */}
@@ -258,15 +273,24 @@ export default function RemitentesPage() {
                   <div className="mt-3 flex flex-wrap gap-4 text-sm">
                     <div className="flex items-center gap-1.5 text-emerald-700">
                       <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                      {remitentes.filter((r) => r.status === "active").length} activos
+                      {
+                        remitentes.filter((r) => r.status === "active").length
+                      }{" "}
+                      activos
                     </div>
                     <div className="flex items-center gap-1.5 text-yellow-700">
                       <span className="h-2 w-2 rounded-full bg-yellow-400" />
-                      {remitentes.filter((r) => r.status === "inactive").length} inactivos
+                      {
+                        remitentes.filter((r) => r.status === "inactive").length
+                      }{" "}
+                      inactivos
                     </div>
                     <div className="flex items-center gap-1.5 text-red-600">
                       <span className="h-2 w-2 rounded-full bg-red-400" />
-                      {remitentes.filter((r) => r.status === "fired").length} despedidos
+                      {
+                        remitentes.filter((r) => r.status === "fired").length
+                      }{" "}
+                      despedidos
                     </div>
                   </div>
                 )}
@@ -285,14 +309,16 @@ export default function RemitentesPage() {
                     </p>
                   )}
 
-                  {!isLoading && Array.isArray(remitentes) && remitentes.length === 0 && (
-                    <div className="flex flex-col items-center justify-center py-20 rounded-2xl border-2 border-dashed border-gray-200 bg-white">
-                      <UserGroupIcon className="h-12 w-12 text-gray-300 mb-3" />
-                      <p className="text-gray-500 font-medium">
-                        Aún no hay remitentes
-                      </p>
-                    </div>
-                  )}
+                  {!isLoading &&
+                    Array.isArray(remitentes) &&
+                    remitentes.length === 0 && (
+                      <div className="flex flex-col items-center justify-center py-20 rounded-2xl border-2 border-dashed border-gray-200 bg-white">
+                        <UserGroupIcon className="h-12 w-12 text-gray-300 mb-3" />
+                        <p className="text-gray-500 font-medium">
+                          Aún no hay remitentes
+                        </p>
+                      </div>
+                    )}
 
                   {Array.isArray(remitentes) && remitentes.length > 0 && (
                     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -301,17 +327,26 @@ export default function RemitentesPage() {
                           <thead className="bg-gray-50">
                             <tr className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
                               <th className="px-5 py-3">Nombre</th>
-                              <th className="px-5 py-3 hidden md:table-cell">Usuario</th>
-                              <th className="px-5 py-3 hidden sm:table-cell">Celular</th>
+                              <th className="px-5 py-3 hidden md:table-cell">
+                                Usuario
+                              </th>
+                              <th className="px-5 py-3 hidden sm:table-cell">
+                                Celular
+                              </th>
                               <th className="px-5 py-3">Estado</th>
                               <th className="px-5 py-3 text-right">Acciones</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-gray-50">
                             {remitentes.map((r) => {
-                              const sc = STATUS_CONFIG[r.status] ?? STATUS_CONFIG.inactive;
+                              const sc =
+                                STATUS_CONFIG[r.status] ??
+                                STATUS_CONFIG.inactive;
                               return (
-                                <tr key={r.id} className="hover:bg-gray-50 transition">
+                                <tr
+                                  key={r.id}
+                                  className="hover:bg-gray-50 transition"
+                                >
                                   <td className="px-5 py-4">
                                     <p className="font-medium text-gray-900 text-sm">
                                       {r.first_name} {r.last_name}
@@ -353,7 +388,11 @@ export default function RemitentesPage() {
                                         <button
                                           title="Activar"
                                           onClick={() =>
-                                            changeStatus(r.id, "activar", "Activar")
+                                            changeStatus(
+                                              r.id,
+                                              "activar",
+                                              "Activar",
+                                            )
                                           }
                                           className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 transition"
                                         >
@@ -366,7 +405,11 @@ export default function RemitentesPage() {
                                         <button
                                           title="Inactivar"
                                           onClick={() =>
-                                            changeStatus(r.id, "inactivar", "Inactivar")
+                                            changeStatus(
+                                              r.id,
+                                              "inactivar",
+                                              "Inactivar",
+                                            )
                                           }
                                           className="p-1.5 rounded-lg text-yellow-500 hover:bg-yellow-50 transition"
                                         >
@@ -379,7 +422,11 @@ export default function RemitentesPage() {
                                         <button
                                           title="Despedir"
                                           onClick={() =>
-                                            changeStatus(r.id, "despedir", "Despedir")
+                                            changeStatus(
+                                              r.id,
+                                              "despedir",
+                                              "Despedir",
+                                            )
                                           }
                                           className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 transition"
                                         >
@@ -503,7 +550,8 @@ export default function RemitentesPage() {
 
                 <div>
                   <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
-                    Contraseña {editingId ? "(dejar vacío para no cambiar)" : "*"}
+                    Contraseña{" "}
+                    {editingId ? "(dejar vacío para no cambiar)" : "*"}
                   </label>
                   <input
                     type="password"
