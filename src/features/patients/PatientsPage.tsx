@@ -10,6 +10,8 @@ import FormAlert from "@/features/post-login/components/FormAlert";
 import { Eye } from "lucide-react";
 
 import AuthGuard from "@/components/AuthGuard";
+import PaginationBar from "@/components/PaginationBar";
+import { usePagination } from "@/utils/usePagination";
 
 type PatientRow = {
   id: number;
@@ -116,6 +118,16 @@ export default function PatientsPage() {
     );
   }
 
+  const {
+    currentPage,
+    totalPages,
+    paginatedItems: paginatedPatients,
+    goToNext,
+    goToPrev,
+    isFirstPage,
+    isLastPage,
+  } = usePagination(patients, 10);
+
   return (
     <AuthGuard>
       <MainLayout>
@@ -184,12 +196,9 @@ export default function PatientsPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100 bg-white">
-                        {patients.map((p) => {
+                        {paginatedPatients.map((p) => {
                           const fullName =
-                            `${safeString(p.first_name)} ${safeString(p.last_name)}`
-                              .trim()
-                              .replace(/\b\w/g, (c) => c.toUpperCase());
-
+                            `${safeString(p.first_name)} ${safeString(p.last_name)}`.trim();
                           return (
                             <tr key={p.id} className="text-sm text-gray-800">
                               <td className="px-4 py-3">
@@ -237,6 +246,16 @@ export default function PatientsPage() {
                       </tbody>
                     </table>
                   </div>
+                  <PaginationBar
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalItems={patients.length}
+                    itemsPerPage={10}
+                    onNext={goToNext}
+                    onPrev={goToPrev}
+                    isFirstPage={isFirstPage}
+                    isLastPage={isLastPage}
+                  />
                 </div>
               </RegisterCard>
             </div>

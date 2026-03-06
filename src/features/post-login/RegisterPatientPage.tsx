@@ -14,6 +14,7 @@ import NotesField from "./components/NotesField";
 import StickySubmitBar from "./components/StickySubmitBar";
 import FormAlert from "./components/FormAlert";
 import SidebarSteps from "./components/SideBarSteps";
+import ConfirmModal from "@/components/ConfirmModal";
 import { toast } from "react-hot-toast";
 
 import AuthGuard from "@/components/AuthGuard";
@@ -32,6 +33,9 @@ export default function RegisterPatientPage() {
   const [stepCompleted, setStepCompleted] = useState<
     [boolean, boolean, boolean]
   >([false, false, false]);
+
+  // Modal de confirmación
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   // Estados
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -58,7 +62,6 @@ export default function RegisterPatientPage() {
   // Procedimientos
   const [procedureItems, setProcedureItems] = useState<ProcedureItem[]>([]);
   const [procedureNotes, setProcedureNotes] = useState("");
-
   const [procedurePrices, setProcedurePrices] = useState<
     Record<string, string>
   >({});
@@ -66,10 +69,7 @@ export default function RegisterPatientPage() {
   const handlePriceChange =
     (itemName: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
       let value = e.target.value;
-
-      //eliminar todo lo que no sea número
       value = value.replace(/[^\d]/g, "");
-
       if (!value) {
         setProcedureItems((prev) =>
           prev.map((item) =>
@@ -78,13 +78,9 @@ export default function RegisterPatientPage() {
         );
         return;
       }
-
       const numeric = Number(value);
-
       if (numeric < 0) return;
-
       const formatted = numeric.toLocaleString("es-CO");
-
       setProcedureItems((prev) =>
         prev.map((item) =>
           item.item_name === itemName ? { ...item, price: formatted } : item,
@@ -93,7 +89,6 @@ export default function RegisterPatientPage() {
     };
 
   useEffect(() => {
-    // Paso 1: datos básicos
     const p1 =
       firstName.trim() !== "" &&
       lastName.trim() !== "" &&
@@ -103,12 +98,9 @@ export default function RegisterPatientPage() {
       cellphone.trim() !== "" &&
       biologicalSex.trim() !== "";
 
-    // Paso 2: evaluación clínica mínima
     const w = parseFloat(weightKg) > 0;
     const h = parseFloat(heightM) > 0;
     const p2 = w && h && medicalBackground.trim() !== "";
-
-    // Paso 3: solo se valida tras intentar guardar
     const p3 = procedureItems.length > 0 && procedureNotes.trim().length > 0;
 
     setStepCompleted([Boolean(p1), Boolean(p2), Boolean(p3)]);
@@ -131,7 +123,6 @@ export default function RegisterPatientPage() {
     if (currentStep === 2) {
       const step3Valid =
         procedureItems.length > 0 && procedureNotes.trim().length > 0;
-
       if (!step3Valid) {
         setValidationError(
           "⚠️​ Complete todos los pasos antes de guardar el registro.",
@@ -144,14 +135,12 @@ export default function RegisterPatientPage() {
     }
   }, [currentStep, procedureItems, procedureNotes]);
 
-  // BMI en tiempo real
   useEffect(() => {
     const weight = parseFloat(weightKg);
     const height = parseFloat(heightM);
     if (weight > 0 && height > 0) {
       const bmi = +(weight / (height * height)).toFixed(2);
       setBmiPreview(bmi.toString());
-
       const status =
         bmi < 16.0
           ? "Delgadez severa (< 16.0)"
@@ -168,7 +157,6 @@ export default function RegisterPatientPage() {
                     : bmi < 40.0
                       ? "Obesidad grado II (35.0–39.9)"
                       : "Obesidad grado III (≥ 40)";
-
       setBmiStatusPreview(status);
     } else {
       setBmiPreview("");
@@ -176,36 +164,33 @@ export default function RegisterPatientPage() {
     }
   }, [weightKg, heightM]);
 
-  const handleDirty = () => {
-    setSubmitError(null);
-  };
-
+  const handleDirty = () => setSubmitError(null);
   const [hasTriedSubmit, setHasTriedSubmit] = useState(false);
 
-  // Submit
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (currentStep !== 2) return;
+  const handleSaveClick = () => {
     setHasTriedSubmit(true);
     const step3Valid =
       procedureItems.length > 0 && procedureNotes.trim().length > 0;
-
     if (!step3Valid) {
       setValidationError(
         "⚠️​ Complete todos los pasos antes de guardar el registro.",
       );
       return;
     }
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmedSubmit = async () => {
+    setShowConfirmModal(false);
     setIsSubmitting(true);
 
     try {
-      // Crear paciente
       const token = Cookies.get("XSRF-TOKEN") ?? "";
 
+      // Crear paciente
       const patientRes = await fetch(`${apiBaseUrl}/api/v1/patients`, {
         method: "POST",
-        credentials: "include", //esto es lo que manda la cookie
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
@@ -240,8 +225,6 @@ export default function RegisterPatientPage() {
       }
 
       const patientJson = await patientRes.json();
-      console.log("CREATE PATIENT response:", patientJson);
-
       const patient_id = patientJson.data.id;
 
       // Crear evaluación médica
@@ -261,20 +244,14 @@ export default function RegisterPatientPage() {
         }),
       });
 
-      console.log("CREATE EVAL status:", evalRes.status);
-
-      if (evalRes.status === 401) {
+      if (evalRes.status === 401)
         throw new Error("Sesión expirada. Inicia sesión nuevamente.");
-      }
-
       if (evalRes.status === 403) {
         const errJson = await evalRes.json();
         throw new Error(errJson.message || "Cuenta no activa.");
       }
-
       if (!evalRes.ok) {
         const errBody = await evalRes.json().catch(() => null);
-        console.log("CREATE EVAL failed", evalRes.status, errBody);
         const detail =
           errBody?.message ||
           (errBody?.errors
@@ -288,8 +265,6 @@ export default function RegisterPatientPage() {
       }
 
       const evalJson = await evalRes.json();
-      console.log("CREATE EVAL response:", evalJson);
-
       const medical_evaluation_id = evalJson.data.id;
 
       // Crear procedimientos
@@ -312,11 +287,8 @@ export default function RegisterPatientPage() {
         }),
       });
 
-      console.log("CREATE PROCEDURES status:", procRes.status);
-
       if (!procRes.ok) {
         const errBody = await procRes.json().catch(() => null);
-        console.log("CREATE PROCEDURES failed", procRes.status, errBody);
         const detail =
           errBody?.message ||
           (errBody?.errors
@@ -329,8 +301,9 @@ export default function RegisterPatientPage() {
         throw new Error(detail);
       }
 
-      setSubmitError(null);
-      setSubmitSuccess("Registro guardado correctamente");
+      // Todo OK → redirigir al historial del paciente
+      toast.success("Registro guardado correctamente");
+      router.push(`/patients/${patient_id}/records/${medical_evaluation_id}`);
     } catch (err) {
       console.error("SUBMIT ERROR:", err);
       setSubmitError(
@@ -343,7 +316,6 @@ export default function RegisterPatientPage() {
   };
 
   const selectedCount = procedureItems.length;
-
   const stickyTotalCop = procedureItems
     .reduce((total, item) => {
       const numeric = Number(item.price?.replace(/\D/g, "")) || 0;
@@ -358,9 +330,7 @@ export default function RegisterPatientPage() {
     <AuthGuard>
       <MainLayout>
         <div className="bg-gradient-to-b from-emerald-50 via-white to-white">
-          {/* CONTAINER GENERAL */}
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
-            {/* GRID PRINCIPAL */}
             <div className="grid grid-cols-12 gap-6">
               {/* SIDEBAR */}
               <aside className="col-span-12 lg:col-span-4">
@@ -402,20 +372,20 @@ export default function RegisterPatientPage() {
                     índice de masa corporal (IMC) se registrará automáticamente.
                   </p>
 
-                  <form className="space-y-5 mt-6" onSubmit={handleSubmit}>
+                  <form
+                    className="space-y-5 mt-6"
+                    onSubmit={(e) => e.preventDefault()}
+                  >
                     {validationError && (
                       <FormAlert variant="warning" message={validationError} />
                     )}
-
                     {submitError && (
                       <FormAlert variant="error" message={submitError} />
                     )}
-
                     {submitSuccess && (
                       <FormAlert variant="success" message={submitSuccess} />
                     )}
 
-                    {/* Paso 1 */}
                     {currentStep === 0 && (
                       <RegisterCard
                         title="Datos del paciente"
@@ -441,7 +411,6 @@ export default function RegisterPatientPage() {
                       </RegisterCard>
                     )}
 
-                    {/* Paso 2 */}
                     {currentStep === 1 && (
                       <RegisterCard
                         title="Evaluación clínica"
@@ -461,7 +430,6 @@ export default function RegisterPatientPage() {
                       </RegisterCard>
                     )}
 
-                    {/* Paso 3 */}
                     {currentStep === 2 && (
                       <RegisterCard
                         title="Procedimientos"
@@ -476,8 +444,6 @@ export default function RegisterPatientPage() {
                           procedurePrices={procedurePrices}
                           handlePriceChange={handlePriceChange}
                         />
-
-                        {/* Notas del procedimiento */}
                         <div className="mt-6">
                           <NotesField
                             value={procedureNotes}
@@ -485,8 +451,6 @@ export default function RegisterPatientPage() {
                             onDirty={handleDirty}
                           />
                         </div>
-
-                        {/* Total COP y procedimientos Seleccionados */}
                         <StickySubmitBar
                           selectedCount={selectedCount}
                           stickyTotalCop={stickyTotalCop}
@@ -495,14 +459,14 @@ export default function RegisterPatientPage() {
                       </RegisterCard>
                     )}
 
-                    {/* Navegación de pasos */}
+                    {/* Navegación */}
                     <div className="flex items-center justify-between pt-2">
                       <button
                         type="button"
                         onClick={() =>
                           setCurrentStep((s) => Math.max(0, s - 1))
                         }
-                        className="rounded-xl overflow-visible border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-60"
+                        className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-60"
                         disabled={currentStep === 0 || isSubmitting}
                       >
                         Anterior
@@ -521,15 +485,15 @@ export default function RegisterPatientPage() {
                         </button>
                       ) : (
                         <button
-                          type="submit"
+                          type="button"
                           disabled={isSubmitting || !allStepsCompleted}
-                          onClick={() => setHasTriedSubmit(true)}
+                          onClick={handleSaveClick}
                           className={`rounded-xl px-4 py-2 text-sm font-semibold text-white transition-all duration-200
-    ${
-      allStepsCompleted
-        ? "bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-700 hover:to-teal-600 shadow-sm cursor-pointer"
-        : "bg-emerald-200 cursor-not-allowed"
-    }`}
+                            ${
+                              allStepsCompleted
+                                ? "bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-700 hover:to-teal-600 shadow-sm cursor-pointer"
+                                : "bg-emerald-200 cursor-not-allowed"
+                            }`}
                         >
                           {isSubmitting ? "Guardando..." : "Guardar registro"}
                         </button>
@@ -542,6 +506,16 @@ export default function RegisterPatientPage() {
           </div>
         </div>
       </MainLayout>
+      {/* Modal de confirmación*/}
+      <ConfirmModal
+        isOpen={showConfirmModal}
+        title="¿Guardar registro clínico?"
+        message="Estás a punto de guardar el registro del paciente con todos sus datos clínicos y procedimientos. Una vez guardado, serás redirigido al historial del paciente."
+        confirmLabel="Sí, guardar"
+        variant="default"
+        onConfirm={handleConfirmedSubmit}
+        onCancel={() => setShowConfirmModal(false)}
+      />
     </AuthGuard>
   );
 }
