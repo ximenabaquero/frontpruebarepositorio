@@ -162,7 +162,7 @@ export default function PatientsPage() {
                   <div className="w-full sm:max-w-md">
                     <label
                       htmlFor="search"
-                      className="block text-sm font-medium text-gray-700"
+                      className="block text-xs font-medium text-gray-700 uppercase"
                     >
                       Buscar paciente
                     </label>
@@ -186,7 +186,7 @@ export default function PatientsPage() {
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-100">
                       <thead className="bg-gray-50">
-                        <tr className="text-left text-xs font-semibold text-gray-600">
+                        <tr className="text-left text-xs font-semibold text-gray-600 uppercase">
                           <th className="px-4 py-3">Paciente</th>
                           <th className="px-4 py-3">N° de documento</th>
                           <th className="px-4 py-3">Tipo</th>

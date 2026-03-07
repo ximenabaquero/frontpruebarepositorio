@@ -26,44 +26,42 @@ export default function TopProceduresByDemand() {
     return <p className="text-red-500">Error al cargar demanda.</p>;
 
   return (
-    <div className="w-full max-w-xs min-w-[280px] px-4 sm:px-0">
-      <div className="rounded-2xl bg-white border shadow-md border-gray-100 p-5">
-        {/* Título */}
-        <h3 className="text-sm font-semibold text-gray-900 mb-1">
-          Top por Demanda
-        </h3>
-        <p className="text-[10px] uppercase tracking-wider text-gray-400 mb-4">
-          Basado en el periodo actual
-        </p>
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-md p-6">
+      {/* Título */}
+      <h3 className="text-sm font-semibold text-gray-900 mb-1">
+        Top por Demanda
+      </h3>
+      <p className="text-[10px] uppercase tracking-wider text-gray-400 mb-4">
+        Basado en el periodo actual
+      </p>
 
-        {/* Lista */}
-        <div className="space-y-3">
-          {data.map((item: any, index: number) => {
-            const color = numberColors[index % numberColors.length];
+      {/* Lista */}
+      <div className="space-y-3">
+        {data.map((item: any, index: number) => {
+          const color = numberColors[index % numberColors.length];
 
-            return (
-              <div
-                key={item.item_name}
-                className="flex items-start gap-3 text-sm w-full"
+          return (
+            <div
+              key={item.item_name}
+              className="flex items-start gap-3 text-sm w-full"
+            >
+              <span
+                className={`w-6 h-6 flex items-center justify-center rounded-md text-xs font-semibold ${color}`}
               >
-                <span
-                  className={`w-6 h-6 flex items-center justify-center rounded-md text-xs font-semibold ${color}`}
-                >
-                  {index + 1}
-                </span>
+                {index + 1}
+              </span>
 
-                <div className="flex flex-col w-full">
-                  <span className="text-gray-700 font-medium">
-                    {item.item_name}
-                  </span>
-                  <span className="text-xs text-gray-400">
-                    {item.total_count} citas/mes
-                  </span>
-                </div>
+              <div className="flex flex-col w-full">
+                <span className="text-gray-700 font-medium">
+                  {item.item_name}
+                </span>
+                <span className="text-xs text-gray-400">
+                  {item.total_count} citas/mes
+                </span>
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

@@ -6,21 +6,64 @@ import {
   DocumentCheckIcon,
   DocumentIcon,
   DocumentMinusIcon,
-  ArrowTopRightOnSquareIcon,
+  ArrowRightIcon,
+  UserIcon,
+  CalendarDaysIcon,
 } from "@heroicons/react/24/outline";
-
-import { UserIcon } from "@heroicons/react/24/solid";
 
 interface MedicalEvaluation {
   id: number;
   created_at: string;
   referrer_name: string;
   status: "CANCELADO" | "CONFIRMADO" | "EN_ESPERA";
+  procedures?: { procedure_date: string }[];
 }
 
 interface Props {
   patientId: number;
 }
+
+const STATUS_CONFIG = {
+  CONFIRMADO: {
+    label: "Confirmado",
+    icon: DocumentCheckIcon,
+    dot: "bg-emerald-500",
+    badge: "bg-emerald-50 text-emerald-700 border border-emerald-100",
+    accent: "border-l-emerald-500",
+    iconColor: "text-emerald-600",
+    iconBg: "bg-emerald-50",
+  },
+  EN_ESPERA: {
+    label: "En espera",
+    icon: DocumentIcon,
+    dot: "bg-amber-400",
+    badge: "bg-amber-50 text-amber-700 border border-amber-100",
+    accent: "border-l-amber-400",
+    iconColor: "text-amber-500",
+    iconBg: "bg-amber-50",
+  },
+  CANCELADO: {
+    label: "Cancelado",
+    icon: DocumentMinusIcon,
+    dot: "bg-red-400",
+    badge: "bg-red-50 text-red-600 border border-red-100",
+    accent: "border-l-red-400",
+    iconColor: "text-red-500",
+    iconBg: "bg-red-50",
+  },
+};
+
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return {
+    day: date.toLocaleDateString("es-ES", { day: "2-digit" }),
+    month: date
+      .toLocaleDateString("es-ES", { month: "short" })
+      .replace(".", "")
+      .toUpperCase(),
+    year: date.toLocaleDateString("es-ES", { year: "numeric" }),
+  };
+};
 
 export default function PatientRecordsList({ patientId }: Props) {
   const router = useRouter();
@@ -31,7 +74,6 @@ export default function PatientRecordsList({ patientId }: Props) {
 
   useEffect(() => {
     if (!apiBaseUrl) return;
-
     const fetchRecords = async () => {
       try {
         const token = document.cookie
@@ -56,13 +98,9 @@ export default function PatientRecordsList({ patientId }: Props) {
           setLoading(false);
           return;
         }
-
-        if (!res.ok) {
-          throw new Error("Error al cargar registros");
-        }
+        if (!res.ok) throw new Error("Error al cargar registros");
 
         const data = await res.json();
-        console.log("Respuesta backend:", data);
         setRecords(data.data ?? []);
       } catch (error) {
         console.error("Error:", error);
@@ -70,99 +108,108 @@ export default function PatientRecordsList({ patientId }: Props) {
         setLoading(false);
       }
     };
-
     fetchRecords();
   }, [patientId, apiBaseUrl]);
 
   if (loading) {
-    return <p className="text-sm text-gray-500">Cargando registros...</p>;
-  }
-
-  if (!loading && records.length === 0) {
     return (
-      <div className="text-sm text-gray-500">
-        Este paciente no tiene registros clínicos.
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="h-40 rounded-2xl bg-gray-100 animate-pulse" />
+        ))}
       </div>
     );
   }
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const formatted = date.toLocaleDateString("es-ES", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-    return formatted.replace(/\b\w/g, (c) => c.toUpperCase());
-  };
+  if (!loading && records.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <div className="w-14 h-14 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center mb-4">
+          <DocumentIcon className="w-6 h-6 text-gray-300" />
+        </div>
+        <p className="text-sm font-medium text-gray-400">
+          Sin registros clínicos
+        </p>
+        <p className="text-xs text-gray-300 mt-1">
+          Este paciente no tiene registros aún.
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl">
-      {records.map((record) => {
-        const status = record.status;
-
-        const statusConfig = {
-          CONFIRMADO: {
-            bg: "bg-green-100",
-            text: "text-green-600",
-            icon: <DocumentCheckIcon className="h-5 w-5 text-green-600" />,
-          },
-          EN_ESPERA: {
-            bg: "bg-yellow-100",
-            text: "text-yellow-600",
-            icon: <DocumentIcon className="h-5 w-5 text-yellow-600" />,
-          },
-          CANCELADO: {
-            bg: "bg-red-100",
-            text: "text-red-600",
-            icon: <DocumentMinusIcon className="h-5 w-5 text-red-600" />,
-          },
-        }[status];
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl">
+      {records.map((record, idx) => {
+        const cfg = STATUS_CONFIG[record.status];
+        const Icon = cfg.icon;
+        const dateStr =
+          record.procedures?.[0]?.procedure_date ?? record.created_at;
+        const { day, month, year } = formatDate(dateStr);
 
         return (
           <div
             key={record.id}
-            className="relative rounded-2xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition"
+            className={`group relative bg-white rounded-2xl border border-gray-100 border-l-4 ${cfg.accent} shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden`}
           >
-            {/* Fecha */}
-            <span className="absolute top-4 right-4 text-xs font-semibold bg-gray-100 text-gray-600 px-3 py-1 rounded-lg">
-              {formatDate(record.created_at)}
-            </span>
+            {/* Top row */}
+            <div className="flex items-start justify-between px-5 pt-5 pb-3">
+              {/* Icon */}
+              <div
+                className={`w-9 h-9 rounded-xl flex items-center justify-center ${cfg.iconBg}`}
+              >
+                <Icon
+                  className={`w-4.5 h-4.5 ${cfg.iconColor}`}
+                  strokeWidth={1.8}
+                />
+              </div>
 
-            {/* Icono */}
-            <div
-              className={`w-10 h-10 flex items-center justify-center rounded-xl ${statusConfig.bg} mb-4`}
-            >
-              {statusConfig.icon}
+              {/* Date block */}
+              <div className="text-right">
+                <div className="flex items-center gap-1 justify-end text-gray-400 mb-0.5">
+                  <CalendarDaysIcon className="w-3 h-3" />
+                  <span className="text-[10px] uppercase tracking-wider">
+                    {month} {year}
+                  </span>
+                </div>
+                <p className="text-2xl font-bold text-gray-800 leading-none">
+                  {day}
+                </p>
+              </div>
             </div>
 
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">
-              Registro Clínico
-            </h3>
+            {/* Divider */}
+            <div className="mx-5 border-t border-gray-50" />
 
-            <p className="text-sm text-gray-500 mb-3 flex items-center gap-2">
-              <UserIcon className="h-4 w-4 text-gray-500" />
-              {record.referrer_name}
-            </p>
+            {/* Content */}
+            <div className="px-5 py-3">
+              <p className="text-xs font-bold uppercase tracking-wider text-gray-900 mb-1">
+                Registro clínico
+              </p>
+              <div className="flex items-center gap-1.5">
+                <UserIcon className="w-3 h-3 text-gray-400 shrink-0" />
+                <p className="text-xs text-gray-500 truncate">
+                  {record.referrer_name}
+                </p>
+              </div>
+            </div>
 
-            {/* Línea divisoria */}
-            <div className="border-t border-gray-200 my-4" />
-
-            <div className="flex items-center justify-between">
+            {/* Footer */}
+            <div className="flex items-center justify-between px-5 pb-4">
               <span
-                className={`inline-block text-xs font-semibold px-3 py-1 rounded-full ${statusConfig.bg} ${statusConfig.text}`}
+                className={`inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full ${cfg.badge}`}
               >
-                {status.replace("_", " ")}
+                <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+                {cfg.label}
               </span>
 
               <button
                 onClick={() =>
                   router.push(`/patients/${patientId}/records/${record.id}`)
                 }
-                className="flex items-center gap-1 text-sm font-medium text-emerald-600 hover:underline"
+                className="flex items-center gap-1 text-xs font-medium text-gray-400 hover:text-emerald-600 transition-colors duration-200 group-hover:text-emerald-600"
               >
                 Ver detalles
-                <ArrowTopRightOnSquareIcon className="h-4 w-4" />
+                <ArrowRightIcon className="w-3 h-3 transition-transform duration-200 group-hover:translate-x-0.5" />
               </button>
             </div>
           </div>

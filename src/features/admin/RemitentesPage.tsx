@@ -10,6 +10,8 @@ import RegisterHeaderBar from "../post-login/components/RegisterHeaderBar";
 import AuthGuard from "@/components/AuthGuard";
 import RoleGuard from "@/components/RoleGuard";
 import ConfirmModal from "@/components/ConfirmModal";
+import PaginationBar from "@/components/PaginationBar";
+import { usePagination } from "@/utils/usePagination";
 import {
   PlusIcon,
   PencilSquareIcon,
@@ -233,6 +235,24 @@ export default function RemitentesPage() {
     });
   };
 
+  const {
+    currentPage,
+    totalPages,
+    paginatedItems: paginatedRemitentes,
+    goToNext,
+    goToPrev,
+    isFirstPage,
+    isLastPage,
+  } = usePagination(remitentes ?? [], 10);
+
+  const stats = (remitentes ?? []).reduce(
+    (acc, r) => {
+      acc[r.status]++;
+      return acc;
+    },
+    { active: 0, inactive: 0, fired: 0 },
+  );
+
   return (
     <AuthGuard>
       <RoleGuard allow={["ADMIN"]}>
@@ -272,25 +292,24 @@ export default function RemitentesPage() {
                 {Array.isArray(remitentes) && (
                   <div className="mt-3 flex flex-wrap gap-4 text-sm">
                     <div className="flex items-center gap-1.5 text-emerald-700">
-                      <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                      {
-                        remitentes.filter((r) => r.status === "active").length
-                      }{" "}
-                      activos
+                      <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
+                      <span className="font-semibold">
+                        {stats.active} Activos
+                      </span>
                     </div>
+
                     <div className="flex items-center gap-1.5 text-yellow-700">
-                      <span className="h-2 w-2 rounded-full bg-yellow-400" />
-                      {
-                        remitentes.filter((r) => r.status === "inactive").length
-                      }{" "}
-                      inactivos
+                      <span className="h-2 w-2 rounded-full border-2 border-yellow-500 shrink-0" />
+                      <span className="font-semibold">
+                        {stats.inactive} Inactivos
+                      </span>
                     </div>
+
                     <div className="flex items-center gap-1.5 text-red-600">
-                      <span className="h-2 w-2 rounded-full bg-red-400" />
-                      {
-                        remitentes.filter((r) => r.status === "fired").length
-                      }{" "}
-                      despedidos
+                      <NoSymbolIcon className="h-3 w-3 text-red-500 shrink-0" />
+                      <span className="font-semibold">
+                        {stats.fired} Despedidos
+                      </span>
                     </div>
                   </div>
                 )}
@@ -324,28 +343,32 @@ export default function RemitentesPage() {
                     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                       <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-100">
-                          <thead className="bg-gray-50">
-                            <tr className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                              <th className="px-5 py-3">Nombre</th>
+                          <thead className="bg-gradient-to-r from-emerald-600 to-teal-600">
+                            <tr className="text-left text-xs font-semibold text-white/95 uppercase tracking-wide">
+                              <th className="px-5 py-3">Especialista</th>
                               <th className="px-5 py-3 hidden md:table-cell">
-                                Usuario
+                                Usuario del sistema
                               </th>
                               <th className="px-5 py-3 hidden sm:table-cell">
                                 Celular
                               </th>
-                              <th className="px-5 py-3">Estado</th>
-                              <th className="px-5 py-3 text-right">Acciones</th>
+                              <th className="px-5 py-3 w-px whitespace-nowrap">
+                                Estado
+                              </th>
+                              <th className="px-5 py-3 w-px whitespace-nowrap text-right">
+                                Acciones
+                              </th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-gray-50">
-                            {remitentes.map((r) => {
+                            {paginatedRemitentes.map((r) => {
                               const sc =
                                 STATUS_CONFIG[r.status] ??
                                 STATUS_CONFIG.inactive;
                               return (
                                 <tr
                                   key={r.id}
-                                  className="hover:bg-gray-50 transition"
+                                  className="hover:bg-emerald-50/40 transition-colors"
                                 >
                                   <td className="px-5 py-4">
                                     <p className="font-medium text-gray-900 text-sm">
@@ -365,20 +388,36 @@ export default function RemitentesPage() {
                                       {r.cellphone}
                                     </span>
                                   </td>
-                                  <td className="px-5 py-4">
+                                  <td className="px-5 py-4 whitespace-nowrap">
                                     <span
-                                      className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full ${sc.classes}`}
+                                      className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${sc.classes}`}
                                     >
+                                      {r.status === "active" && (
+                                        <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
+                                      )}
+                                      {r.status === "inactive" && (
+                                        <span className="h-2 w-2 rounded-full border-2 border-yellow-500 shrink-0" />
+                                      )}
+                                      {r.status === "fired" && (
+                                        <NoSymbolIcon className="h-3 w-3 text-red-500 shrink-0" />
+                                      )}
                                       {sc.label}
                                     </span>
                                   </td>
-                                  <td className="px-5 py-4">
+                                  <td className="px-5 py-4 whitespace-nowrap">
                                     <div className="flex items-center justify-end gap-1.5">
                                       {/* Editar */}
                                       <button
-                                        title="Editar"
-                                        onClick={() => openEdit(r)}
-                                        className="p-1.5 rounded-lg text-blue-500 hover:bg-blue-50 transition"
+                                        title={
+                                          r.status === "fired"
+                                            ? "No se puede editar un remitente despedido"
+                                            : "Editar"
+                                        }
+                                        onClick={() =>
+                                          r.status !== "fired" && openEdit(r)
+                                        }
+                                        disabled={r.status === "fired"}
+                                        className="p-1.5 rounded-lg text-blue-500 hover:bg-blue-50 transition disabled:opacity-30 disabled:cursor-not-allowed"
                                       >
                                         <PencilSquareIcon className="h-4 w-4" />
                                       </button>
@@ -394,7 +433,7 @@ export default function RemitentesPage() {
                                               "Activar",
                                             )
                                           }
-                                          className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 transition"
+                                          className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-colors"
                                         >
                                           <CheckCircleIcon className="h-4 w-4" />
                                         </button>
@@ -411,7 +450,7 @@ export default function RemitentesPage() {
                                               "Inactivar",
                                             )
                                           }
-                                          className="p-1.5 rounded-lg text-yellow-500 hover:bg-yellow-50 transition"
+                                          className="p-1.5 rounded-lg text-yellow-500 hover:bg-yellow-50 transition-colors"
                                         >
                                           <PauseCircleIcon className="h-4 w-4" />
                                         </button>
@@ -428,7 +467,7 @@ export default function RemitentesPage() {
                                               "Despedir",
                                             )
                                           }
-                                          className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 transition"
+                                          className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
                                         >
                                           <NoSymbolIcon className="h-4 w-4" />
                                         </button>
@@ -441,6 +480,16 @@ export default function RemitentesPage() {
                           </tbody>
                         </table>
                       </div>
+                      <PaginationBar
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalItems={remitentes?.length ?? 0}
+                        itemsPerPage={10}
+                        onNext={goToNext}
+                        onPrev={goToPrev}
+                        isFirstPage={isFirstPage}
+                        isLastPage={isLastPage}
+                      />
                     </div>
                   )}
                 </div>
