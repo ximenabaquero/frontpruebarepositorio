@@ -220,7 +220,7 @@ export default function ControlImagesPage() {
                   <div className="flex flex-col items-center justify-center py-20 rounded-2xl border-2 border-dashed border-gray-200 bg-white">
                     <PhotoIcon className="h-12 w-12 text-gray-300 mb-3" />
                     <p className="text-gray-500 font-medium">Aún no hay imágenes</p>
-                    <p className="text-sm text-gray-400 mt-1">Crea la primera haciendo clic en "Nueva imagen"</p>
+                    <p className="text-sm text-gray-400 mt-1">Crea la primera haciendo clic en &quot;Nueva imagen&quot;</p>
                   </div>
                 )}
 
