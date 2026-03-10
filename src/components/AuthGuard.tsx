@@ -32,7 +32,7 @@ export default function AuthGuard({ children }: { children: ReactNode }) {
 
   if (!authChecked) return null;
 
-  if (!user && !isLoggingOut) {
+  if (!user) {
     return (
       <div className="flex items-center justify-center h-screen bg-white">
         <div className="text-center">

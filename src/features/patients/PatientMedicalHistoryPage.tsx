@@ -34,6 +34,7 @@ export default function PatientMedicalHistoryPage({ patientId }: Props) {
                 onPatientsClick={() => router.push("/patients")}
                 onBackToRegisterClick={() => router.push("/register-patient")}
                 onRemitentesClick={() => router.push("/admin/remitentes")}
+                onInventoryClick={() => router.push("/inventory")}
                 active="patients"
               />
 

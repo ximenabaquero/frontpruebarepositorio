@@ -170,6 +170,7 @@ export default function ControlImagesPage() {
                 onPatientsClick={() => router.push("/patients")}
                 onStatsClick={() => router.push("/stats")}
                 onRemitentesClick={() => router.push("/admin/remitentes")}
+                onInventoryClick={() => router.push("/inventory")}
                 active="images"
               />
 

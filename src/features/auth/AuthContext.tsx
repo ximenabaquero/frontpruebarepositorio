@@ -80,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error("Logout error:", err);
     } finally {
       setUser(null);
-      //setIsLoggingOut(false);
+      setIsLoggingOut(false);
     }
   }
 

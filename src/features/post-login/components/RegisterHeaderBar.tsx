@@ -6,7 +6,8 @@ type RegisterHeaderBarProps = {
   onStatsClick?: () => void;
   onImagesClick?: () => void;
   onRemitentesClick?: () => void;
-  active?: "register" | "patients" | "stats" | "images" | "remitentes";
+  onInventoryClick?: () => void;
+  active?: "register" | "patients" | "stats" | "images" | "remitentes" | "inventory";
 };
 
 export default function RegisterHeaderBar({
@@ -15,6 +16,7 @@ export default function RegisterHeaderBar({
   onStatsClick,
   onImagesClick,
   onRemitentesClick,
+  onInventoryClick,
   active = "register",
 }: RegisterHeaderBarProps) {
   const { user } = useAuth();
@@ -79,6 +81,16 @@ export default function RegisterHeaderBar({
             className={active === "remitentes" ? activeBtn : inactiveBtn}
           >
             Remitentes
+          </button>
+        )}
+
+        {onInventoryClick && (
+          <button
+            type="button"
+            onClick={onInventoryClick}
+            className={active === "inventory" ? activeBtn : inactiveBtn}
+          >
+            Inventario
           </button>
         )}
       </div>
