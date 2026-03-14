@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import MainLayout from "@/layouts/MainLayout";
+import { useAuth } from "@/features/auth/AuthContext";
 import { useRouter } from "next/navigation";
 import RegisterHeaderBar from "../post-login/components/RegisterHeaderBar";
 import BackButton from "../../components/BackButton";
@@ -19,6 +20,8 @@ interface Props {
 
 export default function PatientMedicalHistoryPage({ patientId }: Props) {
   const router = useRouter();
+  const { user } = useAuth();
+  const isAdmin = user?.role === "ADMIN";
   const [showNewRecord, setShowNewRecord] = useState(false);
   const [recordsKey, setRecordsKey] = useState(0);
 
@@ -42,10 +45,9 @@ export default function PatientMedicalHistoryPage({ patientId }: Props) {
                 Historial clínico del paciente
               </h1>
               <p className="mt-2 text-sm text-gray-600">
-                Aquí se muestran todos los registros clínicos asociados al
-                paciente, incluyendo fechas, remitentes y estado de cada
-                valoración. Este historial permite mantener un seguimiento claro
-                y confiable de su evolución médica.
+                {isAdmin
+                  ? "Aquí se muestran todos los registros clínicos asociados al paciente, incluyendo fechas, remitentes y estado de cada valoración. Este historial permite mantener un seguimiento claro y confiable de su evolución médica."
+                  : "Aquí se muestran todos los registros clínicos asociados al paciente, incluyendo fechas y estado de cada valoración."}
               </p>
 
               <div className="mt-4 flex justify-between items-center mb-6">

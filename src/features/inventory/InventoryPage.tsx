@@ -16,21 +16,17 @@ import CategoryManager from "./components/CategoryManager";
 import ProductCatalog from "./components/ProductCatalog";
 import PurchaseForm from "./components/PurchaseForm";
 import PurchaseTable from "./components/PurchaseTable";
-import UsageForm from "./components/UsageForm";
-import UsageTable from "./components/UsageTable";
 
 import {
   getCategories,
   getPurchases,
   deletePurchase,
   getProducts,
-  getUsages,
 } from "./services/inventoryService";
 import type {
   InventoryCategory,
   InventoryProduct,
   InventoryPurchase,
-  InventoryUsage,
 } from "./types";
 
 const MONTHS = [
@@ -51,13 +47,10 @@ export default function InventoryPage() {
   const [categories, setCategories] = useState<InventoryCategory[]>([]);
   const [products, setProducts] = useState<InventoryProduct[]>([]);
   const [purchases, setPurchases] = useState<InventoryPurchase[]>([]);
-  const [usages, setUsages] = useState<InventoryUsage[]>([]);
   const [loadingPurchases, setLoadingPurchases] = useState(true);
-  const [loadingUsages, setLoadingUsages] = useState(true);
 
   const [showPurchaseForm, setShowPurchaseForm] = useState(false);
   const [editingPurchase, setEditingPurchase] = useState<InventoryPurchase | null>(null);
-  const [showUsageForm, setShowUsageForm] = useState(false);
   const [confirmDeletePurchase, setConfirmDeletePurchase] = useState<InventoryPurchase | null>(null);
 
   const years = Array.from({ length: 4 }, (_, i) => now.getFullYear() - i);
@@ -67,7 +60,7 @@ export default function InventoryPage() {
       const data = await getCategories();
       setCategories(data);
     } catch {
-      // silencioso si no es admin
+      // silencioso
     }
   }, []);
 
@@ -96,22 +89,9 @@ export default function InventoryPage() {
     }
   }, [month, year, filterCategory]);
 
-  const loadUsages = useCallback(async () => {
-    setLoadingUsages(true);
-    try {
-      const data = await getUsages({ month, year });
-      setUsages(data);
-    } catch {
-      setUsages([]);
-    } finally {
-      setLoadingUsages(false);
-    }
-  }, [month, year]);
-
   useEffect(() => { loadCategories(); }, [loadCategories]);
   useEffect(() => { loadProducts(); }, [loadProducts]);
   useEffect(() => { loadPurchases(); }, [loadPurchases]);
-  useEffect(() => { loadUsages(); }, [loadUsages]);
 
   function handleEdit(p: InventoryPurchase) {
     setEditingPurchase(p);
@@ -122,7 +102,7 @@ export default function InventoryPage() {
     if (!confirmDeletePurchase) return;
     try {
       await deletePurchase(confirmDeletePurchase.id);
-      toast.success("Compra eliminada");
+      toast.success(isAdmin ? "Compra eliminada" : "Gasto eliminado");
       loadPurchases();
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "Error al eliminar");
@@ -147,12 +127,12 @@ export default function InventoryPage() {
             />
 
             <h1 className="mt-3 text-2xl sm:text-3xl font-bold text-gray-900">
-              Inventario y gastos
+              {isAdmin ? "Inventario y gastos" : "Mis gastos"}
             </h1>
             <p className="mt-1 text-sm text-gray-500">
               {isAdmin
                 ? "Registra y controla los gastos de la clínica. Ve ingresos vs gastos y tu ganancia neta."
-                : "Registra las compras e insumos que adquiriste este periodo."}
+                : "Registra los insumos y materiales que usaste en la clínica este mes."}
             </p>
 
             {/* Filtros de periodo */}
@@ -210,19 +190,19 @@ export default function InventoryPage() {
               />
             )}
 
-            {/* Compras */}
+            {/* Compras / Gastos */}
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                Compras registradas
+                {isAdmin ? "Compras registradas" : "Mis gastos registrados"}
               </h2>
               <button
                 onClick={() => { setEditingPurchase(null); setShowPurchaseForm(true); }}
                 disabled={categories.length === 0}
-                title={categories.length === 0 ? "Crea una categoría primero" : ""}
+                title={categories.length === 0 ? "No hay categorías disponibles aún" : ""}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <PlusIcon className="w-4 h-4" />
-                Registrar compra
+                {isAdmin ? "Registrar compra" : "Registrar gasto"}
               </button>
             </div>
             <PurchaseTable
@@ -233,41 +213,13 @@ export default function InventoryPage() {
               onDelete={(p) => setConfirmDeletePurchase(p)}
               loading={loadingPurchases}
             />
-
-            {/* Consumos */}
-            <div className="flex items-center justify-between mt-10 mb-4">
-              <div>
-                <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                  Consumos registrados
-                </h2>
-                <p className="text-xs text-gray-400 mt-0.5">
-                  Insumos utilizados en procedimientos — descuenta del stock automáticamente
-                </p>
-              </div>
-              <button
-                onClick={() => setShowUsageForm(true)}
-                disabled={products.filter((p) => p.active && p.stock > 0).length === 0}
-                title={products.filter((p) => p.active && p.stock > 0).length === 0 ? "No hay productos con stock disponible" : ""}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <PlusIcon className="w-4 h-4" />
-                Registrar consumo
-              </button>
-            </div>
-            <UsageTable
-              usages={usages}
-              isAdmin={isAdmin}
-              currentUserId={user?.id ?? 0}
-              loading={loadingUsages}
-              onRefresh={loadUsages}
-            />
           </div>
         </div>
 
         <ConfirmModal
           isOpen={confirmDeletePurchase !== null}
-          title="Eliminar compra"
-          message={`¿Eliminar la compra "${confirmDeletePurchase?.item_name}"? Esta acción no se puede deshacer.`}
+          title={isAdmin ? "Eliminar compra" : "Eliminar gasto"}
+          message={`¿Eliminar "${confirmDeletePurchase?.item_name}"? Esta acción no se puede deshacer.`}
           confirmLabel="Eliminar"
           variant="danger"
           onConfirm={handleConfirmDeletePurchase}
@@ -280,14 +232,6 @@ export default function InventoryPage() {
             editing={editingPurchase}
             onClose={() => setShowPurchaseForm(false)}
             onSaved={loadPurchases}
-          />
-        )}
-
-        {showUsageForm && (
-          <UsageForm
-            products={products}
-            onClose={() => setShowUsageForm(false)}
-            onSaved={() => { loadUsages(); loadProducts(); }}
           />
         )}
       </MainLayout>
