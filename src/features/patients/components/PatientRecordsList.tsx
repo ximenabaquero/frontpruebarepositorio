@@ -10,6 +10,8 @@ import {
   UserIcon,
   CalendarDaysIcon,
 } from "@heroicons/react/24/outline";
+import PaginationBar from "@/components/PaginationBar";
+import { usePagination } from "@/utils/usePagination";
 
 interface MedicalEvaluation {
   id: number;
@@ -69,6 +71,16 @@ export default function PatientRecordsList({ patientId }: Props) {
   const router = useRouter();
   const [records, setRecords] = useState<MedicalEvaluation[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const {
+    currentPage,
+    totalPages,
+    paginatedItems: paginatedRecords,
+    goToNext,
+    goToPrev,
+    isFirstPage,
+    isLastPage,
+  } = usePagination(records, 10);
 
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
 
@@ -138,8 +150,9 @@ export default function PatientRecordsList({ patientId }: Props) {
   }
 
   return (
+    <div className="space-y-4">
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl">
-      {records.map((record, idx) => {
+      {paginatedRecords.map((record, idx) => {
         const cfg = STATUS_CONFIG[record.status];
         const Icon = cfg.icon;
         const dateStr =
@@ -215,6 +228,17 @@ export default function PatientRecordsList({ patientId }: Props) {
           </div>
         );
       })}
+    </div>
+    <PaginationBar
+      currentPage={currentPage}
+      totalPages={totalPages}
+      totalItems={records.length}
+      itemsPerPage={10}
+      onNext={goToNext}
+      onPrev={goToPrev}
+      isFirstPage={isFirstPage}
+      isLastPage={isLastPage}
+    />
     </div>
   );
 }
