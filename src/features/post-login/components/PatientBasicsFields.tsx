@@ -1,6 +1,26 @@
+import { useState } from "react";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import ValidatedInput from "./ValidatedInput";
 import PhoneInputField from "./PhoneInputField";
 import "react-phone-input-2/lib/style.css";
+
+const MONTHS = [
+  { value: "01", label: "Enero" },
+  { value: "02", label: "Febrero" },
+  { value: "03", label: "Marzo" },
+  { value: "04", label: "Abril" },
+  { value: "05", label: "Mayo" },
+  { value: "06", label: "Junio" },
+  { value: "07", label: "Julio" },
+  { value: "08", label: "Agosto" },
+  { value: "09", label: "Septiembre" },
+  { value: "10", label: "Octubre" },
+  { value: "11", label: "Noviembre" },
+  { value: "12", label: "Diciembre" },
+];
+
+const CURRENT_YEAR = new Date().getFullYear();
+const YEARS = Array.from({ length: CURRENT_YEAR - 1919 }, (_, i) => CURRENT_YEAR - i);
 
 const DOCUMENT_TYPES = [
   "Cédula de Ciudadanía",
@@ -51,6 +71,28 @@ export default function PatientBasicsFields({
   setBiologicalSex,
   onDirty,
 }: PatientBasicsFieldsProps) {
+  const [dobDay,   setDobDay]   = useState(() => dateOfBirth?.split("-")[2] ?? "");
+  const [dobMonth, setDobMonth] = useState(() => dateOfBirth?.split("-")[1] ?? "");
+  const [dobYear,  setDobYear]  = useState(() => dateOfBirth?.split("-")[0] ?? "");
+
+  const handleDobChange = (day: string, month: string, year: string) => {
+    if (day && month && year) {
+      setDateOfBirth(`${year}-${month}-${day}`);
+    } else {
+      setDateOfBirth("");
+    }
+    onDirty();
+  };
+
+  const daysInMonth = dobMonth && dobYear
+    ? new Date(Number(dobYear), Number(dobMonth), 0).getDate()
+    : 31;
+  const DAYS = Array.from({ length: daysInMonth }, (_, i) =>
+    String(i + 1).padStart(2, "0")
+  );
+
+  const selectCls = "w-full appearance-none rounded-xl border border-gray-200 bg-white px-3 py-2 pr-8 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-0 focus:border-gray-300";
+
   const calculatedAge = (() => {
     if (!dateOfBirth) return "";
     const today = new Date();
@@ -101,26 +143,60 @@ export default function PatientBasicsFields({
       {/* Fecha de nacimiento y Edad */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
         <div>
-          <label
-            htmlFor="date_of_birth"
-            className="block text-sm font-medium text-gray-700"
-          >
+          <label className="block text-sm font-medium text-gray-700">
             Fecha de nacimiento
           </label>
-          <input
-            id="date_of_birth"
-            type="date"
-            required
-            max={new Date().toISOString().split("T")[0]}
-            value={dateOfBirth}
-            onChange={(e) => {
-              setDateOfBirth(e.target.value);
-              onDirty();
-            }}
-            className="mt-1 w-full rounded-xl border border-gray-200 bg-white 
-                       px-3 py-2 text-sm text-gray-900 shadow-sm 
-                       focus:outline-none focus:ring-0 focus:border-gray-300"
-          />
+          <div className="mt-1 grid grid-cols-3 gap-2">
+            {/* Día */}
+            <div className="relative">
+              <select
+                value={dobDay}
+                onChange={(e) => {
+                  setDobDay(e.target.value);
+                  handleDobChange(e.target.value, dobMonth, dobYear);
+                }}
+                className={selectCls}
+              >
+                <option value="">Día</option>
+                {DAYS.map((d) => <option key={d} value={d}>{d}</option>)}
+              </select>
+              <ChevronDownIcon className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            </div>
+            {/* Mes */}
+            <div className="relative">
+              <select
+                value={dobMonth}
+                onChange={(e) => {
+                  setDobMonth(e.target.value);
+                  handleDobChange(dobDay, e.target.value, dobYear);
+                }}
+                className={selectCls}
+              >
+                <option value="">Mes</option>
+                {MONTHS.map((m) => (
+                  <option key={m.value} value={m.value}>{m.label}</option>
+                ))}
+              </select>
+              <ChevronDownIcon className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            </div>
+            {/* Año */}
+            <div className="relative">
+              <select
+                value={dobYear}
+                onChange={(e) => {
+                  setDobYear(e.target.value);
+                  handleDobChange(dobDay, dobMonth, e.target.value);
+                }}
+                className={selectCls}
+              >
+                <option value="">Año</option>
+                {YEARS.map((y) => (
+                  <option key={y} value={String(y)}>{y}</option>
+                ))}
+              </select>
+              <ChevronDownIcon className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            </div>
+          </div>
         </div>
 
         <div>
