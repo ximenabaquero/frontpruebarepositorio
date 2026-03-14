@@ -31,9 +31,6 @@ type PatientBasicsFieldsProps = {
   biologicalSex: string;
   setBiologicalSex: (v: string) => void;
 
-  dataConsent: boolean;
-  setDataConsent: (v: boolean) => void;
-
   onDirty: () => void;
 };
 
@@ -52,8 +49,6 @@ export default function PatientBasicsFields({
   setCellphone,
   biologicalSex,
   setBiologicalSex,
-  dataConsent,
-  setDataConsent,
   onDirty,
 }: PatientBasicsFieldsProps) {
   const calculatedAge = (() => {
@@ -271,43 +266,6 @@ export default function PatientBasicsFields({
         />
       </div>
 
-      {/* Consentimiento tratamiento de datos */}
-      <div className="mt-5">
-        <label
-          className={`flex items-start gap-3 cursor-pointer rounded-xl border p-4 transition-colors
-            ${dataConsent ? "border-emerald-400 bg-emerald-50" : "border-gray-200 bg-white hover:bg-gray-50"}`}
-        >
-          <input
-            type="checkbox"
-            id="data_consent"
-            checked={dataConsent}
-            onChange={(e) => {
-              setDataConsent(e.target.checked);
-              onDirty();
-            }}
-            className="mt-0.5 h-4 w-4 shrink-0 accent-emerald-600 cursor-pointer"
-          />
-          <span className="text-sm text-gray-700 leading-snug">
-            El/la paciente autoriza el tratamiento de sus datos personales
-            conforme a la{" "}
-            <span className="font-semibold text-gray-900">
-              Ley 1581 de 2012
-            </span>{" "}
-            y el{" "}
-            <span className="font-semibold text-gray-900">
-              Decreto 1377 de 2013
-            </span>{" "}
-            (Protección de Datos Personales — Colombia), y ha leído y aceptado
-            los términos y condiciones del servicio.{" "}
-            <span className="text-red-500 font-semibold">*</span>
-          </span>
-        </label>
-        {!dataConsent && (
-          <p className="text-[10px] uppercase tracking-wider text-red-400 mt-1 pl-1">
-            Requerido para continuar
-          </p>
-        )}
-      </div>
     </>
   );
 }

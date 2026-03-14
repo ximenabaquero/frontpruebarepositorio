@@ -82,6 +82,7 @@ export default function PatientRecordDetail({
   const [isChangingStatus, setIsChangingStatus] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [dataConsent, setDataConsent] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const sigCanvasRef = useRef<SignatureCanvas | null>(null);
 
@@ -126,12 +127,17 @@ export default function PatientRecordDetail({
   const closeConfirmModal = () => {
     setShowConfirmModal(false);
     setTermsAccepted(false);
+    setDataConsent(false);
     sigCanvasRef.current?.clear();
   };
 
   const handleConfirmar = async () => {
     if (!termsAccepted) {
       toast.error("Debes aceptar los términos y condiciones");
+      return;
+    }
+    if (!dataConsent) {
+      toast.error("Debes aceptar el tratamiento de datos personales");
       return;
     }
     if (!sigCanvasRef.current || sigCanvasRef.current.isEmpty()) {
@@ -757,16 +763,34 @@ export default function PatientRecordDetail({
                 </div>
               </div>
 
-              {/* Checkbox aceptar */}
+              {/* Checkbox aceptar términos */}
               <label className="flex items-start gap-3 cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={termsAccepted}
                   onChange={(e) => setTermsAccepted(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded border-gray-300 accent-emerald-600"
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 accent-emerald-600"
                 />
                 <span className="text-sm text-gray-700">
                   He leído y acepto los términos y condiciones anteriores.
+                </span>
+              </label>
+
+              {/* Checkbox tratamiento de datos */}
+              <label className="flex items-start gap-3 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={dataConsent}
+                  onChange={(e) => setDataConsent(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 accent-emerald-600"
+                />
+                <span className="text-sm text-gray-700">
+                  El/la paciente autoriza el tratamiento de sus datos personales
+                  conforme a la{" "}
+                  <span className="font-semibold text-gray-900">Ley 1581 de 2012</span>{" "}
+                  y el{" "}
+                  <span className="font-semibold text-gray-900">Decreto 1377 de 2013</span>{" "}
+                  (Protección de Datos Personales — Colombia).
                 </span>
               </label>
 

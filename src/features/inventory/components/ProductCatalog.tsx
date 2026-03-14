@@ -7,6 +7,8 @@ import {
   TrashIcon,
   CubeIcon,
 } from "@heroicons/react/24/outline";
+import toast from "react-hot-toast";
+import ConfirmModal from "@/components/ConfirmModal";
 import type { InventoryCategory, InventoryProduct } from "../types";
 import { deleteProduct } from "../services/inventoryService";
 import ProductForm from "./ProductForm";
@@ -49,6 +51,7 @@ export default function ProductCatalog({ products, categories, onRefresh }: Prop
   const [editing, setEditing] = useState<InventoryProduct | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [filterActive, setFilterActive] = useState<"all" | "active" | "inactive">("active");
+  const [confirmTarget, setConfirmTarget] = useState<InventoryProduct | null>(null);
 
   const visible = products.filter((p) => {
     if (filterActive === "active") return p.active;
@@ -56,16 +59,18 @@ export default function ProductCatalog({ products, categories, onRefresh }: Prop
     return true;
   });
 
-  async function handleDelete(product: InventoryProduct) {
-    if (!confirm(`¿Eliminar "${product.name}"? Solo es posible si tiene 0 unidades en stock.`)) return;
-    setDeletingId(product.id);
+  async function handleConfirmDelete() {
+    if (!confirmTarget) return;
+    setDeletingId(confirmTarget.id);
     try {
-      await deleteProduct(product.id);
+      await deleteProduct(confirmTarget.id);
+      toast.success(`Producto "${confirmTarget.name}" eliminado`);
       onRefresh();
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : "Error al eliminar");
+      toast.error(err instanceof Error ? err.message : "Error al eliminar");
     } finally {
       setDeletingId(null);
+      setConfirmTarget(null);
     }
   }
 
@@ -172,7 +177,7 @@ export default function ProductCatalog({ products, categories, onRefresh }: Prop
                         <PencilSquareIcon className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleDelete(product)}
+                        onClick={() => setConfirmTarget(product)}
                         disabled={deletingId === product.id}
                         className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-40"
                         title="Eliminar (solo si stock = 0)"
@@ -187,6 +192,16 @@ export default function ProductCatalog({ products, categories, onRefresh }: Prop
           </table>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={confirmTarget !== null}
+        title="Eliminar producto"
+        message={`¿Eliminar "${confirmTarget?.name}"? Solo es posible si tiene 0 unidades en stock.`}
+        confirmLabel="Eliminar"
+        variant="danger"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmTarget(null)}
+      />
 
       {showForm && (
         <ProductForm

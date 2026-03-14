@@ -51,8 +51,6 @@ export default function RegisterPatientPage() {
   const [cedula, setCedula] = useState("");
   const [cellphone, setCellphone] = useState("");
   const [biologicalSex, setBiologicalSex] = useState("");
-  const [dataConsent, setDataConsent] = useState(false);
-
   // Evaluación clínica
   const [weightKg, setWeightKg] = useState("");
   const [heightM, setHeightM] = useState("");
@@ -97,8 +95,7 @@ export default function RegisterPatientPage() {
       documentType.trim() !== "" &&
       cedula.trim() !== "" &&
       cellphone.trim() !== "" &&
-      biologicalSex.trim() !== "" &&
-      dataConsent === true;
+      biologicalSex.trim() !== "";
 
     const w = parseFloat(weightKg) > 0;
     const h = parseFloat(heightM) > 0;
@@ -114,7 +111,6 @@ export default function RegisterPatientPage() {
     cedula,
     cellphone,
     biologicalSex,
-    dataConsent,
     weightKg,
     heightM,
     medicalBackground,
@@ -207,7 +203,6 @@ export default function RegisterPatientPage() {
           cedula,
           cellphone,
           biological_sex: biologicalSex,
-          data_treatment_consent: dataConsent,
         }),
       });
 
@@ -411,8 +406,6 @@ export default function RegisterPatientPage() {
                           setCellphone={setCellphone}
                           biologicalSex={biologicalSex}
                           setBiologicalSex={setBiologicalSex}
-                          dataConsent={dataConsent}
-                          setDataConsent={setDataConsent}
                           onDirty={handleDirty}
                         />
                       </RegisterCard>

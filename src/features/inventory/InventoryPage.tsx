@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { PlusIcon, FunnelIcon } from "@heroicons/react/24/outline";
+import toast from "react-hot-toast";
+import ConfirmModal from "@/components/ConfirmModal";
 
 import MainLayout from "@/layouts/MainLayout";
 import AuthGuard from "@/components/AuthGuard";
@@ -11,17 +13,24 @@ import { useAuth } from "@/features/auth/AuthContext";
 
 import InventorySummaryCards from "./components/InventorySummaryCards";
 import CategoryManager from "./components/CategoryManager";
+import ProductCatalog from "./components/ProductCatalog";
 import PurchaseForm from "./components/PurchaseForm";
 import PurchaseTable from "./components/PurchaseTable";
+import UsageForm from "./components/UsageForm";
+import UsageTable from "./components/UsageTable";
 
 import {
   getCategories,
   getPurchases,
   deletePurchase,
+  getProducts,
+  getUsages,
 } from "./services/inventoryService";
 import type {
   InventoryCategory,
+  InventoryProduct,
   InventoryPurchase,
+  InventoryUsage,
 } from "./types";
 
 const MONTHS = [
@@ -40,11 +49,16 @@ export default function InventoryPage() {
   const [filterCategory, setFilterCategory] = useState<number | "">("");
 
   const [categories, setCategories] = useState<InventoryCategory[]>([]);
+  const [products, setProducts] = useState<InventoryProduct[]>([]);
   const [purchases, setPurchases] = useState<InventoryPurchase[]>([]);
+  const [usages, setUsages] = useState<InventoryUsage[]>([]);
   const [loadingPurchases, setLoadingPurchases] = useState(true);
+  const [loadingUsages, setLoadingUsages] = useState(true);
 
   const [showPurchaseForm, setShowPurchaseForm] = useState(false);
   const [editingPurchase, setEditingPurchase] = useState<InventoryPurchase | null>(null);
+  const [showUsageForm, setShowUsageForm] = useState(false);
+  const [confirmDeletePurchase, setConfirmDeletePurchase] = useState<InventoryPurchase | null>(null);
 
   const years = Array.from({ length: 4 }, (_, i) => now.getFullYear() - i);
 
@@ -54,6 +68,15 @@ export default function InventoryPage() {
       setCategories(data);
     } catch {
       // silencioso si no es admin
+    }
+  }, []);
+
+  const loadProducts = useCallback(async () => {
+    try {
+      const data = await getProducts();
+      setProducts(data);
+    } catch {
+      setProducts([]);
     }
   }, []);
 
@@ -73,21 +96,38 @@ export default function InventoryPage() {
     }
   }, [month, year, filterCategory]);
 
+  const loadUsages = useCallback(async () => {
+    setLoadingUsages(true);
+    try {
+      const data = await getUsages({ month, year });
+      setUsages(data);
+    } catch {
+      setUsages([]);
+    } finally {
+      setLoadingUsages(false);
+    }
+  }, [month, year]);
+
   useEffect(() => { loadCategories(); }, [loadCategories]);
+  useEffect(() => { loadProducts(); }, [loadProducts]);
   useEffect(() => { loadPurchases(); }, [loadPurchases]);
+  useEffect(() => { loadUsages(); }, [loadUsages]);
 
   function handleEdit(p: InventoryPurchase) {
     setEditingPurchase(p);
     setShowPurchaseForm(true);
   }
 
-  async function handleDelete(p: InventoryPurchase) {
-    if (!confirm(`¿Eliminar "${p.item_name}"?`)) return;
+  async function handleConfirmDeletePurchase() {
+    if (!confirmDeletePurchase) return;
     try {
-      await deletePurchase(p.id);
+      await deletePurchase(confirmDeletePurchase.id);
+      toast.success("Compra eliminada");
       loadPurchases();
     } catch (e: unknown) {
-      alert(e instanceof Error ? e.message : "Error al eliminar");
+      toast.error(e instanceof Error ? e.message : "Error al eliminar");
+    } finally {
+      setConfirmDeletePurchase(null);
     }
   }
 
@@ -161,6 +201,15 @@ export default function InventoryPage() {
               <CategoryManager categories={categories} onRefresh={loadCategories} />
             )}
 
+            {/* Catálogo de productos (solo admin) */}
+            {isAdmin && (
+              <ProductCatalog
+                products={products}
+                categories={categories}
+                onRefresh={loadProducts}
+              />
+            )}
+
             {/* Compras */}
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
@@ -181,11 +230,49 @@ export default function InventoryPage() {
               isAdmin={isAdmin}
               currentUserId={user?.id ?? 0}
               onEdit={handleEdit}
-              onDelete={handleDelete}
+              onDelete={(p) => setConfirmDeletePurchase(p)}
               loading={loadingPurchases}
+            />
+
+            {/* Consumos */}
+            <div className="flex items-center justify-between mt-10 mb-4">
+              <div>
+                <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                  Consumos registrados
+                </h2>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  Insumos utilizados en procedimientos — descuenta del stock automáticamente
+                </p>
+              </div>
+              <button
+                onClick={() => setShowUsageForm(true)}
+                disabled={products.filter((p) => p.active && p.stock > 0).length === 0}
+                title={products.filter((p) => p.active && p.stock > 0).length === 0 ? "No hay productos con stock disponible" : ""}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <PlusIcon className="w-4 h-4" />
+                Registrar consumo
+              </button>
+            </div>
+            <UsageTable
+              usages={usages}
+              isAdmin={isAdmin}
+              currentUserId={user?.id ?? 0}
+              loading={loadingUsages}
+              onRefresh={loadUsages}
             />
           </div>
         </div>
+
+        <ConfirmModal
+          isOpen={confirmDeletePurchase !== null}
+          title="Eliminar compra"
+          message={`¿Eliminar la compra "${confirmDeletePurchase?.item_name}"? Esta acción no se puede deshacer.`}
+          confirmLabel="Eliminar"
+          variant="danger"
+          onConfirm={handleConfirmDeletePurchase}
+          onCancel={() => setConfirmDeletePurchase(null)}
+        />
 
         {showPurchaseForm && (
           <PurchaseForm
@@ -193,6 +280,14 @@ export default function InventoryPage() {
             editing={editingPurchase}
             onClose={() => setShowPurchaseForm(false)}
             onSaved={loadPurchases}
+          />
+        )}
+
+        {showUsageForm && (
+          <UsageForm
+            products={products}
+            onClose={() => setShowUsageForm(false)}
+            onSaved={() => { loadUsages(); loadProducts(); }}
           />
         )}
       </MainLayout>

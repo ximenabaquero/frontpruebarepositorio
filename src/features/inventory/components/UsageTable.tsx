@@ -1,6 +1,8 @@
 "use client";
 
 import { TrashIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
+import toast from "react-hot-toast";
+import ConfirmModal from "@/components/ConfirmModal";
 import type { InventoryUsage } from "../types";
 import { deleteUsage } from "../services/inventoryService";
 import { useState } from "react";
@@ -22,17 +24,20 @@ function formatDate(dateStr: string) {
 
 export default function UsageTable({ usages, isAdmin, currentUserId, loading, onRefresh }: Props) {
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [confirmTarget, setConfirmTarget] = useState<InventoryUsage | null>(null);
 
-  async function handleDelete(usage: InventoryUsage) {
-    if (!confirm(`¿Eliminar consumo de "${usage.product?.name ?? "producto"}"? El stock será revertido.`)) return;
-    setDeletingId(usage.id);
+  async function handleConfirmDelete() {
+    if (!confirmTarget) return;
+    setDeletingId(confirmTarget.id);
     try {
-      await deleteUsage(usage.id);
+      await deleteUsage(confirmTarget.id);
+      toast.success("Consumo eliminado y stock revertido");
       onRefresh();
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : "Error al eliminar");
+      toast.error(err instanceof Error ? err.message : "Error al eliminar");
     } finally {
       setDeletingId(null);
+      setConfirmTarget(null);
     }
   }
 
@@ -55,6 +60,15 @@ export default function UsageTable({ usages, isAdmin, currentUserId, loading, on
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+      <ConfirmModal
+        isOpen={confirmTarget !== null}
+        title="Eliminar consumo"
+        message={`¿Eliminar consumo de "${confirmTarget?.product?.name ?? "producto"}"? El stock será revertido automáticamente.`}
+        confirmLabel="Eliminar"
+        variant="danger"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmTarget(null)}
+      />
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -118,7 +132,7 @@ export default function UsageTable({ usages, isAdmin, currentUserId, loading, on
                     <div className="flex justify-end">
                       {canDelete && (
                         <button
-                          onClick={() => handleDelete(usage)}
+                          onClick={() => setConfirmTarget(usage)}
                           disabled={deletingId === usage.id}
                           className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-40"
                           title="Eliminar consumo (revierte stock)"
