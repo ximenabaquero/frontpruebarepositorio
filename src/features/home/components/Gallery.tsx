@@ -6,7 +6,9 @@ import Image from "next/image";
 import { Star, CheckCircle, Target, Camera } from 'lucide-react';
 
 const fetcher = (url: string) =>
-  fetch(url, { credentials: "include" }).then((res) => res.json());
+  fetch(url, { credentials: "include" })
+    .then((res) => res.json())
+    .then((json) => json.data || []);
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
 
@@ -48,7 +50,7 @@ export default function Gallery() {
   const [visible, setVisible] = useState<boolean[]>([]);
 
   useEffect(() => {
-    if (images) {
+    if (images && Array.isArray(images)) {
       setVisible(images.map(() => false));
     }
   }, [images]);

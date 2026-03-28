@@ -36,7 +36,8 @@ export async function getCategories(): Promise<InventoryCategory[]> {
     headers: readHeaders(),
   });
   if (!res.ok) throw new Error("Error al cargar categorías");
-  return res.json();
+  const json = await res.json();
+  return json.data || [];
 }
 
 export async function createCategory(
@@ -49,7 +50,8 @@ export async function createCategory(
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error("Error al crear categoría");
-  return res.json();
+  const json = await res.json();
+  return json.data;
 }
 
 export async function updateCategory(
@@ -63,7 +65,8 @@ export async function updateCategory(
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error("Error al actualizar categoría");
-  return res.json();
+  const json = await res.json();
+  return json.data;
 }
 
 export async function deleteCategory(id: number): Promise<void> {
@@ -94,7 +97,8 @@ export async function getPurchases(params?: {
     headers: readHeaders(),
   });
   if (!res.ok) throw new Error("Error al cargar compras");
-  return res.json();
+  const json = await res.json();
+  return json.data || [];
 }
 
 export async function createPurchase(
@@ -107,7 +111,8 @@ export async function createPurchase(
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error("Error al registrar compra");
-  return res.json();
+  const json = await res.json();
+  return json.data;
 }
 
 export async function updatePurchase(
@@ -121,7 +126,8 @@ export async function updatePurchase(
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error("Error al actualizar compra");
-  return res.json();
+  const json = await res.json();
+  return json.data;
 }
 
 export async function deletePurchase(id: number): Promise<void> {
@@ -143,7 +149,8 @@ export async function getInventorySummary(
     headers: readHeaders(),
   });
   if (!res.ok) throw new Error("Error al cargar resumen");
-  return res.json();
+  const json = await res.json();
+  return json.data || {};
 }
 
 // ── Productos (catálogo) ──────────────────────────────────────
@@ -153,7 +160,8 @@ export async function getProducts(): Promise<InventoryProduct[]> {
     headers: readHeaders(),
   });
   if (!res.ok) throw new Error("Error al cargar productos");
-  return res.json();
+  const json = await res.json();
+  return json.data || [];
 }
 
 export async function createProduct(
@@ -169,7 +177,8 @@ export async function createProduct(
     const err = await res.json().catch(() => ({}));
     throw new Error(err.message || "Error al crear producto");
   }
-  return res.json();
+  const json = await res.json();
+  return json.data;
 }
 
 export async function updateProduct(
@@ -186,7 +195,8 @@ export async function updateProduct(
     const err = await res.json().catch(() => ({}));
     throw new Error(err.message || "Error al actualizar producto");
   }
-  return res.json();
+  const json = await res.json();
+  return json.data;
 }
 
 export async function deleteProduct(id: number): Promise<void> {
@@ -217,7 +227,8 @@ export async function getUsages(params?: {
     headers: readHeaders(),
   });
   if (!res.ok) throw new Error("Error al cargar consumos");
-  return res.json();
+  const json = await res.json();
+  return json.data || [];
 }
 
 export async function createUsage(
@@ -233,7 +244,8 @@ export async function createUsage(
     const err = await res.json().catch(() => ({}));
     throw new Error(err.message || "Error al registrar consumo");
   }
-  return res.json();
+  const json = await res.json();
+  return json.data;
 }
 
 export async function deleteUsage(id: number): Promise<void> {

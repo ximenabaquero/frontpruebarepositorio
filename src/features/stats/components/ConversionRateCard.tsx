@@ -7,7 +7,9 @@ const fetcher = (url: string) =>
   fetch(url, {
     credentials: "include",
     headers: { Accept: "application/json" },
-  }).then((res) => res.json());
+  })
+    .then((res) => res.json())
+    .then((json) => json.data || {});
 
 function describeArc(
   cx: number,

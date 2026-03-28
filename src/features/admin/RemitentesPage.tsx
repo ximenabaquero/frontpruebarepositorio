@@ -44,7 +44,9 @@ const fetcher = (url: string) => {
       Accept: "application/json",
       "X-XSRF-TOKEN": token,
     },
-  }).then((r) => r.json());
+  })
+    .then((r) => r.json())
+    .then((json) => json.data || []);
 };
 
 const STATUS_CONFIG = {
@@ -243,9 +245,9 @@ export default function RemitentesPage() {
     goToPrev,
     isFirstPage,
     isLastPage,
-  } = usePagination(remitentes ?? [], 10);
+  } = usePagination(Array.isArray(remitentes) ? remitentes : [], 10);
 
-  const stats = (remitentes ?? []).reduce(
+  const stats = (Array.isArray(remitentes) ? remitentes : []).reduce(
     (acc, r) => {
       acc[r.status]++;
       return acc;

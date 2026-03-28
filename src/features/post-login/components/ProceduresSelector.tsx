@@ -11,10 +11,6 @@ type ProceduresSelectorProps = {
   procedureNotes: string;
   setProcedureNotes: React.Dispatch<React.SetStateAction<string>>;
   clearSubmitError: () => void;
-  procedurePrices: Record<string, string>;
-  handlePriceChange: (
-    itemName: string,
-  ) => (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
 export default function ProceduresSelector({
@@ -23,13 +19,29 @@ export default function ProceduresSelector({
   procedureNotes,
   setProcedureNotes,
   clearSubmitError,
-  handlePriceChange,
 }: ProceduresSelectorProps) {
   const isSelected = (label: string) =>
     procedureItems.some((item) => item.item_name === label);
 
   const getPrice = (label: string) =>
     procedureItems.find((item) => item.item_name === label)?.price ?? "";
+
+  const handlePriceChange = (itemName: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^\d]/g, "");
+    if (!value) {
+      setProcedureItems((prev) =>
+        prev.map((item) => item.item_name === itemName ? { ...item, price: "" } : item),
+      );
+      return;
+    }
+    const numeric = Number(value);
+    if (numeric < 0) return;
+    setProcedureItems((prev) =>
+      prev.map((item) =>
+        item.item_name === itemName ? { ...item, price: numeric.toLocaleString("es-CO") } : item,
+      ),
+    );
+  };
 
   const toggleItem = (label: string) => {
     clearSubmitError();
@@ -54,11 +66,7 @@ export default function ProceduresSelector({
   const handleFajaChange = (value: string) => {
     setProcedureNotes((prev) => {
       const clean = prev.replace(/Faja talla:.*(\n\n)?/, "");
-
-      if (!clean) {
-        return `Faja talla: ${value}`;
-      }
-
+      if (!clean) return `Faja talla: ${value}`;
       return `Faja talla: ${value}\n\n${clean}`;
     });
   };
@@ -71,13 +79,8 @@ export default function ProceduresSelector({
 
     setProcedureNotes((prev) => {
       const clean = prev.replace(/Pierna:.*(\n\n)?/, "");
-
       if (!note) return clean;
-
-      if (!clean) {
-        return note;
-      }
-
+      if (!clean) return note;
       return `${note}\n\n${clean}`;
     });
   };
@@ -86,10 +89,7 @@ export default function ProceduresSelector({
     return groupProcedureIds.reduce((count, procedureId) => {
       const procedure = PROCEDURES.find((p) => p.id === procedureId);
       if (!procedure) return count;
-
-      return procedureItems.some((item) => item.item_name === procedure.label)
-        ? count + 1
-        : count;
+      return procedureItems.some((item) => item.item_name === procedure.label) ? count + 1 : count;
     }, 0);
   };
 
@@ -104,19 +104,11 @@ export default function ProceduresSelector({
           >
             <summary className="cursor-pointer list-none px-4 py-3 bg-emerald-50/50 hover:bg-emerald-50 rounded-t-2xl transition-colors">
               <div className="flex items-center justify-between">
-                {/* Nombre del grupo */}
                 <span className="text-sm font-semibold text-emerald-900">
                   {group.label}
                 </span>
-
-                {/* Badge contador en esquina derecha */}
                 {getGroupCount(group.procedureIds) > 0 && (
-                  <span
-                    className="flex items-center justify-center 
-                      min-w-[24px] h-6 px-2
-                      rounded-full bg-emerald-600 
-                      text-white text-xs font-bold shadow-sm"
-                  >
+                  <span className="flex items-center justify-center min-w-[24px] h-6 px-2 rounded-full bg-emerald-600 text-white text-xs font-bold shadow-sm">
                     {getGroupCount(group.procedureIds)}
                   </span>
                 )}
@@ -124,7 +116,6 @@ export default function ProceduresSelector({
             </summary>
 
             <div className="px-4 pb-4">
-              {/* Encabezado de columnas */}
               <div className="hidden sm:grid sm:grid-cols-[28px_1fr_260px_220px] gap-3 border-y border-gray-100 py-2 text-xs font-semibold text-gray-500">
                 <div />
                 <div>Procedimiento</div>
@@ -134,31 +125,20 @@ export default function ProceduresSelector({
 
               <div className="divide-y divide-gray-100">
                 {group.procedureIds.map((procedureId) => {
-                  const procedure = PROCEDURES.find(
-                    (p) => p.id === procedureId,
-                  );
+                  const procedure = PROCEDURES.find((p) => p.id === procedureId);
                   if (!procedure) return null;
 
                   const checked = isSelected(procedure.label);
                   const priceValue = getPrice(procedure.label);
-
                   const isFaja = procedure.id === "faja_postoperatoria";
                   const isPierna = procedure.id === "pierna";
 
-                  // detectar detalles seleccionados
                   const fajaDetalle = procedureNotes.includes("Faja talla:");
-                  const piernaInterna =
-                    procedureNotes.includes("Pierna: interna");
-                  const piernaExterna =
-                    procedureNotes.includes("Pierna: externa");
-                  const piernaAmbas =
-                    procedureNotes.includes("interna y externa");
-
-                  const piernaDetalle =
-                    piernaInterna || piernaExterna || piernaAmbas;
-
-                  const disablePrice =
-                    (isFaja && !fajaDetalle) || (isPierna && !piernaDetalle);
+                  const piernaInterna = procedureNotes.includes("Pierna: interna");
+                  const piernaExterna = procedureNotes.includes("Pierna: externa");
+                  const piernaAmbas = procedureNotes.includes("interna y externa");
+                  const piernaDetalle = piernaInterna || piernaExterna || piernaAmbas;
+                  const disablePrice = (isFaja && !fajaDetalle) || (isPierna && !piernaDetalle);
 
                   return (
                     <div
@@ -176,15 +156,11 @@ export default function ProceduresSelector({
                       </div>
 
                       {/* Nombre */}
-                      <label
-                        className={`text-sm font-medium ${
-                          checked ? "text-gray-900" : "text-gray-700"
-                        }`}
-                      >
+                      <label className={`text-sm font-medium ${checked ? "text-gray-900" : "text-gray-700"}`}>
                         {procedure.label}
                       </label>
 
-                      {/* DETALLES */}
+                      {/* Detalles */}
                       {checked ? (
                         <>
                           {isFaja ? (
@@ -200,27 +176,16 @@ export default function ProceduresSelector({
                                 <input
                                   type="checkbox"
                                   checked={piernaInterna || piernaAmbas}
-                                  onChange={(e) =>
-                                    handlePiernaChange(
-                                      e.target.checked,
-                                      piernaExterna,
-                                    )
-                                  }
+                                  onChange={(e) => handlePiernaChange(e.target.checked, piernaExterna)}
                                   className="h-4 w-4 rounded border-gray-300"
                                 />
                                 Interna
                               </label>
-
                               <label className="flex items-center gap-2 text-sm text-gray-700">
                                 <input
                                   type="checkbox"
                                   checked={piernaExterna || piernaAmbas}
-                                  onChange={(e) =>
-                                    handlePiernaChange(
-                                      piernaInterna,
-                                      e.target.checked,
-                                    )
-                                  }
+                                  onChange={(e) => handlePiernaChange(piernaInterna, e.target.checked)}
                                   className="h-4 w-4 rounded border-gray-300"
                                 />
                                 Externa
@@ -233,7 +198,8 @@ export default function ProceduresSelector({
                       ) : (
                         <div className="text-sm text-gray-400">—</div>
                       )}
-                      {/* PRECIO */}
+
+                      {/* Precio */}
                       {checked ? (
                         <input
                           type="text"

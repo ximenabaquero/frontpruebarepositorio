@@ -21,7 +21,9 @@ import {
 } from "@heroicons/react/24/outline";
 
 const fetcher = (url: string) =>
-  fetch(url, { credentials: "include" }).then((res) => res.json());
+  fetch(url, { credentials: "include" })
+    .then((res) => res.json())
+    .then((json) => json.data || []);
 
 export default function ControlImagesPage() {
   const router = useRouter();

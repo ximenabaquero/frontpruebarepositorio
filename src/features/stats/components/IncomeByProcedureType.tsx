@@ -3,7 +3,9 @@ import useSWR from "swr";
 import { endpoints } from "../services/StatsService";
 
 const fetcher = (url: string) =>
-  fetch(url, { credentials: "include", headers: { Accept: "application/json" } }).then((r) => r.json());
+  fetch(url, { credentials: "include", headers: { Accept: "application/json" } })
+    .then((r) => r.json())
+    .then((json) => json.data || []);
 
 export default function IncomeByProcedureType() {
   const { data, error, isLoading } = useSWR(endpoints.incomeByProcedure, fetcher);

@@ -82,6 +82,7 @@ export default function PatientRecordDetail({
   const [isChangingStatus, setIsChangingStatus] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [dataConsentAccepted, setDataConsentAccepted] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const sigCanvasRef = useRef<SignatureCanvas | null>(null);
 
@@ -126,12 +127,17 @@ export default function PatientRecordDetail({
   const closeConfirmModal = () => {
     setShowConfirmModal(false);
     setTermsAccepted(false);
+    setDataConsentAccepted(false);
     sigCanvasRef.current?.clear();
   };
 
   const handleConfirmar = async () => {
     if (!termsAccepted) {
       toast.error("Debes aceptar los términos y condiciones");
+      return;
+    }
+    if (!dataConsentAccepted) {
+      toast.error("Debes autorizar el tratamiento de datos personales");
       return;
     }
     if (!sigCanvasRef.current || sigCanvasRef.current.isEmpty()) {
@@ -757,7 +763,7 @@ export default function PatientRecordDetail({
                 </div>
               </div>
 
-              {/* Checkbox aceptar */}
+              {/* Checkbox aceptar términos */}
               <label className="flex items-start gap-3 cursor-pointer select-none">
                 <input
                   type="checkbox"
@@ -769,6 +775,34 @@ export default function PatientRecordDetail({
                   He leído y acepto los términos y condiciones anteriores.
                 </span>
               </label>
+
+              {/* Checkbox autorización de datos personales */}
+              <label className="flex items-start gap-3 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={dataConsentAccepted}
+                  onChange={(e) => setDataConsentAccepted(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-gray-300 accent-emerald-600"
+                />
+                <span className="text-sm text-gray-700">
+                  El/la paciente autoriza el tratamiento de sus datos personales
+                  conforme a la{" "}
+                  <span className="font-semibold text-gray-900">
+                    Ley 1581 de 2012
+                  </span>{" "}
+                  y el{" "}
+                  <span className="font-semibold text-gray-900">
+                    Decreto 1377 de 2013
+                  </span>{" "}
+                  (Protección de Datos Personales — Colombia), y ha leído y aceptado
+                  los términos y condiciones del servicio. <span className="text-red-500 font-semibold">*</span>
+                </span>
+              </label>
+              {!dataConsentAccepted && (
+                <p className="text-[10px] uppercase tracking-wider text-red-400 -mt-3 pl-7">
+                  Requerido para continuar
+                </p>
+              )}
 
               {/* Pad de firma */}
               <div>
