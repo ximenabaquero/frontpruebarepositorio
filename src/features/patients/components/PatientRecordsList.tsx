@@ -13,10 +13,11 @@ import {
 
 interface MedicalEvaluation {
   id: number;
-  created_at: string;
+  patient_id: number;
+  user_id: number;
   referrer_name: string;
   status: "CANCELADO" | "CONFIRMADO" | "EN_ESPERA";
-  procedures?: { procedure_date: string }[];
+  procedure_date: string | null;
 }
 
 interface Props {
@@ -82,7 +83,7 @@ export default function PatientRecordsList({ patientId }: Props) {
           ?.split("=")[1];
 
         const res = await fetch(
-          `${apiBaseUrl}/api/v1/medical-evaluation/patient/${patientId}`,
+          `${apiBaseUrl}/api/v1/patients/${patientId}/clinical-records`,
           {
             method: "GET",
             credentials: "include",
@@ -101,7 +102,7 @@ export default function PatientRecordsList({ patientId }: Props) {
         if (!res.ok) throw new Error("Error al cargar registros");
 
         const data = await res.json();
-        setRecords(data.data ?? []);
+        setRecords(data.data?.evaluations ?? []);
       } catch (error) {
         console.error("Error:", error);
       } finally {
@@ -142,8 +143,7 @@ export default function PatientRecordsList({ patientId }: Props) {
       {records.map((record, idx) => {
         const cfg = STATUS_CONFIG[record.status];
         const Icon = cfg.icon;
-        const dateStr =
-          record.procedures?.[0]?.procedure_date ?? record.created_at;
+        const dateStr = record.procedure_date || new Date().toISOString();
         const { day, month, year } = formatDate(dateStr);
 
         return (

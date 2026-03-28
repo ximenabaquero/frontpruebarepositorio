@@ -92,13 +92,16 @@ export default function PatientInfo({ patientId }: Props) {
   const [isSaving, setIsSaving] = useState(false);
   const [form, setForm] = useState<Partial<Patient>>({});
 
-  const { data, error, isLoading, mutate } = useSWR<Patient>(
-    patientId ? `${apiBaseUrl}/api/v1/patients/${patientId}` : null,
+  const { data, error, isLoading, mutate } = useSWR<any>(
+    patientId ? `${apiBaseUrl}/api/v1/patients/${patientId}/clinical-records` : null,
     fetcher,
   );
 
+  // Extraer datos del paciente de la Vista 1
+  const patient = data?.patient as Patient | undefined;
+
   const openEdit = () => {
-    if (data) setForm({ ...data });
+    if (patient) setForm({ ...patient });
     setShowEdit(true);
   };
 
@@ -153,20 +156,20 @@ export default function PatientInfo({ patientId }: Props) {
       </div>
     );
 
-  if (error || !data)
+  if (error || !patient)
     return (
       <div className="rounded-xl border border-red-100 bg-red-50 p-4 text-sm text-red-600">
         Error al cargar los datos del paciente.
       </div>
     );
 
-  const fullName = capitalize(`${data.first_name} ${data.last_name}`);
+  const fullName = capitalize(`${patient.first_name} ${patient.last_name}`);
 
   const infoItems = [
     {
       icon: <CalendarIcon className="h-5 w-5 text-emerald-600" />,
       label: "Nacimiento",
-      value: new Date(data.date_of_birth).toLocaleDateString("es-ES", {
+      value: new Date(patient.date_of_birth).toLocaleDateString("es-ES", {
         day: "2-digit",
         month: "short",
         year: "numeric",
@@ -175,12 +178,12 @@ export default function PatientInfo({ patientId }: Props) {
     {
       icon: <UserIcon className="h-5 w-5 text-emerald-600" />,
       label: "Sexo biológico",
-      value: data.biological_sex,
+      value: patient.biological_sex,
     },
     {
       icon: <PhoneIcon className="h-5 w-5 text-emerald-600" />,
       label: "Celular",
-      value: data.cellphone || "—",
+      value: patient.cellphone || "—",
     },
   ];
 
@@ -192,7 +195,7 @@ export default function PatientInfo({ patientId }: Props) {
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-[10px] uppercase tracking-widest text-emerald-600 font-bold mb-1">
-                Paciente · ID #{data.id}
+                Paciente · ID #{patient.id}
               </p>
               <h1 className="text-2xl font-bold text-gray-900">{fullName}</h1>
             </div>
@@ -223,9 +226,9 @@ export default function PatientInfo({ patientId }: Props) {
                 </p>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <p className="text-sm font-semibold text-gray-800 truncate">
-                    {data.cedula || "—"}
+                    {patient.cedula || "—"}
                   </p>
-                  <DocumentTypeBadge type={data.document_type} />
+                  <DocumentTypeBadge type={patient.document_type} />
                 </div>
               </div>
             </div>
