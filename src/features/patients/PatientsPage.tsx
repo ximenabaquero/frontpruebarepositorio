@@ -12,6 +12,7 @@ import { Eye } from "lucide-react";
 import AuthGuard from "@/components/AuthGuard";
 import PaginationBar from "@/components/PaginationBar";
 import { usePagination } from "@/utils/usePagination";
+import { useAuth } from "@/features/auth/AuthContext";
 
 type PatientRow = {
   id: number;
@@ -41,6 +42,8 @@ function safeString(value: unknown): string {
 
 export default function PatientsPage() {
   const router = useRouter();
+  const { user } = useAuth();
+  const isAdmin = user?.role === "ADMIN";
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -145,17 +148,17 @@ export default function PatientsPage() {
               />
 
               <h1 className="mt-3 text-2xl sm:text-3xl font-bold text-gray-900">
-                Pacientes
+                {isAdmin ? "Pacientes" : "Mis pacientes"}
               </h1>
               <p className="mt-2 text-sm text-gray-600">
-                Este listado corresponde al registro central de pacientes del
-                sistema clínico. La información se actualiza automáticamente y
-                refleja los datos más recientes disponibles.
+                {isAdmin
+                  ? "Este listado corresponde al registro central de pacientes del sistema clínico. La información se actualiza automáticamente y refleja los datos más recientes disponibles."
+                  : "Estos son los pacientes que has registrado en el sistema."}
               </p>
 
               <RegisterCard
                 title="Historial clínico"
-                subtitle="Pacientes registrados, ordenados por fecha de ingreso (más recientes primero)."
+                subtitle={isAdmin ? "Pacientes registrados, ordenados por fecha de ingreso (más recientes primero)." : "Tus pacientes registrados, ordenados por fecha de ingreso."}
               >
                 {error ? <FormAlert variant="error" message={error} /> : null}
 

@@ -1,5 +1,7 @@
 import ValidatedInput from "./ValidatedInput";
 import PhoneInputField from "./PhoneInputField";
+import SelectField from "./SelectField";
+import DateOfBirthPicker from "./DateOfBirthPicker";
 import "react-phone-input-2/lib/style.css";
 
 const DOCUMENT_TYPES = [
@@ -9,62 +11,31 @@ const DOCUMENT_TYPES = [
   "Tarjeta de Identidad",
 ];
 
-type PatientBasicsFieldsProps = {
+export type PatientBasicData = {
   firstName: string;
-  setFirstName: (v: string) => void;
-
   lastName: string;
-  setLastName: (v: string) => void;
-
-  documentType: string;
-  setDocumentType: (v: string) => void;
-
-  cedula: string;
-  setCedula: (v: string) => void;
-
   dateOfBirth: string;
-  setDateOfBirth: (v: string) => void;
-
+  documentType: string;
+  cedula: string;
   cellphone: string;
-  setCellphone: (v: string) => void;
-
   biologicalSex: string;
-  setBiologicalSex: (v: string) => void;
+};
 
-  dataConsent: boolean;
-  setDataConsent: (v: boolean) => void;
-
+type PatientBasicsFieldsProps = {
+  data: PatientBasicData;
+  onChange: (field: keyof PatientBasicData, value: string) => void;
   onDirty: () => void;
 };
 
 export default function PatientBasicsFields({
-  firstName,
-  setFirstName,
-  lastName,
-  setLastName,
-  documentType,
-  setDocumentType,
-  dateOfBirth,
-  setDateOfBirth,
-  cedula,
-  setCedula,
-  cellphone,
-  setCellphone,
-  biologicalSex,
-  setBiologicalSex,
-  dataConsent,
-  setDataConsent,
+  data,
+  onChange,
   onDirty,
 }: PatientBasicsFieldsProps) {
-  const calculatedAge = (() => {
-    if (!dateOfBirth) return "";
-    const today = new Date();
-    const birth = new Date(dateOfBirth);
-    let age = today.getFullYear() - birth.getFullYear();
-    const m = today.getMonth() - birth.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
-    return age >= 0 ? age : "";
-  })();
+  const set = (field: keyof PatientBasicData) => (value: string) => {
+    onChange(field, value);
+    onDirty();
+  };
 
   return (
     <>
@@ -80,11 +51,8 @@ export default function PatientBasicsFields({
           id="first_name"
           label="Nombre(s)"
           placeholder="Nombre(s) del paciente"
-          value={firstName}
-          onChange={(val) => {
-            setFirstName(val);
-            onDirty();
-          }}
+          value={data.firstName}
+          onChange={set("firstName")}
           required
           maxLength={100}
         />
@@ -93,127 +61,43 @@ export default function PatientBasicsFields({
           id="last_name"
           label="Apellido(s)"
           placeholder="Apellido(s) del paciente"
-          value={lastName}
-          onChange={(val) => {
-            setLastName(val);
-            onDirty();
-          }}
+          value={data.lastName}
+          onChange={set("lastName")}
           required
           maxLength={100}
         />
       </div>
 
       {/* Fecha de nacimiento y Edad */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-        <div>
-          <label
-            htmlFor="date_of_birth"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Fecha de nacimiento
-          </label>
-          <input
-            id="date_of_birth"
-            type="date"
-            required
-            max={new Date().toISOString().split("T")[0]}
-            value={dateOfBirth}
-            onChange={(e) => {
-              setDateOfBirth(e.target.value);
-              onDirty();
-            }}
-            className="mt-1 w-full rounded-xl border border-gray-200 bg-white 
-                       px-3 py-2 text-sm text-gray-900 shadow-sm 
-                       focus:outline-none focus:ring-0 focus:border-gray-300"
-          />
-        </div>
-
-        <div>
-          <label
-            htmlFor="calculated_age"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Edad
-          </label>
-          <input
-            id="calculated_age"
-            type="text"
-            value={calculatedAge !== "" ? `${calculatedAge} años` : ""}
-            readOnly
-            className={`mt-1 w-full rounded-xl border 
-              ${
-                calculatedAge !== "" &&
-                (calculatedAge < 14 || calculatedAge > 120)
-                  ? "border-red-300 bg-red-50"
-                  : "border-gray-200 bg-gray-50"
-              }
-              px-3 py-2 text-sm text-gray-900 shadow-sm`}
-          />
-          {calculatedAge !== "" &&
-            (calculatedAge < 14 || calculatedAge > 120) && (
-              <p className="text-[10px] uppercase font-semibold tracking-wider text-red-500 mt-1">
-                Rango permitido: 14 a 120 años.
-              </p>
-            )}
-        </div>
+      <div className="mt-4">
+        <DateOfBirthPicker
+          value={data.dateOfBirth}
+          onChange={set("dateOfBirth")}
+          onDirty={onDirty}
+        />
       </div>
 
       {/* Tipo de documento y Cédula */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-        <div>
-          <label
-            htmlFor="document_type"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Tipo de documento
-          </label>
-          <div className="relative">
-            <select
-              id="document_type"
-              required
-              value={documentType}
-              onChange={(e) => {
-                setDocumentType(e.target.value);
-                onDirty();
-              }}
-              className="mt-1 w-full appearance-none rounded-xl border border-gray-200 bg-white 
-                         px-3 py-2 text-sm text-gray-900 shadow-sm 
-                         focus:outline-none focus:ring-0 focus:border-gray-300"
-            >
-              <option value="">Seleccione un tipo</option>
-              {DOCUMENT_TYPES.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-gray-400">
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </div>
-          </div>
-        </div>
+        <SelectField
+          id="document_type"
+          label="Tipo de documento"
+          value={data.documentType}
+          onChange={set("documentType")}
+          required
+        >
+          <option value="">Seleccione un tipo</option>
+          {DOCUMENT_TYPES.map((type) => (
+            <option key={type} value={type}>{type}</option>
+          ))}
+        </SelectField>
 
         <ValidatedInput
           id="cedula"
           label="Número de documento"
           placeholder="Número de documento"
-          value={cedula}
-          onChange={(val) => {
-            setCedula(val);
-            onDirty();
-          }}
+          value={data.cedula}
+          onChange={set("cedula")}
           required
           maxLength={15}
         />
@@ -221,92 +105,24 @@ export default function PatientBasicsFields({
 
       {/* Celular y Sexo biológico */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-        <div>
-          <label
-            htmlFor="biological_sex"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Sexo biológico
-          </label>
-          <div className="relative">
-            <select
-              id="biological_sex"
-              required
-              value={biologicalSex}
-              onChange={(e) => {
-                setBiologicalSex(e.target.value);
-                onDirty();
-              }}
-              className="mt-1 w-full appearance-none rounded-xl border border-gray-200 bg-white 
-                          px-3 py-2 text-sm text-gray-900 shadow-sm 
-                          focus:outline-none focus:ring-0 focus:border-gray-300"
-            >
-              <option value="">Seleccione una opción</option>
-              <option value="Femenino">Femenino</option>
-              <option value="Masculino">Masculino</option>
-              <option value="Otro">Otro</option>
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-gray-400">
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </div>
-          </div>
-        </div>
+        <SelectField
+          id="biological_sex"
+          label="Sexo biológico"
+          value={data.biologicalSex}
+          onChange={set("biologicalSex")}
+          required
+        >
+          <option value="">Seleccione una opción</option>
+          <option value="Femenino">Femenino</option>
+          <option value="Masculino">Masculino</option>
+          <option value="Otro">Otro</option>
+        </SelectField>
 
         <PhoneInputField
-          value={cellphone}
-          onChange={setCellphone}
+          value={data.cellphone}
+          onChange={set("cellphone")}
           onDirty={onDirty}
         />
-      </div>
-
-      {/* Consentimiento tratamiento de datos */}
-      <div className="mt-5">
-        <label
-          className={`flex items-start gap-3 cursor-pointer rounded-xl border p-4 transition-colors
-            ${dataConsent ? "border-emerald-400 bg-emerald-50" : "border-gray-200 bg-white hover:bg-gray-50"}`}
-        >
-          <input
-            type="checkbox"
-            id="data_consent"
-            checked={dataConsent}
-            onChange={(e) => {
-              setDataConsent(e.target.checked);
-              onDirty();
-            }}
-            className="mt-0.5 h-4 w-4 shrink-0 accent-emerald-600 cursor-pointer"
-          />
-          <span className="text-sm text-gray-700 leading-snug">
-            El/la paciente autoriza el tratamiento de sus datos personales
-            conforme a la{" "}
-            <span className="font-semibold text-gray-900">
-              Ley 1581 de 2012
-            </span>{" "}
-            y el{" "}
-            <span className="font-semibold text-gray-900">
-              Decreto 1377 de 2013
-            </span>{" "}
-            (Protección de Datos Personales — Colombia), y ha leído y aceptado
-            los términos y condiciones del servicio.{" "}
-            <span className="text-red-500 font-semibold">*</span>
-          </span>
-        </label>
-        {!dataConsent && (
-          <p className="text-[10px] uppercase tracking-wider text-red-400 mt-1 pl-1">
-            Requerido para continuar
-          </p>
-        )}
       </div>
     </>
   );

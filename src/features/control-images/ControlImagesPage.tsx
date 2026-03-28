@@ -10,6 +10,7 @@ import MainLayout from "@/layouts/MainLayout";
 import RegisterHeaderBar from "../post-login/components/RegisterHeaderBar";
 import AuthGuard from "@/components/AuthGuard";
 import ConfirmModal from "@/components/ConfirmModal";
+import { useAuth } from "@/features/auth/AuthContext";
 import { endpoints } from "./services/ClinicalImagesService";
 import type { ClinicalImage } from "./types/ClinicalImage";
 import {
@@ -25,6 +26,8 @@ const fetcher = (url: string) =>
 
 export default function ControlImagesPage() {
   const router = useRouter();
+  const { user } = useAuth();
+  const isAdmin = user?.role === "ADMIN";
   const {
     data: images,
     error,
@@ -178,19 +181,21 @@ export default function ControlImagesPage() {
               <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                   <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                    Gestión de imágenes clínicas
+                    {isAdmin ? "Gestión de imágenes clínicas" : "Imágenes clínicas"}
                   </h1>
                   <p className="mt-1 text-sm text-gray-500">
                     Imágenes comparativas antes / después de los tratamientos.
                   </p>
                 </div>
-                <button
-                  onClick={() => { setEditingId(null); setShowModal(true); }}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition shadow-sm shrink-0"
-                >
-                  <PlusIcon className="h-4 w-4" />
-                  Nueva imagen
-                </button>
+                {isAdmin && (
+                  <button
+                    onClick={() => { setEditingId(null); setShowModal(true); }}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition shadow-sm shrink-0"
+                  >
+                    <PlusIcon className="h-4 w-4" />
+                    Nueva imagen
+                  </button>
+                )}
               </div>
 
               {/* Stats strip */}
@@ -220,7 +225,9 @@ export default function ControlImagesPage() {
                   <div className="flex flex-col items-center justify-center py-20 rounded-2xl border-2 border-dashed border-gray-200 bg-white">
                     <PhotoIcon className="h-12 w-12 text-gray-300 mb-3" />
                     <p className="text-gray-500 font-medium">Aún no hay imágenes</p>
-                    <p className="text-sm text-gray-400 mt-1">Crea la primera haciendo clic en &quot;Nueva imagen&quot;</p>
+                    {isAdmin && (
+                      <p className="text-sm text-gray-400 mt-1">Crea la primera haciendo clic en &quot;Nueva imagen&quot;</p>
+                    )}
                   </div>
                 )}
 
@@ -264,22 +271,24 @@ export default function ControlImagesPage() {
                               {image.description}
                             </p>
                           )}
-                          <div className="flex gap-2 mt-2">
-                            <button
-                              onClick={() => handleEdit(image)}
-                              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition"
-                            >
-                              <PencilSquareIcon className="h-3.5 w-3.5" />
-                              Editar
-                            </button>
-                            <button
-                              onClick={() => handleDelete(image.id)}
-                              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition"
-                            >
-                              <TrashIcon className="h-3.5 w-3.5" />
-                              Eliminar
-                            </button>
-                          </div>
+                          {isAdmin && (
+                            <div className="flex gap-2 mt-2">
+                              <button
+                                onClick={() => handleEdit(image)}
+                                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition"
+                              >
+                                <PencilSquareIcon className="h-3.5 w-3.5" />
+                                Editar
+                              </button>
+                              <button
+                                onClick={() => handleDelete(image.id)}
+                                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition"
+                              >
+                                <TrashIcon className="h-3.5 w-3.5" />
+                                Eliminar
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}

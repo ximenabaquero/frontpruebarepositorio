@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useEffect, useRef } from "react";
+import { ReactNode, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/features/auth/AuthContext";
 
@@ -15,28 +15,17 @@ export default function RoleGuard({
 }) {
   const router = useRouter();
   const { user, authChecked, isLoggingOut } = useAuth();
-  const alertShown = useRef(false);
-
-  const showAlertOnce = (msg: string) => {
-    if (!alertShown.current) {
-      alertShown.current = true;
-      alert(msg);
-    }
-  };
 
   useEffect(() => {
     if (!authChecked || isLoggingOut) return;
 
-    // No logueado
     if (!user) {
       router.replace("/");
       return;
     }
 
-    // Rol no permitido
     if (!allow.includes(user.role)) {
-      showAlertOnce("🚫 Solo personas autorizadas pueden acceder.");
-      router.replace("/dashboard");
+      router.replace("/register-patient");
     }
   }, [user, authChecked, isLoggingOut, allow, router]);
 

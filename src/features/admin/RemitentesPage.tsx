@@ -93,6 +93,7 @@ export default function RemitentesPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [form, setForm] = useState<FormData>(emptyForm);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [confirmModal, setConfirmModal] = useState<{
     message: string;
     variant: "danger" | "warning" | "default";
@@ -123,6 +124,7 @@ export default function RemitentesPage() {
     setShowModal(false);
     setEditingId(null);
     setForm(emptyForm);
+    setFieldErrors({});
   };
 
   const handleSave = async () => {
@@ -165,16 +167,16 @@ export default function RemitentesPage() {
       });
 
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(
-          (err as { message?: string }).message ??
-            Object.values(
-              (err as { errors?: Record<string, string[]> }).errors ?? {},
-            )
-              .flat()
-              .join(" ") ??
-            "Error al guardar",
-        );
+        const err = await res.json().catch(() => ({})) as { message?: string; errors?: Record<string, string[]> };
+        if (err.errors) {
+          const mapped: Record<string, string> = {};
+          for (const [field, msgs] of Object.entries(err.errors)) {
+            mapped[field] = msgs[0] ?? "";
+          }
+          setFieldErrors(mapped);
+        }
+        toast.error(err.message ?? "Revisa los campos del formulario");
+        return;
       }
 
       toast.success(editingId ? "Remitente actualizado" : "Remitente creado");
@@ -529,12 +531,14 @@ export default function RemitentesPage() {
                     <input
                       type="text"
                       value={form.first_name}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, first_name: e.target.value }))
-                      }
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none"
+                      onChange={(e) => {
+                        setForm((f) => ({ ...f, first_name: e.target.value }));
+                        setFieldErrors((prev) => ({ ...prev, first_name: "" }));
+                      }}
+                      className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none ${fieldErrors.first_name ? "border-red-400" : "border-gray-200"}`}
                       placeholder="Nombre"
                     />
+                    {fieldErrors.first_name && <p className="mt-1 text-xs text-red-500">{fieldErrors.first_name}</p>}
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
@@ -543,12 +547,14 @@ export default function RemitentesPage() {
                     <input
                       type="text"
                       value={form.last_name}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, last_name: e.target.value }))
-                      }
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none"
+                      onChange={(e) => {
+                        setForm((f) => ({ ...f, last_name: e.target.value }));
+                        setFieldErrors((prev) => ({ ...prev, last_name: "" }));
+                      }}
+                      className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none ${fieldErrors.last_name ? "border-red-400" : "border-gray-200"}`}
                       placeholder="Apellido"
                     />
+                    {fieldErrors.last_name && <p className="mt-1 text-xs text-red-500">{fieldErrors.last_name}</p>}
                   </div>
                 </div>
 
@@ -559,12 +565,14 @@ export default function RemitentesPage() {
                   <input
                     type="text"
                     value={form.name}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, name: e.target.value }))
-                    }
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none"
+                    onChange={(e) => {
+                      setForm((f) => ({ ...f, name: e.target.value }));
+                      setFieldErrors((prev) => ({ ...prev, name: "" }));
+                    }}
+                    className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none ${fieldErrors.name ? "border-red-400" : "border-gray-200"}`}
                     placeholder="usuario_unico"
                   />
+                  {fieldErrors.name && <p className="mt-1 text-xs text-red-500">{fieldErrors.name}</p>}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -575,12 +583,14 @@ export default function RemitentesPage() {
                     <input
                       type="email"
                       value={form.email}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, email: e.target.value }))
-                      }
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none"
+                      onChange={(e) => {
+                        setForm((f) => ({ ...f, email: e.target.value }));
+                        setFieldErrors((prev) => ({ ...prev, email: "" }));
+                      }}
+                      className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none ${fieldErrors.email ? "border-red-400" : "border-gray-200"}`}
                       placeholder="correo@ejemplo.com"
                     />
+                    {fieldErrors.email && <p className="mt-1 text-xs text-red-500">{fieldErrors.email}</p>}
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
@@ -589,12 +599,14 @@ export default function RemitentesPage() {
                     <input
                       type="text"
                       value={form.cellphone}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, cellphone: e.target.value }))
-                      }
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none"
+                      onChange={(e) => {
+                        setForm((f) => ({ ...f, cellphone: e.target.value }));
+                        setFieldErrors((prev) => ({ ...prev, cellphone: "" }));
+                      }}
+                      className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none ${fieldErrors.cellphone ? "border-red-400" : "border-gray-200"}`}
                       placeholder="3001234567"
                     />
+                    {fieldErrors.cellphone && <p className="mt-1 text-xs text-red-500">{fieldErrors.cellphone}</p>}
                   </div>
                 </div>
 
@@ -606,13 +618,15 @@ export default function RemitentesPage() {
                   <input
                     type="password"
                     value={form.password}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, password: e.target.value }))
-                    }
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none"
+                    onChange={(e) => {
+                      setForm((f) => ({ ...f, password: e.target.value }));
+                      setFieldErrors((prev) => ({ ...prev, password: "" }));
+                    }}
+                    className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none ${fieldErrors.password ? "border-red-400" : "border-gray-200"}`}
                     placeholder="Mínimo 6 caracteres"
                     minLength={6}
                   />
+                  {fieldErrors.password && <p className="mt-1 text-xs text-red-500">{fieldErrors.password}</p>}
                 </div>
               </div>
 

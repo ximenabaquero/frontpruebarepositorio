@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { PlusIcon, FunnelIcon } from "@heroicons/react/24/outline";
+import toast from "react-hot-toast";
+import ConfirmModal from "@/components/ConfirmModal";
 
 import MainLayout from "@/layouts/MainLayout";
 import AuthGuard from "@/components/AuthGuard";
@@ -11,6 +13,7 @@ import { useAuth } from "@/features/auth/AuthContext";
 
 import InventorySummaryCards from "./components/InventorySummaryCards";
 import CategoryManager from "./components/CategoryManager";
+import ProductCatalog from "./components/ProductCatalog";
 import PurchaseForm from "./components/PurchaseForm";
 import PurchaseTable from "./components/PurchaseTable";
 
@@ -18,9 +21,11 @@ import {
   getCategories,
   getPurchases,
   deletePurchase,
+  getProducts,
 } from "./services/inventoryService";
 import type {
   InventoryCategory,
+  InventoryProduct,
   InventoryPurchase,
 } from "./types";
 
@@ -40,11 +45,13 @@ export default function InventoryPage() {
   const [filterCategory, setFilterCategory] = useState<number | "">("");
 
   const [categories, setCategories] = useState<InventoryCategory[]>([]);
+  const [products, setProducts] = useState<InventoryProduct[]>([]);
   const [purchases, setPurchases] = useState<InventoryPurchase[]>([]);
   const [loadingPurchases, setLoadingPurchases] = useState(true);
 
   const [showPurchaseForm, setShowPurchaseForm] = useState(false);
   const [editingPurchase, setEditingPurchase] = useState<InventoryPurchase | null>(null);
+  const [confirmDeletePurchase, setConfirmDeletePurchase] = useState<InventoryPurchase | null>(null);
 
   const years = Array.from({ length: 4 }, (_, i) => now.getFullYear() - i);
 
@@ -53,7 +60,16 @@ export default function InventoryPage() {
       const data = await getCategories();
       setCategories(data);
     } catch {
-      // silencioso si no es admin
+      // silencioso
+    }
+  }, []);
+
+  const loadProducts = useCallback(async () => {
+    try {
+      const data = await getProducts();
+      setProducts(data);
+    } catch {
+      setProducts([]);
     }
   }, []);
 
@@ -74,6 +90,7 @@ export default function InventoryPage() {
   }, [month, year, filterCategory]);
 
   useEffect(() => { loadCategories(); }, [loadCategories]);
+  useEffect(() => { loadProducts(); }, [loadProducts]);
   useEffect(() => { loadPurchases(); }, [loadPurchases]);
 
   function handleEdit(p: InventoryPurchase) {
@@ -81,13 +98,16 @@ export default function InventoryPage() {
     setShowPurchaseForm(true);
   }
 
-  async function handleDelete(p: InventoryPurchase) {
-    if (!confirm(`¿Eliminar "${p.item_name}"?`)) return;
+  async function handleConfirmDeletePurchase() {
+    if (!confirmDeletePurchase) return;
     try {
-      await deletePurchase(p.id);
+      await deletePurchase(confirmDeletePurchase.id);
+      toast.success(isAdmin ? "Compra eliminada" : "Gasto eliminado");
       loadPurchases();
     } catch (e: unknown) {
-      alert(e instanceof Error ? e.message : "Error al eliminar");
+      toast.error(e instanceof Error ? e.message : "Error al eliminar");
+    } finally {
+      setConfirmDeletePurchase(null);
     }
   }
 
@@ -107,12 +127,12 @@ export default function InventoryPage() {
             />
 
             <h1 className="mt-3 text-2xl sm:text-3xl font-bold text-gray-900">
-              Inventario y gastos
+              {isAdmin ? "Inventario y gastos" : "Mis gastos"}
             </h1>
             <p className="mt-1 text-sm text-gray-500">
               {isAdmin
                 ? "Registra y controla los gastos de la clínica. Ve ingresos vs gastos y tu ganancia neta."
-                : "Registra las compras e insumos que adquiriste este periodo."}
+                : "Registra los insumos y materiales que usaste en la clínica este mes."}
             </p>
 
             {/* Filtros de periodo */}
@@ -161,19 +181,28 @@ export default function InventoryPage() {
               <CategoryManager categories={categories} onRefresh={loadCategories} />
             )}
 
-            {/* Compras */}
+            {/* Catálogo de productos (solo admin) */}
+            {isAdmin && (
+              <ProductCatalog
+                products={products}
+                categories={categories}
+                onRefresh={loadProducts}
+              />
+            )}
+
+            {/* Compras / Gastos */}
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                Compras registradas
+                {isAdmin ? "Compras registradas" : "Mis gastos registrados"}
               </h2>
               <button
                 onClick={() => { setEditingPurchase(null); setShowPurchaseForm(true); }}
                 disabled={categories.length === 0}
-                title={categories.length === 0 ? "Crea una categoría primero" : ""}
+                title={categories.length === 0 ? "No hay categorías disponibles aún" : ""}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <PlusIcon className="w-4 h-4" />
-                Registrar compra
+                {isAdmin ? "Registrar compra" : "Registrar gasto"}
               </button>
             </div>
             <PurchaseTable
@@ -181,11 +210,21 @@ export default function InventoryPage() {
               isAdmin={isAdmin}
               currentUserId={user?.id ?? 0}
               onEdit={handleEdit}
-              onDelete={handleDelete}
+              onDelete={(p) => setConfirmDeletePurchase(p)}
               loading={loadingPurchases}
             />
           </div>
         </div>
+
+        <ConfirmModal
+          isOpen={confirmDeletePurchase !== null}
+          title={isAdmin ? "Eliminar compra" : "Eliminar gasto"}
+          message={`¿Eliminar "${confirmDeletePurchase?.item_name}"? Esta acción no se puede deshacer.`}
+          confirmLabel="Eliminar"
+          variant="danger"
+          onConfirm={handleConfirmDeletePurchase}
+          onCancel={() => setConfirmDeletePurchase(null)}
+        />
 
         {showPurchaseForm && (
           <PurchaseForm
