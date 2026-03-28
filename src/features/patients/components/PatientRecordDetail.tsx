@@ -87,7 +87,7 @@ export default function PatientRecordDetail({
 
   const { data, error, isLoading, mutate } = useSWR(
     evaluationId
-      ? `${apiBaseUrl}/api/v1/medical-evaluations/${evaluationId}`
+      ? `${apiBaseUrl}/api/v1/patients/${patientId}/clinical-records/${evaluationId}`
       : null,
     fetcher,
   );

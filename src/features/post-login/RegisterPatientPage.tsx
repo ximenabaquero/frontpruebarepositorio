@@ -190,8 +190,8 @@ export default function RegisterPatientPage() {
     try {
       const token = Cookies.get("XSRF-TOKEN") ?? "";
 
-      // Crear paciente
-      const patientRes = await fetch(`${apiBaseUrl}/api/v1/patients`, {
+      // Crear registro clínico completo (paciente + evaluación + procedimientos)
+      const res = await fetch(`${apiBaseUrl}/api/v1/clinical-records`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -200,62 +200,55 @@ export default function RegisterPatientPage() {
           "X-XSRF-TOKEN": token,
         },
         body: JSON.stringify({
-          first_name: firstName,
-          last_name: lastName,
-          date_of_birth: dateOfBirth,
-          document_type: documentType,
-          cedula,
-          cellphone,
-          biological_sex: biologicalSex,
-          data_treatment_consent: dataConsent,
+          patient: {
+            first_name: firstName,
+            last_name: lastName,
+            date_of_birth: dateOfBirth,
+            document_type: documentType,
+            cedula,
+            cellphone,
+            biological_sex: biologicalSex,
+          },
+          evaluation: {
+            weight: parseFloat(weightKg),
+            height: parseFloat(heightM),
+            medical_background: medicalBackground,
+          },
+          procedure: {
+            notes: procedureNotes,
+            items: procedureItems.map((item) => ({
+              item_name: item.item_name,
+              price: Number((item.price || "").replace(/\D/g, "")),
+            })),
+          },
         }),
       });
 
-      console.log("CREATE PATIENT status:", patientRes.status);
+      console.log("CREATE CLINICAL RECORD status:", res.status);
 
-      if (!patientRes.ok) {
-        const errBody = await patientRes.json().catch(() => null);
-        console.log("CREATE PATIENT failed", patientRes.status, errBody);
-        const detail =
-          errBody?.message ||
-          (errBody?.errors
-            ? Object.values(errBody.errors as Record<string, string[]>)
-                .flat()
-                .join(" ")
-            : null) ||
-          errBody?.error ||
-          "Error al crear paciente";
-        throw new Error(detail);
+      // Paciente ya existe → redirigir a su historial
+      if (res.status === 409) {
+        const errBody = await res.json();
+        if (errBody.error === "PATIENT_EXISTS" && errBody.data?.patient) {
+          const existingPatient = errBody.data.patient;
+          toast.error(`El paciente ${existingPatient.full_name} ya existe. Redirigiendo...`);
+          router.push(`/patients/${existingPatient.id}/records`);
+          return;
+        }
       }
 
-      const patientJson = await patientRes.json();
-      const patient_id = patientJson.data.id;
-
-      // Crear evaluación médica
-      const evalRes = await fetch(`${apiBaseUrl}/api/v1/medical-evaluations`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          "X-XSRF-TOKEN": token,
-        },
-        body: JSON.stringify({
-          patient_id,
-          weight: parseFloat(weightKg),
-          height: parseFloat(heightM),
-          medical_background: medicalBackground,
-        }),
-      });
-
-      if (evalRes.status === 401)
+      if (res.status === 401) {
         throw new Error("Sesión expirada. Inicia sesión nuevamente.");
-      if (evalRes.status === 403) {
-        const errJson = await evalRes.json();
+      }
+
+      if (res.status === 403) {
+        const errJson = await res.json();
         throw new Error(errJson.message || "Cuenta no activa.");
       }
-      if (!evalRes.ok) {
-        const errBody = await evalRes.json().catch(() => null);
+
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => null);
+        console.log("CREATE CLINICAL RECORD failed", res.status, errBody);
         const detail =
           errBody?.message ||
           (errBody?.errors
@@ -264,50 +257,17 @@ export default function RegisterPatientPage() {
                 .join(" ")
             : null) ||
           errBody?.error ||
-          "Error al crear evaluación médica";
+          "Error al crear registro clínico";
         throw new Error(detail);
       }
 
-      const evalJson = await evalRes.json();
-      const medical_evaluation_id = evalJson.data.id;
-
-      // Crear procedimientos
-      const procRes = await fetch(`${apiBaseUrl}/api/v1/procedures`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          "X-XSRF-TOKEN": token,
-        },
-        body: JSON.stringify({
-          medical_evaluation_id,
-          procedure_date: new Date().toISOString().slice(0, 10),
-          notes: procedureNotes,
-          items: procedureItems.map((item) => ({
-            item_name: item.item_name,
-            price: Number((item.price || "").replace(/\D/g, "")),
-          })),
-        }),
-      });
-
-      if (!procRes.ok) {
-        const errBody = await procRes.json().catch(() => null);
-        const detail =
-          errBody?.message ||
-          (errBody?.errors
-            ? Object.values(errBody.errors as Record<string, string[]>)
-                .flat()
-                .join(" ")
-            : null) ||
-          errBody?.error ||
-          "Error al crear procedimientos";
-        throw new Error(detail);
-      }
+      const responseData = await res.json();
+      const patient_id = responseData.data.patient.id;
+      const evaluation_id = responseData.data.evaluation.id;
 
       // Todo OK → redirigir al historial del paciente
       toast.success("Registro guardado correctamente");
-      router.push(`/patients/${patient_id}/records/${medical_evaluation_id}`);
+      router.push(`/patients/${patient_id}/records/${evaluation_id}`);
     } catch (err) {
       console.error("SUBMIT ERROR:", err);
       setSubmitError(

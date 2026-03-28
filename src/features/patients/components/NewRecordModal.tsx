@@ -72,55 +72,40 @@ export default function NewRecordModal({ patientId, onClose, onSuccess }: Props)
     const token = Cookies.get("XSRF-TOKEN") ?? "";
 
     try {
-      // 1. Crear evaluación médica con firma
-      const evalRes = await fetch(`${apiBaseUrl}/api/v1/medical-evaluations`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          "X-XSRF-TOKEN": token,
-        },
-        body: JSON.stringify({
-          patient_id: patientId,
-          weight: parseFloat(weight),
-          height: parseFloat(height),
-          medical_background: medicalBackground,
-          patient_signature: patientSignature,
-        }),
-      });
+      // Crear registro clínico completo (evaluación + procedimiento) con firma
+      const res = await fetch(
+        `${apiBaseUrl}/api/v1/patients/${patientId}/clinical-records`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            "X-XSRF-TOKEN": token,
+          },
+          body: JSON.stringify({
+            evaluation: {
+              weight: parseFloat(weight),
+              height: parseFloat(height),
+              medical_background: medicalBackground,
+            },
+            procedure: {
+              notes,
+              items: items.map((it) => ({
+                item_name: it.item_name.trim(),
+                price: parseFloat(it.price.replace(/\./g, "").replace(",", ".")),
+              })),
+            },
+            patient_signature: patientSignature,
+          }),
+        }
+      );
 
-      if (!evalRes.ok) {
-        const err = await evalRes.json().catch(() => ({}));
-        throw new Error(err.message ?? "Error al crear valoración");
-      }
-
-      const evalData = await evalRes.json();
-      const evaluationId: number = evalData.data.id;
-
-      // 2. Crear procedimiento
-      const procRes = await fetch(`${apiBaseUrl}/api/v1/procedures`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          "X-XSRF-TOKEN": token,
-        },
-        body: JSON.stringify({
-          medical_evaluation_id: evaluationId,
-          procedure_date: procedureDate,
-          notes,
-          items: items.map((it) => ({
-            item_name: it.item_name.trim(),
-            price: parseFloat(it.price.replace(/\./g, "").replace(",", ".")),
-          })),
-        }),
-      });
-
-      if (!procRes.ok) {
-        const err = await procRes.json().catch(() => ({}));
-        throw new Error(err.message ?? "Error al crear procedimiento");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(
+          err.message ?? "Error al crear registro clínico"
+        );
       }
 
       toast.success("Registro clínico creado y confirmado con firma");
