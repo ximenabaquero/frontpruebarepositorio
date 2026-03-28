@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { PlusIcon, PencilIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import toast from "react-hot-toast";
+import ConfirmModal from "@/components/ConfirmModal";
 import {
   createCategory,
   updateCategory,
@@ -26,6 +28,7 @@ export default function CategoryManager({ categories, onRefresh }: Props) {
   const [color, setColor] = useState(PRESET_COLORS[0]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmTarget, setConfirmTarget] = useState<InventoryCategory | null>(null);
 
   function openNew() {
     setEditing(null);
@@ -62,13 +65,16 @@ export default function CategoryManager({ categories, onRefresh }: Props) {
     }
   }
 
-  async function handleDelete(cat: InventoryCategory) {
-    if (!confirm(`¿Eliminar la categoría "${cat.name}"?`)) return;
+  async function handleConfirmDelete() {
+    if (!confirmTarget) return;
     try {
-      await deleteCategory(cat.id);
+      await deleteCategory(confirmTarget.id);
+      toast.success(`Categoría "${confirmTarget.name}" eliminada`);
       onRefresh();
     } catch (e: unknown) {
-      alert(e instanceof Error ? e.message : "Error al eliminar");
+      toast.error(e instanceof Error ? e.message : "Error al eliminar");
+    } finally {
+      setConfirmTarget(null);
     }
   }
 
@@ -99,7 +105,7 @@ export default function CategoryManager({ categories, onRefresh }: Props) {
             <button onClick={() => openEdit(cat)} className="text-gray-400 hover:text-indigo-600 transition-colors">
               <PencilIcon className="w-3.5 h-3.5" />
             </button>
-            <button onClick={() => handleDelete(cat)} className="text-gray-400 hover:text-rose-500 transition-colors">
+            <button onClick={() => setConfirmTarget(cat)} className="text-gray-400 hover:text-rose-500 transition-colors">
               <TrashIcon className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -108,6 +114,16 @@ export default function CategoryManager({ categories, onRefresh }: Props) {
           <p className="text-sm text-gray-400 italic">Sin categorías aún. Crea una para continuar.</p>
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={confirmTarget !== null}
+        title="Eliminar categoría"
+        message={`¿Eliminar la categoría "${confirmTarget?.name}"? Esta acción no se puede deshacer.`}
+        confirmLabel="Eliminar"
+        variant="danger"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmTarget(null)}
+      />
 
       {/* Modal */}
       {open && (

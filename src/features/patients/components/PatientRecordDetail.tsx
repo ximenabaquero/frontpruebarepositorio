@@ -769,7 +769,7 @@ export default function PatientRecordDetail({
                   type="checkbox"
                   checked={termsAccepted}
                   onChange={(e) => setTermsAccepted(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded border-gray-300 accent-emerald-600"
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 accent-emerald-600"
                 />
                 <span className="text-sm text-gray-700">
                   He leído y acepto los términos y condiciones anteriores.
@@ -782,7 +782,7 @@ export default function PatientRecordDetail({
                   type="checkbox"
                   checked={dataConsentAccepted}
                   onChange={(e) => setDataConsentAccepted(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded border-gray-300 accent-emerald-600"
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 accent-emerald-600"
                 />
                 <span className="text-sm text-gray-700">
                   El/la paciente autoriza el tratamiento de sus datos personales

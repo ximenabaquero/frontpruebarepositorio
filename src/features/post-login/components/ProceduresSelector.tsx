@@ -26,22 +26,27 @@ export default function ProceduresSelector({
   const getPrice = (label: string) =>
     procedureItems.find((item) => item.item_name === label)?.price ?? "";
 
-  const handlePriceChange = (itemName: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/[^\d]/g, "");
-    if (!value) {
+  const handlePriceChange =
+    (itemName: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      let value = e.target.value;
+      value = value.replace(/[^\d]/g, "");
+      if (!value) {
+        setProcedureItems((prev) =>
+          prev.map((item) =>
+            item.item_name === itemName ? { ...item, price: "" } : item,
+          ),
+        );
+        return;
+      }
+      const numeric = Number(value);
+      if (numeric < 0) return;
+      const formatted = numeric.toLocaleString("es-CO");
       setProcedureItems((prev) =>
-        prev.map((item) => item.item_name === itemName ? { ...item, price: "" } : item),
+        prev.map((item) =>
+          item.item_name === itemName ? { ...item, price: formatted } : item,
+        ),
       );
-      return;
-    }
-    const numeric = Number(value);
-    if (numeric < 0) return;
-    setProcedureItems((prev) =>
-      prev.map((item) =>
-        item.item_name === itemName ? { ...item, price: numeric.toLocaleString("es-CO") } : item,
-      ),
-    );
-  };
+    };
 
   const toggleItem = (label: string) => {
     clearSubmitError();
@@ -51,7 +56,6 @@ export default function ProceduresSelector({
         prev.filter((item) => item.item_name !== label),
       );
 
-      // limpiar notas automáticas
       if (label.includes("Faja")) {
         setProcedureNotes((prev) => prev.replace(/Faja talla:.*(\n\n)?/, ""));
       }
@@ -89,7 +93,9 @@ export default function ProceduresSelector({
     return groupProcedureIds.reduce((count, procedureId) => {
       const procedure = PROCEDURES.find((p) => p.id === procedureId);
       if (!procedure) return count;
-      return procedureItems.some((item) => item.item_name === procedure.label) ? count + 1 : count;
+      return procedureItems.some((item) => item.item_name === procedure.label)
+        ? count + 1
+        : count;
     }, 0);
   };
 
@@ -107,8 +113,14 @@ export default function ProceduresSelector({
                 <span className="text-sm font-semibold text-emerald-900">
                   {group.label}
                 </span>
+
                 {getGroupCount(group.procedureIds) > 0 && (
-                  <span className="flex items-center justify-center min-w-[24px] h-6 px-2 rounded-full bg-emerald-600 text-white text-xs font-bold shadow-sm">
+                  <span
+                    className="flex items-center justify-center
+                      min-w-[24px] h-6 px-2
+                      rounded-full bg-emerald-600
+                      text-white text-xs font-bold shadow-sm"
+                  >
                     {getGroupCount(group.procedureIds)}
                   </span>
                 )}
@@ -125,27 +137,36 @@ export default function ProceduresSelector({
 
               <div className="divide-y divide-gray-100">
                 {group.procedureIds.map((procedureId) => {
-                  const procedure = PROCEDURES.find((p) => p.id === procedureId);
+                  const procedure = PROCEDURES.find(
+                    (p) => p.id === procedureId,
+                  );
                   if (!procedure) return null;
 
                   const checked = isSelected(procedure.label);
                   const priceValue = getPrice(procedure.label);
+
                   const isFaja = procedure.id === "faja_postoperatoria";
                   const isPierna = procedure.id === "pierna";
 
                   const fajaDetalle = procedureNotes.includes("Faja talla:");
-                  const piernaInterna = procedureNotes.includes("Pierna: interna");
-                  const piernaExterna = procedureNotes.includes("Pierna: externa");
-                  const piernaAmbas = procedureNotes.includes("interna y externa");
-                  const piernaDetalle = piernaInterna || piernaExterna || piernaAmbas;
-                  const disablePrice = (isFaja && !fajaDetalle) || (isPierna && !piernaDetalle);
+                  const piernaInterna =
+                    procedureNotes.includes("Pierna: interna");
+                  const piernaExterna =
+                    procedureNotes.includes("Pierna: externa");
+                  const piernaAmbas =
+                    procedureNotes.includes("interna y externa");
+
+                  const piernaDetalle =
+                    piernaInterna || piernaExterna || piernaAmbas;
+
+                  const disablePrice =
+                    (isFaja && !fajaDetalle) || (isPierna && !piernaDetalle);
 
                   return (
                     <div
                       key={procedure.id}
                       className="grid grid-cols-1 sm:grid-cols-[28px_1fr_260px_220px] gap-3 py-3"
                     >
-                      {/* Checkbox */}
                       <div className="pt-1">
                         <input
                           type="checkbox"
@@ -155,12 +176,14 @@ export default function ProceduresSelector({
                         />
                       </div>
 
-                      {/* Nombre */}
-                      <label className={`text-sm font-medium ${checked ? "text-gray-900" : "text-gray-700"}`}>
+                      <label
+                        className={`text-sm font-medium ${
+                          checked ? "text-gray-900" : "text-gray-700"
+                        }`}
+                      >
                         {procedure.label}
                       </label>
 
-                      {/* Detalles */}
                       {checked ? (
                         <>
                           {isFaja ? (
@@ -176,16 +199,27 @@ export default function ProceduresSelector({
                                 <input
                                   type="checkbox"
                                   checked={piernaInterna || piernaAmbas}
-                                  onChange={(e) => handlePiernaChange(e.target.checked, piernaExterna)}
+                                  onChange={(e) =>
+                                    handlePiernaChange(
+                                      e.target.checked,
+                                      piernaExterna,
+                                    )
+                                  }
                                   className="h-4 w-4 rounded border-gray-300"
                                 />
                                 Interna
                               </label>
+
                               <label className="flex items-center gap-2 text-sm text-gray-700">
                                 <input
                                   type="checkbox"
                                   checked={piernaExterna || piernaAmbas}
-                                  onChange={(e) => handlePiernaChange(piernaInterna, e.target.checked)}
+                                  onChange={(e) =>
+                                    handlePiernaChange(
+                                      piernaInterna,
+                                      e.target.checked,
+                                    )
+                                  }
                                   className="h-4 w-4 rounded border-gray-300"
                                 />
                                 Externa
@@ -199,7 +233,6 @@ export default function ProceduresSelector({
                         <div className="text-sm text-gray-400">—</div>
                       )}
 
-                      {/* Precio */}
                       {checked ? (
                         <input
                           type="text"

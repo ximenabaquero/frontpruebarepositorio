@@ -3,8 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import MainLayout from "@/layouts/MainLayout";
-import Cookies from "js-cookie";
-
 import RegisterCard from "./components/RegisterCard";
 import RegisterHeaderBar from "./components/RegisterHeaderBar";
 import PatientBasicsFields, { type PatientBasicData } from "./components/PatientBasicsFields";
@@ -23,8 +21,6 @@ type ProcedureItem = {
   item_name: string;
   price: string;
 };
-
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
 
 const INITIAL_PATIENT: PatientBasicData = {
   firstName: "", lastName: "", dateOfBirth: "",
@@ -169,7 +165,6 @@ export default function RegisterPatientPage() {
       toast.success("Registro guardado correctamente");
       router.push(`/patients/${patient_id}/records/${evaluation_id}`);
     } catch (err) {
-      console.error("SUBMIT ERROR:", err);
       setSubmitError(
         err instanceof Error ? err.message : "No se pudo guardar el registro.",
       );
