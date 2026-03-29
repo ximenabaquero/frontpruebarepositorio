@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 import MainLayout from "@/layouts/MainLayout";
 import RegisterCard from "./components/RegisterCard";
 import RegisterHeaderBar from "./components/RegisterHeaderBar";
@@ -16,6 +17,8 @@ import ConfirmModal from "@/components/ConfirmModal";
 import { toast } from "react-hot-toast";
 
 import AuthGuard from "@/components/AuthGuard";
+
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
 
 type ProcedureItem = {
   item_name: string;

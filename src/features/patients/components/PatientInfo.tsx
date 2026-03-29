@@ -1,5 +1,5 @@
 "use client";
-
+//patien profile-> vista 1
 import { useState } from "react";
 import useSWR from "swr";
 import Cookies from "js-cookie";
@@ -21,8 +21,9 @@ interface Props {
 
 interface Patient {
   id: number;
-  first_name: string;
-  last_name: string;
+  first_name?: string;
+  last_name?: string;
+  full_name?: string;
   cedula: string;
   document_type?: string;
   date_of_birth: string;
@@ -67,13 +68,13 @@ function DocumentTypeBadge({ type }: { type?: string | null }) {
     "Cédula de Ciudadanía":
       "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
     "Cédula de Extranjería": "bg-blue-50 text-blue-700 ring-1 ring-blue-200",
-    Pasaporte: "bg-violet-50 text-violet-700 ring-1 ring-violet-200",
+    "Pasaporte": "bg-violet-50 text-violet-700 ring-1 ring-violet-200",
     "Tarjeta de Identidad": "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
   };
   const short: Record<string, string> = {
     "Cédula de Ciudadanía": "C.C.",
     "Cédula de Extranjería": "C.E.",
-    Pasaporte: "PAS.",
+    "Pasaporte": "PAS.",
     "Tarjeta de Identidad": "T.I.",
   };
   const label = type ?? "—";
@@ -93,12 +94,11 @@ export default function PatientInfo({ patientId }: Props) {
   const [form, setForm] = useState<Partial<Patient>>({});
 
   const { data, error, isLoading, mutate } = useSWR<any>(
-    patientId ? `${apiBaseUrl}/api/v1/patients/${patientId}/clinical-records` : null,
+    patientId ? `${apiBaseUrl}/api/v1/patients/${patientId}` : null,
     fetcher,
   );
 
-  // Extraer datos del paciente de la Vista 1
-  const patient = data?.patient as Patient | undefined;
+  const patient = data?.data as Patient | undefined;
 
   const openEdit = () => {
     if (patient) setForm({ ...patient });
@@ -163,7 +163,9 @@ export default function PatientInfo({ patientId }: Props) {
       </div>
     );
 
-  const fullName = capitalize(`${patient.first_name} ${patient.last_name}`);
+  const fullName = patient.full_name || 
+    capitalize(`${patient.first_name || ''} ${patient.last_name || ''}`).trim() || 
+    "Sin nombre";
 
   const infoItems = [
     {

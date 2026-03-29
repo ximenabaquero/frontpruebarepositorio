@@ -69,7 +69,7 @@ export default function SummaryStats() {
       variation: data.patients_variation,
     },
     {
-      label: "Regis. Clínicos Confirmados",
+      label: "Sesiones Realizadas",
       value: data.this_month_sessions,
       variation: data.sessions_variation,
     },

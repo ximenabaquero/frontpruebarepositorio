@@ -1,10 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
-import SignatureCanvas from "react-signature-canvas";
+import { useState } from "react";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
-import { XMarkIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon } from "@heroicons/react/24/outline";
+import ProceduresSelector from "../../post-login/components/ProceduresSelector";
+import NotesField from "../../post-login/components/NotesField";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
 
@@ -20,7 +21,7 @@ interface Props {
 }
 
 export default function NewRecordModal({ patientId, onClose, onSuccess }: Props) {
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Step 1 — Evaluación clínica
@@ -29,17 +30,8 @@ export default function NewRecordModal({ patientId, onClose, onSuccess }: Props)
   const [medicalBackground, setMedicalBackground] = useState("");
 
   // Step 2 — Procedimientos
-  const [procedureDate, setProcedureDate] = useState(
-    new Date().toISOString().slice(0, 10),
-  );
   const [notes, setNotes] = useState("");
-  const [items, setItems] = useState<ProcedureItem[]>([
-    { item_name: "", price: "" },
-  ]);
-
-  // Step 3 — Firma
-  const sigCanvasRef = useRef<SignatureCanvas>(null);
-  const [signatureEmpty, setSignatureEmpty] = useState(true);
+  const [items, setItems] = useState<ProcedureItem[]>([]);
 
   // BMI preview
   const bmiValue =
@@ -47,32 +39,29 @@ export default function NewRecordModal({ patientId, onClose, onSuccess }: Props)
       ? (parseFloat(weight) / (parseFloat(height) * parseFloat(height))).toFixed(2)
       : null;
 
-  const addItem = () => setItems((prev) => [...prev, { item_name: "", price: "" }]);
-  const removeItem = (i: number) =>
-    setItems((prev) => prev.filter((_, idx) => idx !== i));
-  const updateItem = (i: number, field: keyof ProcedureItem, val: string) =>
-    setItems((prev) =>
-      prev.map((item, idx) => (idx === i ? { ...item, [field]: val } : item)),
-    );
-
-  const clearSignature = () => {
-    sigCanvasRef.current?.clear();
-    setSignatureEmpty(true);
-  };
+  const clearSubmitError = () => {};
 
   async function handleSubmit() {
-    if (signatureEmpty || sigCanvasRef.current?.isEmpty()) {
-      toast.error("La paciente debe firmar antes de confirmar");
+    // Validar que todos los campos estén completos
+    if (!notes.trim()) {
+      toast.error("Las notas clínicas son obligatorias");
+      return;
+    }
+    
+    if (items.length === 0) {
+      toast.error("Debes agregar al menos un procedimiento");
       return;
     }
 
-    const patientSignature = sigCanvasRef.current!.toDataURL("image/png");
+    if (items.some((it) => !it.item_name.trim() || !it.price)) {
+      toast.error("Completa el precio de todos los procedimientos seleccionados");
+      return;
+    }
 
     setIsSubmitting(true);
     const token = Cookies.get("XSRF-TOKEN") ?? "";
 
     try {
-      // Crear registro clínico completo (evaluación + procedimiento) con firma
       const res = await fetch(
         `${apiBaseUrl}/api/v1/patients/${patientId}/clinical-records`,
         {
@@ -93,22 +82,20 @@ export default function NewRecordModal({ patientId, onClose, onSuccess }: Props)
               notes,
               items: items.map((it) => ({
                 item_name: it.item_name.trim(),
-                price: parseFloat(it.price.replace(/\./g, "").replace(",", ".")),
+                price: parseFloat(it.price.replace(/\./g, "").replace(",", ".")) || 0,
               })),
             },
-            patient_signature: patientSignature,
           }),
         }
       );
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(
-          err.message ?? "Error al crear registro clínico"
-        );
+        const errorMsg = err.data?.message || err.message || "Error al crear registro clínico";
+        throw new Error(errorMsg);
       }
 
-      toast.success("Registro clínico creado y confirmado con firma");
+      toast.success("Registro clínico creado correctamente");
       onSuccess();
       onClose();
     } catch (error: unknown) {
@@ -118,14 +105,14 @@ export default function NewRecordModal({ patientId, onClose, onSuccess }: Props)
     }
   }
 
-  const progressPercent = step === 1 ? "33%" : step === 2 ? "66%" : "100%";
+  const progressPercent = step === 1 ? "50%" : "100%";
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <div>
@@ -133,12 +120,8 @@ export default function NewRecordModal({ patientId, onClose, onSuccess }: Props)
               Nuevo registro clínico
             </h2>
             <p className="text-xs text-gray-500 mt-0.5">
-              Paso {step} de 3 —{" "}
-              {step === 1
-                ? "Evaluación clínica"
-                : step === 2
-                  ? "Procedimiento y precios"
-                  : "Firma de la paciente"}
+              Paso {step} de 2 —{" "}
+              {step === 1 ? "Evaluación clínica" : "Procedimiento y precios"}
             </p>
           </div>
           <button
@@ -158,7 +141,7 @@ export default function NewRecordModal({ patientId, onClose, onSuccess }: Props)
         </div>
 
         {/* Body */}
-        <div className="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
+        <div className="px-6 py-5 space-y-4 overflow-y-auto flex-1">
           {step === 1 && (
             <>
               <div className="grid grid-cols-2 gap-4">
@@ -221,124 +204,39 @@ export default function NewRecordModal({ patientId, onClose, onSuccess }: Props)
           )}
 
           {step === 2 && (
-            <>
-              <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
-                  Fecha del procedimiento *
-                </label>
-                <input
-                  type="date"
-                  value={procedureDate}
-                  onChange={(e) => setProcedureDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none"
-                />
-              </div>
+            <div className="space-y-5">
+              <ProceduresSelector
+                procedureItems={items}
+                setProcedureItems={setItems}
+                procedureNotes={notes}
+                setProcedureNotes={setNotes}
+                clearSubmitError={clearSubmitError}
+              />
+              
+              <NotesField
+                value={notes}
+                onChange={setNotes}
+                onDirty={clearSubmitError}
+              />
 
-              <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
-                  Notas clínicas *
-                </label>
-                <textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none resize-none"
-                  placeholder="Describe el procedimiento y observaciones clínicas..."
-                />
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
-                    Procedimientos y precios *
-                  </label>
-                  <button
-                    type="button"
-                    onClick={addItem}
-                    className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-700 font-medium"
-                  >
-                    <PlusIcon className="h-4 w-4" />
-                    Agregar ítem
-                  </button>
+              {items.length > 0 && (
+                <div className="rounded-lg bg-emerald-50 border border-emerald-100 px-4 py-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-emerald-700">
+                      Procedimientos seleccionados:
+                    </span>
+                    <span className="text-sm font-bold text-emerald-800">
+                      {items.length}
+                    </span>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  {items.map((item, i) => (
-                    <div key={i} className="flex gap-2">
-                      <input
-                        type="text"
-                        value={item.item_name}
-                        onChange={(e) => updateItem(i, "item_name", e.target.value)}
-                        className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none"
-                        placeholder="Nombre del procedimiento"
-                      />
-                      <input
-                        type="number"
-                        value={item.price}
-                        onChange={(e) => updateItem(i, "price", e.target.value)}
-                        className="w-28 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none"
-                        placeholder="$ Precio"
-                        min={0}
-                      />
-                      {items.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeItem(i)}
-                          className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                        >
-                          <TrashIcon className="h-4 w-4" />
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
-
-          {step === 3 && (
-            <div className="space-y-4">
-              <div className="rounded-lg bg-amber-50 border border-amber-100 px-4 py-3">
-                <p className="text-xs text-amber-700 font-medium">
-                  La paciente debe leer y firmar a continuación para confirmar
-                  su consentimiento con el registro clínico.
-                </p>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
-                    Firma de la paciente *
-                  </label>
-                  <button
-                    type="button"
-                    onClick={clearSignature}
-                    className="text-xs text-gray-400 hover:text-gray-600 underline"
-                  >
-                    Limpiar
-                  </button>
-                </div>
-
-                <div className="border-2 border-dashed border-gray-300 rounded-xl overflow-hidden bg-gray-50 hover:border-emerald-400 transition-colors">
-                  <SignatureCanvas
-                    ref={sigCanvasRef}
-                    penColor="#1f2937"
-                    canvasProps={{
-                      className: "w-full",
-                      style: { width: "100%", height: "180px" },
-                    }}
-                    onEnd={() => setSignatureEmpty(false)}
-                  />
-                </div>
-                <p className="text-xs text-gray-400 mt-1 text-center">
-                  Firme dentro del recuadro con el dedo o el cursor
-                </p>
-              </div>
+              )}
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-100 flex justify-between gap-3">
+        <div className="px-6 py-4 border-t border-gray-100 flex justify-between gap-3 bg-white">
           {step === 1 && (
             <>
               <button
@@ -372,43 +270,17 @@ export default function NewRecordModal({ patientId, onClose, onSuccess }: Props)
             <>
               <button
                 onClick={() => setStep(1)}
-                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition"
-              >
-                ← Atrás
-              </button>
-              <button
-                onClick={() => {
-                  if (
-                    !notes.trim() ||
-                    !procedureDate ||
-                    items.some((it) => !it.item_name.trim() || !it.price)
-                  ) {
-                    toast.error("Completa todos los campos del procedimiento");
-                    return;
-                  }
-                  setStep(3);
-                }}
-                className="px-5 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium"
-              >
-                Siguiente →
-              </button>
-            </>
-          )}
-
-          {step === 3 && (
-            <>
-              <button
-                onClick={() => setStep(2)}
-                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition"
+                disabled={isSubmitting}
+                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition disabled:opacity-50"
               >
                 ← Atrás
               </button>
               <button
                 onClick={handleSubmit}
-                disabled={isSubmitting || signatureEmpty}
+                disabled={isSubmitting}
                 className="px-5 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium disabled:opacity-50"
               >
-                {isSubmitting ? "Guardando..." : "Confirmar y guardar"}
+                {isSubmitting ? "Guardando..." : "Crear registro"}
               </button>
             </>
           )}

@@ -92,8 +92,8 @@ function CustomTooltip({ active, payload, metric }: any) {
   const m = METRICS.find((x) => x.key === metric)!;
   return (
     <div className="bg-white border border-gray-100 shadow-xl rounded-xl px-4 py-3 text-sm min-w-[160px]">
-      {payload.map((p: any) => (
-        <div key={p.name} className="flex items-center justify-between gap-4">
+      {payload.map((p: any, i: number) => (
+        <div key={`${p.name}-${i}`} className="flex items-center justify-between gap-4">
           <span className="text-gray-400 text-xs">{p.name}</span>
           <span className="font-bold text-xs" style={{ color: p.color }}>
             {m.format(p.value)}

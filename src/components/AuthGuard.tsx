@@ -15,7 +15,7 @@ export default function AuthGuard({ children }: { children: ReactNode }) {
   const alertShown = useRef(false);
 
   const showAlertOnce = (msg: string) => {
-    if (!alertShown.current) {
+    if (!alertShown.current && !isLoggingOut) {
       alertShown.current = true;
       alert(msg);
     }
@@ -30,7 +30,7 @@ export default function AuthGuard({ children }: { children: ReactNode }) {
     }
   }, [authChecked, user, isLoggingOut, router]);
 
-  if (!authChecked) return null;
+  if (!authChecked || isLoggingOut) return null;
 
   if (!user) {
     return (
