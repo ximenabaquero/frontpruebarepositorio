@@ -94,11 +94,11 @@ export default function PatientInfo({ patientId }: Props) {
   const [form, setForm] = useState<Partial<Patient>>({});
 
   const { data, error, isLoading, mutate } = useSWR<any>(
-    patientId ? `${apiBaseUrl}/api/v1/patients/${patientId}` : null,
+    patientId ? `${apiBaseUrl}/api/v1/patients/${patientId}/clinical-records` : null,
     fetcher,
   );
 
-  const patient = data?.data as Patient | undefined;
+  const patient = data?.data?.patient as Patient | undefined;
 
   const openEdit = () => {
     if (patient) setForm({ ...patient });

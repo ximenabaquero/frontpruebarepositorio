@@ -11,12 +11,10 @@ type Props = {
   status?: "EN_ESPERA" | "CONFIRMADO" | "CANCELADO";
   onEditEval: () => void;
   onEditProc: (proc: Procedure) => void;
-  onConfirm?: () => void;
-  onCancel?: () => void;
 };
 
 const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
-  ({ evaluation, currentYear, isConfirmed, status = "EN_ESPERA", onEditEval, onEditProc, onConfirm, onCancel }, ref) => {
+  ({ evaluation, currentYear, isConfirmed, status = "EN_ESPERA", onEditEval, onEditProc }, ref) => {
     const { patient, procedures } = evaluation;
 
     const procedureDate = procedures?.[0]?.procedure_date ?? evaluation.created_at;
@@ -116,74 +114,17 @@ const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
         <div className="px-4 sm:px-8 py-6 space-y-10">
           {/* Estado del registro */}
           <section>
-            <div className={`relative overflow-hidden rounded-2xl border-2 ${currentStatus.borderColor} ${currentStatus.bgColor} p-6 shadow-sm`}>
-              <div className="flex items-start gap-4">
-                <div className={`flex-shrink-0 p-3 rounded-xl bg-white shadow-sm`}>
-                  <StatusIcon className={`h-8 w-8 ${currentStatus.iconColor}`} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-3 mb-2">
-                    <h3 className={`text-xl font-bold ${currentStatus.textColor}`}>
-                      {currentStatus.label}
-                    </h3>
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white ${currentStatus.textColor} border ${currentStatus.borderColor}`}>
-                      Estado del registro
-                    </span>
-                  </div>
-                  <p className={`text-sm ${currentStatus.textColor} opacity-80 mb-3`}>
-                    {currentStatus.description}
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-gray-500 tracking-wide mb-1">
-                        Paciente
-                      </p>
-                      <p className={`font-semibold ${currentStatus.textColor}`}>
-                        {patient.first_name} {patient.last_name}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-gray-500 tracking-wide mb-1">
-                        Fecha de registro
-                      </p>
-                      <p className={`font-semibold ${currentStatus.textColor}`}>
-                        {formattedDate}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  {/* Botones de acción integrados */}
-                  {!isConfirmed && status === "EN_ESPERA" && (onConfirm || onCancel) && (
-                    <div className="mt-4 pt-4 border-t border-yellow-300">
-                      <p className="text-xs font-semibold mb-2.5 text-yellow-600">Acciones disponibles:</p>
-                      <div className="flex flex-wrap gap-2 print:hidden">
-                        {onConfirm && (
-                          <button
-                            onClick={onConfirm}
-                            className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-white text-emerald-600 border-2 border-emerald-500 rounded-lg hover:bg-emerald-600 hover:text-white transition shadow-sm"
-                          >
-                            <CheckCircleIcon className="h-4 w-4" />
-                            Confirmar registro
-                          </button>
-                        )}
-                        {onCancel && (
-                          <button
-                            onClick={onCancel}
-                            className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-white text-red-600 border-2 border-red-500 rounded-lg hover:bg-red-600 hover:text-white transition shadow-sm"
-                          >
-                            <XCircleIcon className="h-4 w-4" />
-                            Cancelar registro
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-              {/* Decoración de fondo */}
-              <div className="absolute top-0 right-0 -mt-4 -mr-4 opacity-5">
-                <StatusIcon className="h-32 w-32" />
-              </div>
+            <div className={`flex flex-wrap items-center gap-3 rounded-xl border ${currentStatus.borderColor} ${currentStatus.bgColor} px-4 py-3`}>
+              <StatusIcon className={`h-5 w-5 shrink-0 ${currentStatus.iconColor}`} />
+              <span className={`text-sm font-bold ${currentStatus.textColor}`}>
+                {currentStatus.label}
+              </span>
+              <span className="text-gray-300 hidden sm:inline">|</span>
+              <span className="text-xs text-gray-500">
+                {patient.first_name} {patient.last_name}
+              </span>
+              <span className="text-gray-300 hidden sm:inline">|</span>
+              <span className="text-xs text-gray-500">{formattedDate}</span>
             </div>
           </section>
 

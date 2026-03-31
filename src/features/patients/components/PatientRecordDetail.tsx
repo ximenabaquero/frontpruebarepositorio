@@ -17,6 +17,7 @@ import ConfirmacionModal from "./ConfirmacionModal";
 import EditarEvaluacionModal from "./EditarEvaluacionModal";
 import EditarProcedimientoModal from "./EditarProcedimientoModal";
 import InvoicePdf from "./InvoicePdf";
+import HistoriaClinicaPdf from "./HistoriaClinicaPdf";
 import type { Procedure } from "../types";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
@@ -40,11 +41,12 @@ const STATUS_CONFIG = {
 
 export default function PatientRecordDetail({ patientId, evaluationId }: Props) {
   const [currentYear] = useState(new Date().getFullYear());
-  const exportRef = useRef<HTMLDivElement>(null);
+  const historiaRef = useRef<HTMLDivElement>(null);
   const invoiceRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
   const [showEditEval, setShowEditEval] = useState(false);
   const [editingProc, setEditingProc] = useState<Procedure | null>(null);
   const [isChangingStatus, setIsChangingStatus] = useState(false);
@@ -148,7 +150,7 @@ export default function PatientRecordDetail({ patientId, evaluationId }: Props) 
                   )}
                   {!isCanceled && (
                     <button
-                      onClick={() => handleStatusChange("cancelar")}
+                      onClick={() => setShowCancelModal(true)}
                       disabled={isChangingStatus}
                       className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition disabled:opacity-50"
                     >
@@ -162,27 +164,64 @@ export default function PatientRecordDetail({ patientId, evaluationId }: Props) 
                     label="Imprimir factura"
                   />
                   <ExportButton
-                    targetRef={exportRef}
+                    targetRef={historiaRef}
                     filename={`historia-clinica-paciente-${patientId}.pdf`}
                   />
                 </div>
               </div>
 
               <ClinicalRecordView
-                ref={exportRef}
                 evaluation={evaluation}
                 currentYear={currentYear}
                 isConfirmed={isConfirmed}
                 status={status}
                 onEditEval={() => setShowEditEval(true)}
                 onEditProc={(proc) => setEditingProc(proc)}
-                onConfirm={() => setShowConfirmModal(true)}
-                onCancel={() => handleStatusChange("cancelar")}
               />
             </div>
           </div>
         </div>
       </MainLayout>
+
+      {showCancelModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          onClick={(e) => e.target === e.currentTarget && setShowCancelModal(false)}
+        >
+          <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <h2 className="text-lg font-bold text-gray-900">Cancelar registro</h2>
+              <button
+                onClick={() => setShowCancelModal(false)}
+                className="rounded-full p-1.5 hover:bg-gray-100 transition"
+              >
+                <XCircleIcon className="h-5 w-5 text-gray-500" />
+              </button>
+            </div>
+            <div className="px-6 py-5">
+              <p className="text-sm text-gray-600">
+                ¿Está seguro que desea cancelar este registro clínico? Esta acción no se puede deshacer.
+              </p>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
+              <button
+                onClick={() => setShowCancelModal(false)}
+                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition"
+              >
+                Volver
+              </button>
+              <button
+                onClick={() => { setShowCancelModal(false); handleStatusChange("cancelar"); }}
+                disabled={isChangingStatus}
+                className="flex items-center gap-2 px-5 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium disabled:opacity-50"
+              >
+                <XCircleIcon className="h-4 w-4" />
+                {isChangingStatus ? "Cancelando..." : "Sí, cancelar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showConfirmModal && (
         <ConfirmacionModal
@@ -224,6 +263,12 @@ export default function PatientRecordDetail({ patientId, evaluationId }: Props) 
 
       <InvoicePdf
         ref={invoiceRef}
+        evaluation={evaluation}
+        evaluationId={evaluationId}
+        currentYear={currentYear}
+      />
+      <HistoriaClinicaPdf
+        ref={historiaRef}
         evaluation={evaluation}
         evaluationId={evaluationId}
         currentYear={currentYear}
