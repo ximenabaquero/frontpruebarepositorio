@@ -56,6 +56,21 @@ export default function Header() {
             </span>
           </Link>
 
+          {/* Usuario activo */}
+          {user && (
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-100">
+              <div className="h-6 w-6 rounded-full bg-gradient-to-br from-emerald-400 to-blue-500 flex items-center justify-center shrink-0">
+                <span className="text-[10px] font-bold text-white uppercase">
+                  {user.name.charAt(0)}
+                </span>
+              </div>
+              <div className="leading-tight">
+                <p className="text-xs font-semibold text-gray-800 max-w-[140px] truncate">{user.name}</p>
+                <p className="text-[10px] text-gray-400">{user.role === "ADMIN" ? "Administrador" : "Remitente"}</p>
+              </div>
+            </div>
+          )}
+
           {/* Right section */}
           <div className="flex items-center gap-2">
 
