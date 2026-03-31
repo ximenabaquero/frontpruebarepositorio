@@ -37,39 +37,38 @@ export default function Header() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
 
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="relative h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-400 to-blue-500 p-[2px] shadow-md group-hover:shadow-emerald-200 transition-shadow duration-300">
-              <div className="h-full w-full rounded-[10px] bg-white flex items-center justify-center overflow-hidden">
-                <Image
-                  src="/coldestheticlogo.png"
-                  alt="Coldesthetic"
-                  width={32}
-                  height={32}
-                  className="h-full w-full object-contain"
-                  priority
-                />
+          {/* Logo + usuario */}
+          <div className="flex items-center gap-4">
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <div className="relative h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-400 to-blue-500 p-[2px] shadow-md group-hover:shadow-emerald-200 transition-shadow duration-300">
+                <div className="h-full w-full rounded-[10px] bg-white flex items-center justify-center overflow-hidden">
+                  <Image
+                    src="/coldestheticlogo.png"
+                    alt="Coldesthetic"
+                    width={32}
+                    height={32}
+                    className="h-full w-full object-contain"
+                    priority
+                  />
+                </div>
               </div>
-            </div>
-            <span className="text-lg font-bold bg-gradient-to-r from-emerald-500 to-blue-500 bg-clip-text text-transparent tracking-tight">
-              Coldesthetic
-            </span>
-          </Link>
+              <span className="text-lg font-bold bg-gradient-to-r from-emerald-500 to-blue-500 bg-clip-text text-transparent tracking-tight">
+                Coldesthetic
+              </span>
+            </Link>
 
-          {/* Usuario activo */}
-          {user && (
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-100">
-              <div className="h-6 w-6 rounded-full bg-gradient-to-br from-emerald-400 to-blue-500 flex items-center justify-center shrink-0">
-                <span className="text-[10px] font-bold text-white uppercase">
-                  {user.name.charAt(0)}
-                </span>
+            {user && (
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-100">
+                <div className="h-6 w-6 rounded-full bg-gradient-to-br from-emerald-400 to-blue-500 flex items-center justify-center shrink-0">
+                  <span className="text-[10px] font-bold text-white uppercase">{user.name.charAt(0)}</span>
+                </div>
+                <div className="leading-tight">
+                  <p className="text-xs font-semibold text-gray-800 max-w-[140px] truncate">{user.name}</p>
+                  <p className="text-[10px] text-gray-400">{user.role === "ADMIN" ? "Administrador" : "Remitente"}</p>
+                </div>
               </div>
-              <div className="leading-tight">
-                <p className="text-xs font-semibold text-gray-800 max-w-[140px] truncate">{user.name}</p>
-                <p className="text-[10px] text-gray-400">{user.role === "ADMIN" ? "Administrador" : "Remitente"}</p>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Right section */}
           <div className="flex items-center gap-2">
