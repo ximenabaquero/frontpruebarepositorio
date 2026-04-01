@@ -8,7 +8,9 @@ const fetcher = (url: string) =>
   fetch(url, {
     credentials: "include",
     headers: { Accept: "application/json" },
-  }).then((r) => r.json());
+  })
+    .then((r) => r.json())
+    .then((json) => json.data || {});
 
 function formatCOP(value: number): string {
   return new Intl.NumberFormat("es-CO", {

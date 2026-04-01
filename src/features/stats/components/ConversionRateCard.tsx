@@ -7,7 +7,9 @@ const fetcher = (url: string) =>
   fetch(url, {
     credentials: "include",
     headers: { Accept: "application/json" },
-  }).then((res) => res.json());
+  })
+    .then((res) => res.json())
+    .then((json) => json.data || {});
 
 function describeArc(
   cx: number,
@@ -58,10 +60,10 @@ export default function ConversionRateCard() {
       <div className="flex items-start justify-between">
         <div>
           <h2 className="text-sm font-semibold text-gray-900">
-            Estado de Registros
+            Estado de Evaluaciones
           </h2>
           <p className="text-[10px] uppercase tracking-wider text-gray-400 mt-0.5">
-            Basado en el periodo actual
+            Registros clínicos del periodo actual
           </p>
         </div>
         <div className="text-right">

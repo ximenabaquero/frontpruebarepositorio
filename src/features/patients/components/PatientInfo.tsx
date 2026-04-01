@@ -1,5 +1,5 @@
 "use client";
-
+//patien profile-> vista 1
 import { useState } from "react";
 import useSWR from "swr";
 import Cookies from "js-cookie";
@@ -21,8 +21,9 @@ interface Props {
 
 interface Patient {
   id: number;
-  first_name: string;
-  last_name: string;
+  first_name?: string;
+  last_name?: string;
+  full_name?: string;
   cedula: string;
   document_type?: string;
   date_of_birth: string;
@@ -67,13 +68,13 @@ function DocumentTypeBadge({ type }: { type?: string | null }) {
     "Cédula de Ciudadanía":
       "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
     "Cédula de Extranjería": "bg-blue-50 text-blue-700 ring-1 ring-blue-200",
-    Pasaporte: "bg-violet-50 text-violet-700 ring-1 ring-violet-200",
+    "Pasaporte": "bg-violet-50 text-violet-700 ring-1 ring-violet-200",
     "Tarjeta de Identidad": "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
   };
   const short: Record<string, string> = {
     "Cédula de Ciudadanía": "C.C.",
     "Cédula de Extranjería": "C.E.",
-    Pasaporte: "PAS.",
+    "Pasaporte": "PAS.",
     "Tarjeta de Identidad": "T.I.",
   };
   const label = type ?? "—";
@@ -92,13 +93,15 @@ export default function PatientInfo({ patientId }: Props) {
   const [isSaving, setIsSaving] = useState(false);
   const [form, setForm] = useState<Partial<Patient>>({});
 
-  const { data, error, isLoading, mutate } = useSWR<Patient>(
-    patientId ? `${apiBaseUrl}/api/v1/patients/${patientId}` : null,
+  const { data, error, isLoading, mutate } = useSWR<any>(
+    patientId ? `${apiBaseUrl}/api/v1/patients/${patientId}/clinical-records` : null,
     fetcher,
   );
 
+  const patient = data?.data?.patient as Patient | undefined;
+
   const openEdit = () => {
-    if (data) setForm({ ...data });
+    if (patient) setForm({ ...patient });
     setShowEdit(true);
   };
 
@@ -153,20 +156,22 @@ export default function PatientInfo({ patientId }: Props) {
       </div>
     );
 
-  if (error || !data)
+  if (error || !patient)
     return (
       <div className="rounded-xl border border-red-100 bg-red-50 p-4 text-sm text-red-600">
         Error al cargar los datos del paciente.
       </div>
     );
 
-  const fullName = capitalize(`${data.first_name} ${data.last_name}`);
+  const fullName = patient.full_name || 
+    capitalize(`${patient.first_name || ''} ${patient.last_name || ''}`).trim() || 
+    "Sin nombre";
 
   const infoItems = [
     {
       icon: <CalendarIcon className="h-5 w-5 text-emerald-600" />,
       label: "Nacimiento",
-      value: new Date(data.date_of_birth).toLocaleDateString("es-ES", {
+      value: new Date(patient.date_of_birth).toLocaleDateString("es-ES", {
         day: "2-digit",
         month: "short",
         year: "numeric",
@@ -175,12 +180,12 @@ export default function PatientInfo({ patientId }: Props) {
     {
       icon: <UserIcon className="h-5 w-5 text-emerald-600" />,
       label: "Sexo biológico",
-      value: data.biological_sex,
+      value: patient.biological_sex,
     },
     {
       icon: <PhoneIcon className="h-5 w-5 text-emerald-600" />,
       label: "Celular",
-      value: data.cellphone || "—",
+      value: patient.cellphone || "—",
     },
   ];
 
@@ -192,7 +197,7 @@ export default function PatientInfo({ patientId }: Props) {
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-[10px] uppercase tracking-widest text-emerald-600 font-bold mb-1">
-                Paciente · ID #{data.id}
+                Paciente · ID #{patient.id}
               </p>
               <h1 className="text-2xl font-bold text-gray-900">{fullName}</h1>
             </div>
@@ -223,9 +228,9 @@ export default function PatientInfo({ patientId }: Props) {
                 </p>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <p className="text-sm font-semibold text-gray-800 truncate">
-                    {data.cedula || "—"}
+                    {patient.cedula || "—"}
                   </p>
-                  <DocumentTypeBadge type={data.document_type} />
+                  <DocumentTypeBadge type={patient.document_type} />
                 </div>
               </div>
             </div>

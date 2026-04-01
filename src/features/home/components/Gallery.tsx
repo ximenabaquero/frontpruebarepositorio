@@ -3,21 +3,14 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import useSWR from "swr";
 import Image from "next/image";
-import { Star, CheckCircle, Target, Camera } from 'lucide-react';
+import { CheckCircle, Target, Camera } from 'lucide-react';
+import { endpoints, getImageUrl } from "../../control-images/services/ClinicalImagesService";
+import type { ClinicalImage } from "../../control-images/types/ClinicalImage";
 
 const fetcher = (url: string) =>
-  fetch(url, { credentials: "include" }).then((res) => res.json());
-
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
-
-interface ClinicalImage {
-  id: number;
-  title: string;
-  description: string | null;
-  before_image: string;
-  after_image: string;
-  created_at: string;
-}
+  fetch(url, { credentials: "include" })
+    .then((res) => res.json())
+    .then((json) => json.data || []);
 
 function mulberry32(seed: number) {
   return function () {
@@ -36,19 +29,14 @@ const gradients = [
 
 export default function Gallery() {
   const { data: images, error, isLoading } = useSWR<ClinicalImage[]>(
-    `${apiBaseUrl}/api/v1/clinical-images`,
+    endpoints.list,
     fetcher
   );
-
-  const getImageUrl = (path: string) => {
-    if (path.startsWith("http")) return path;
-    return `${apiBaseUrl}/storage/${path}`;
-  };
 
   const [visible, setVisible] = useState<boolean[]>([]);
 
   useEffect(() => {
-    if (images) {
+    if (images && Array.isArray(images)) {
       setVisible(images.map(() => false));
     }
   }, [images]);

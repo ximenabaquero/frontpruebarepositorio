@@ -26,25 +26,6 @@ export default function ProceduresSelector({
   const getPrice = (label: string) =>
     procedureItems.find((item) => item.item_name === label)?.price ?? "";
 
-  const toggleItem = (label: string) => {
-    clearSubmitError();
-
-    if (isSelected(label)) {
-      setProcedureItems((prev) =>
-        prev.filter((item) => item.item_name !== label),
-      );
-
-      if (label.includes("Faja")) {
-        setProcedureNotes((prev) => prev.replace(/Faja talla:.*(\n\n)?/, ""));
-      }
-      if (label.includes("Pierna")) {
-        setProcedureNotes((prev) => prev.replace(/Pierna:.*(\n\n)?/, ""));
-      }
-    } else {
-      setProcedureItems((prev) => [...prev, { item_name: label, price: "" }]);
-    }
-  };
-
   const handlePriceChange =
     (itemName: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
       let value = e.target.value;
@@ -66,6 +47,25 @@ export default function ProceduresSelector({
         ),
       );
     };
+
+  const toggleItem = (label: string) => {
+    clearSubmitError();
+
+    if (isSelected(label)) {
+      setProcedureItems((prev) =>
+        prev.filter((item) => item.item_name !== label),
+      );
+
+      if (label.includes("Faja")) {
+        setProcedureNotes((prev) => prev.replace(/Faja talla:.*(\n\n)?/, ""));
+      }
+      if (label.includes("Pierna")) {
+        setProcedureNotes((prev) => prev.replace(/Pierna:.*(\n\n)?/, ""));
+      }
+    } else {
+      setProcedureItems((prev) => [...prev, { item_name: label, price: "" }]);
+    }
+  };
 
   const handleFajaChange = (value: string) => {
     setProcedureNotes((prev) => {

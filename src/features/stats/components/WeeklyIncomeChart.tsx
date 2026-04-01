@@ -3,7 +3,9 @@ import useSWR from "swr";
 import { endpoints } from "../services/StatsService";
 
 const fetcher = (url: string) =>
-  fetch(url, { credentials: "include", headers: { Accept: "application/json" } }).then((r) => r.json());
+  fetch(url, { credentials: "include", headers: { Accept: "application/json" } })
+    .then((r) => r.json())
+    .then((json) => json.data || []);
 
 function formatDay(dateStr: string) {
   const d = new Date(dateStr + "T00:00:00");

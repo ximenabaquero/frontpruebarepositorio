@@ -10,7 +10,9 @@ const fetcher = (url: string) =>
   fetch(url, {
     credentials: "include",
     headers: { Accept: "application/json" },
-  }).then((res) => res.json());
+  })
+    .then((res) => res.json())
+    .then((json) => json.data || {});
 
 function formatCopInput(value: string | number): string {
   const n = Number(value);
@@ -67,7 +69,7 @@ export default function SummaryStats() {
       variation: data.patients_variation,
     },
     {
-      label: "Regis. Clínicos Confirmados",
+      label: "Sesiones Realizadas",
       value: data.this_month_sessions,
       variation: data.sessions_variation,
     },

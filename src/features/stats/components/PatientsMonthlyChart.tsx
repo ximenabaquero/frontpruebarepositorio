@@ -7,7 +7,9 @@ const fetcher = (url: string) =>
   fetch(url, {
     credentials: "include",
     headers: { Accept: "application/json" },
-  }).then((r) => r.json());
+  })
+    .then((r) => r.json())
+    .then((json) => json.data || []);
 
 const MONTH_NAMES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 

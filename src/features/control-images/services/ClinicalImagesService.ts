@@ -9,3 +9,8 @@ export const endpoints = {
   update: (id: number) => `${apiBaseUrl}/api/v1/clinical-images/${id}`,
   delete: (id: number) => `${apiBaseUrl}/api/v1/clinical-images/${id}`,
 };
+
+export const getImageUrl = (path: string) => {
+  if (path.startsWith("http")) return path;
+  return `${apiBaseUrl}/storage/${path}`;
+};

@@ -5,7 +5,9 @@ const fetcher = (url: string) =>
   fetch(url, {
     credentials: "include",
     headers: { Accept: "application/json" },
-  }).then((res) => res.json());
+  })
+    .then((res) => res.json())
+    .then((json) => json.data || []);
 
 export default function TopProceduresByIncome() {
   const { data, error, isLoading } = useSWR(endpoints.topByIncome, fetcher);
