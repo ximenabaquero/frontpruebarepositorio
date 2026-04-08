@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { PlusIcon, FunnelIcon } from "@heroicons/react/24/outline";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import toast from "react-hot-toast";
 import ConfirmModal from "@/components/ConfirmModal";
 
@@ -16,23 +16,30 @@ import CategoryManager from "./components/CategoryManager";
 import ProductCatalog from "./components/ProductCatalog";
 import PurchaseForm from "./components/PurchaseForm";
 import PurchaseTable from "./components/PurchaseTable";
+import UsageTable from "./components/UsageTable";
+import UsageForm from "./components/UsageForm";
 
 import {
   getCategories,
   getPurchases,
   deletePurchase,
   getProducts,
+  getUsages,
+  deleteUsage,
 } from "./services/inventoryService";
 import type {
   InventoryCategory,
   InventoryProduct,
   InventoryPurchase,
+  InventoryUsage,
 } from "./types";
 
 const MONTHS = [
   "Enero","Febrero","Marzo","Abril","Mayo","Junio",
   "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre",
 ];
+
+type Tab = "compras" | "consumos";
 
 export default function InventoryPage() {
   const router = useRouter();
@@ -42,72 +49,77 @@ export default function InventoryPage() {
   const now = new Date();
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [year, setYear] = useState(now.getFullYear());
-  const [filterCategory, setFilterCategory] = useState<number | "">("");
 
   const [categories, setCategories] = useState<InventoryCategory[]>([]);
   const [products, setProducts] = useState<InventoryProduct[]>([]);
   const [purchases, setPurchases] = useState<InventoryPurchase[]>([]);
+  const [usages, setUsages] = useState<InventoryUsage[]>([]);
+
   const [loadingPurchases, setLoadingPurchases] = useState(true);
+  const [loadingUsages, setLoadingUsages] = useState(true);
+
+  const [activeTab, setActiveTab] = useState<Tab>("compras");
 
   const [showPurchaseForm, setShowPurchaseForm] = useState(false);
   const [editingPurchase, setEditingPurchase] = useState<InventoryPurchase | null>(null);
   const [confirmDeletePurchase, setConfirmDeletePurchase] = useState<InventoryPurchase | null>(null);
 
+  const [showUsageForm, setShowUsageForm] = useState(false);
+  const [confirmDeleteUsage, setConfirmDeleteUsage] = useState<InventoryUsage | null>(null);
+
   const years = Array.from({ length: 4 }, (_, i) => now.getFullYear() - i);
 
   const loadCategories = useCallback(async () => {
-    try {
-      const data = await getCategories();
-      setCategories(data);
-    } catch {
-      // silencioso
-    }
+    try { setCategories(await getCategories()); } catch { /* silencioso */ }
   }, []);
 
   const loadProducts = useCallback(async () => {
-    try {
-      const data = await getProducts();
-      setProducts(data);
-    } catch {
-      setProducts([]);
-    }
+    try { setProducts(await getProducts()); } catch { setProducts([]); }
   }, []);
 
   const loadPurchases = useCallback(async () => {
     setLoadingPurchases(true);
-    try {
-      const data = await getPurchases({
-        month,
-        year,
-        category_id: filterCategory !== "" ? filterCategory : undefined,
-      });
-      setPurchases(data);
-    } catch {
-      setPurchases([]);
-    } finally {
-      setLoadingPurchases(false);
-    }
-  }, [month, year, filterCategory]);
+    try { setPurchases(await getPurchases({ month, year })); }
+    catch { setPurchases([]); }
+    finally { setLoadingPurchases(false); }
+  }, [month, year]);
+
+  const loadUsages = useCallback(async () => {
+    setLoadingUsages(true);
+    try { setUsages(await getUsages({ month, year })); }
+    catch { setUsages([]); }
+    finally { setLoadingUsages(false); }
+  }, [month, year]);
 
   useEffect(() => { loadCategories(); }, [loadCategories]);
   useEffect(() => { loadProducts(); }, [loadProducts]);
   useEffect(() => { loadPurchases(); }, [loadPurchases]);
-
-  function handleEdit(p: InventoryPurchase) {
-    setEditingPurchase(p);
-    setShowPurchaseForm(true);
-  }
+  useEffect(() => { loadUsages(); }, [loadUsages]);
 
   async function handleConfirmDeletePurchase() {
     if (!confirmDeletePurchase) return;
     try {
       await deletePurchase(confirmDeletePurchase.id);
-      toast.success(isAdmin ? "Compra eliminada" : "Gasto eliminado");
+      toast.success("Compra eliminada");
       loadPurchases();
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "Error al eliminar");
     } finally {
       setConfirmDeletePurchase(null);
+    }
+  }
+
+  async function handleConfirmDeleteUsage() {
+    if (!confirmDeleteUsage) return;
+    try {
+      await deleteUsage(confirmDeleteUsage.id);
+      toast.success("Consumo eliminado");
+      loadUsages();
+      loadProducts(); // stock se restaura
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Error al eliminar");
+    } finally {
+      setConfirmDeleteUsage(null);
     }
   }
 
@@ -126,62 +138,75 @@ export default function InventoryPage() {
               active="inventory"
             />
 
-            <h1 className="mt-3 text-2xl sm:text-3xl font-bold text-gray-900">
-              {isAdmin ? "Inventario y gastos" : "Mis gastos"}
-            </h1>
-            <p className="mt-1 text-sm text-gray-500">
-              {isAdmin
-                ? "Registra y controla los gastos de la clínica. Ve ingresos vs gastos y tu ganancia neta."
-                : "Registra los insumos y materiales que usaste en la clínica este mes."}
-            </p>
-
-            {/* Filtros de periodo */}
-            <div className="mt-5 flex flex-wrap items-center gap-3 mb-6">
-              <div className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 bg-white border border-gray-200 rounded-lg px-3 py-2">
-                <FunnelIcon className="w-3.5 h-3.5" />
-                Filtrar por:
+            {/* Título + filtros mes/año */}
+            <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                  Consumos Registrados
+                </h1>
+                <p className="mt-1 text-sm text-gray-500">
+                  Gestión de inventario y trazabilidad de insumos médicos.
+                </p>
               </div>
-              <select
-                value={month}
-                onChange={(e) => setMonth(Number(e.target.value))}
-                className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              >
-                {MONTHS.map((m, i) => (
-                  <option key={i + 1} value={i + 1}>{m}</option>
-                ))}
-              </select>
-              <select
-                value={year}
-                onChange={(e) => setYear(Number(e.target.value))}
-                className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              >
-                {years.map((y) => <option key={y} value={y}>{y}</option>)}
-              </select>
-              {categories.length > 0 && (
+              <div className="flex items-center gap-2 mt-1">
                 <select
-                  value={filterCategory}
-                  onChange={(e) =>
-                    setFilterCategory(e.target.value !== "" ? Number(e.target.value) : "")
-                  }
-                  className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  value={month}
+                  onChange={(e) => setMonth(Number(e.target.value))}
+                  className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 >
-                  <option value="">Todas las categorías</option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
+                  {MONTHS.map((m, i) => (
+                    <option key={i + 1} value={i + 1}>{m}</option>
                   ))}
                 </select>
-              )}
+                <select
+                  value={year}
+                  onChange={(e) => setYear(Number(e.target.value))}
+                  className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                >
+                  {years.map((y) => <option key={y} value={y}>{y}</option>)}
+                </select>
+              </div>
             </div>
 
             {/* Tarjetas de resumen */}
-            <InventorySummaryCards month={month} year={year} isAdmin={isAdmin} />
+            <div className="mt-6">
+              <InventorySummaryCards month={month} year={year} isAdmin={isAdmin} />
+            </div>
 
-            {/* Gestión de categorías (solo admin) */}
-            {isAdmin && (
-              <CategoryManager categories={categories} onRefresh={loadCategories} />
+            {/* Categorías como pills + botón crear */}
+            {categories.length > 0 && (
+              <div className="mb-5">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Categorías de Consumo
+                  </p>
+                  {isAdmin && (
+                    <CategoryManager
+                      categories={categories}
+                      onRefresh={loadCategories}
+                      compact
+                    />
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {categories.map((cat) => (
+                    <span
+                      key={cat.id}
+                      className="inline-flex items-center gap-1.5 rounded-full border bg-white px-3 py-1 text-xs font-medium text-gray-700 shadow-sm"
+                      style={{ borderColor: cat.color }}
+                    >
+                      <span
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: cat.color }}
+                      />
+                      {cat.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
             )}
 
-            {/* Catálogo de productos (solo admin) */}
+            {/* Catálogo de productos (solo admin, colapsable) */}
             {isAdmin && (
               <ProductCatalog
                 products={products}
@@ -190,40 +215,93 @@ export default function InventoryPage() {
               />
             )}
 
-            {/* Compras / Gastos */}
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                {isAdmin ? "Compras registradas" : "Mis gastos registrados"}
-              </h2>
-              <button
-                onClick={() => { setEditingPurchase(null); setShowPurchaseForm(true); }}
-                disabled={categories.length === 0}
-                title={categories.length === 0 ? "No hay categorías disponibles aún" : ""}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <PlusIcon className="w-4 h-4" />
-                {isAdmin ? "Registrar compra" : "Registrar gasto"}
-              </button>
+            {/* Tabs + botón acción */}
+            <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+              <div className="flex items-center gap-1 bg-white rounded-xl p-1 border border-gray-200 shadow-sm">
+                <button
+                  onClick={() => setActiveTab("compras")}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    activeTab === "compras"
+                      ? "bg-indigo-600 text-white shadow-sm"
+                      : "text-gray-500 hover:text-indigo-600 hover:bg-indigo-50"
+                  }`}
+                >
+                  Historial de Compras
+                </button>
+                <button
+                  onClick={() => setActiveTab("consumos")}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    activeTab === "consumos"
+                      ? "bg-indigo-600 text-white shadow-sm"
+                      : "text-gray-500 hover:text-indigo-600 hover:bg-indigo-50"
+                  }`}
+                >
+                  Consumos Registrados
+                </button>
+              </div>
+
+              {activeTab === "compras" ? (
+                <button
+                  onClick={() => { setEditingPurchase(null); setShowPurchaseForm(true); }}
+                  disabled={categories.length === 0}
+                  title={categories.length === 0 ? "No hay categorías disponibles" : ""}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-colors"
+                >
+                  <PlusIcon className="w-4 h-4" />
+                  Registrar compra
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShowUsageForm(true)}
+                  disabled={products.filter((p) => p.active && p.stock > 0).length === 0}
+                  title={products.filter((p) => p.active && p.stock > 0).length === 0 ? "No hay productos con stock" : ""}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-colors"
+                >
+                  <PlusIcon className="w-4 h-4" />
+                  Registrar Consumo
+                </button>
+              )}
             </div>
-            <PurchaseTable
-              purchases={purchases}
-              isAdmin={isAdmin}
-              currentUserId={user?.id ?? 0}
-              onEdit={handleEdit}
-              onDelete={(p) => setConfirmDeletePurchase(p)}
-              loading={loadingPurchases}
-            />
+
+            {/* Contenido del tab activo */}
+            {activeTab === "compras" ? (
+              <PurchaseTable
+                purchases={purchases}
+                isAdmin={isAdmin}
+                currentUserId={user?.id ?? 0}
+                onEdit={(p) => { setEditingPurchase(p); setShowPurchaseForm(true); }}
+                onDelete={(p) => setConfirmDeletePurchase(p)}
+                loading={loadingPurchases}
+              />
+            ) : (
+              <UsageTable
+                usages={usages}
+                onDelete={(u) => setConfirmDeleteUsage(u)}
+                loading={loadingUsages}
+              />
+            )}
           </div>
         </div>
 
+        {/* Modales */}
         <ConfirmModal
           isOpen={confirmDeletePurchase !== null}
-          title={isAdmin ? "Eliminar compra" : "Eliminar gasto"}
+          title="Eliminar compra"
           message={`¿Eliminar "${confirmDeletePurchase?.item_name}"? Esta acción no se puede deshacer.`}
           confirmLabel="Eliminar"
           variant="danger"
           onConfirm={handleConfirmDeletePurchase}
           onCancel={() => setConfirmDeletePurchase(null)}
+        />
+
+        <ConfirmModal
+          isOpen={confirmDeleteUsage !== null}
+          title="Eliminar consumo"
+          message={`¿Eliminar el consumo de "${confirmDeleteUsage?.product?.name}"? El stock se restaurará.`}
+          confirmLabel="Eliminar"
+          variant="danger"
+          onConfirm={handleConfirmDeleteUsage}
+          onCancel={() => setConfirmDeleteUsage(null)}
         />
 
         {showPurchaseForm && (
@@ -232,6 +310,14 @@ export default function InventoryPage() {
             editing={editingPurchase}
             onClose={() => setShowPurchaseForm(false)}
             onSaved={loadPurchases}
+          />
+        )}
+
+        {showUsageForm && (
+          <UsageForm
+            products={products}
+            onClose={() => setShowUsageForm(false)}
+            onSaved={() => { loadUsages(); loadProducts(); }}
           />
         )}
       </MainLayout>
