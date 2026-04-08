@@ -14,6 +14,7 @@ import {
   ReferenceLine,
 } from "recharts";
 import { SparklesIcon } from "@heroicons/react/24/outline";
+import InfoTooltip from "@/components/InfoTooltip";
 
 const fetcher = (url: string) =>
   fetch(url, {
@@ -85,8 +86,9 @@ export default function RevenueForecastCard() {
         <div>
           <div className="flex items-center gap-2">
             <SparklesIcon className="w-4 h-4 text-violet-500" />
-            <h2 className="text-sm font-semibold text-gray-900">
+            <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-1">
               Proyección de ingresos
+              <InfoTooltip text="estimación de ingresos para los próximos 3 meses basada en el historial de la clínica." />
             </h2>
           </div>
           <p className="mt-1 text-[10px] uppercase tracking-wider text-gray-400">
@@ -97,7 +99,7 @@ export default function RevenueForecastCard() {
         <div className="flex flex-col items-end gap-1">
           {r2 != null && (
             <span
-              className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+              className={`text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 ${
                 r2 >= 0.8
                   ? "bg-emerald-50 text-emerald-700"
                   : r2 >= 0.5
@@ -106,11 +108,13 @@ export default function RevenueForecastCard() {
               }`}
             >
               R² = {r2}
+              <InfoTooltip text="indica qué tan confiable es la proyección. un valor cercano a 1.0 significa mayor precisión." />
             </span>
           )}
           {ceiling != null && (
-            <span className="text-[10px] text-gray-400">
+            <span className="text-[10px] text-gray-400 flex items-center gap-1">
               Techo: {formatCOP(ceiling)} COP/mes
+              <InfoTooltip text="límite máximo de ingresos estimado según la capacidad operativa de la clínica." />
             </span>
           )}
         </div>

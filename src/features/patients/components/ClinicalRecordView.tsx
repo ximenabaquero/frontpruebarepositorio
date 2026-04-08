@@ -112,21 +112,6 @@ const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
         <div className="border-t border-gray-100 mt-1 mb-3" />
 
         <div className="px-4 sm:px-8 py-6 space-y-10">
-          {/* Estado del registro */}
-          <section>
-            <div className={`flex flex-wrap items-center gap-3 rounded-xl border ${currentStatus.borderColor} ${currentStatus.bgColor} px-4 py-3`}>
-              <StatusIcon className={`h-5 w-5 shrink-0 ${currentStatus.iconColor}`} />
-              <span className={`text-sm font-bold ${currentStatus.textColor}`}>
-                {currentStatus.label}
-              </span>
-              <span className="text-gray-300 hidden sm:inline">|</span>
-              <span className="text-xs text-gray-500">
-                {patient.first_name} {patient.last_name}
-              </span>
-              <span className="text-gray-300 hidden sm:inline">|</span>
-              <span className="text-xs text-gray-500">{formattedDate}</span>
-            </div>
-          </section>
 
           {/* Datos personales */
           <section>
@@ -140,7 +125,7 @@ const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
                 { label: "Cedula", value: patient.cedula },
                 { label: "Fecha de nacimiento", value: new Date(patient.date_of_birth).toLocaleDateString("es-ES") },
                 { label: "Edad", value: `${evaluation.patient_age_at_evaluation} años` },
-                { label: "Sexo biologico", value: patient.biological_sex },
+                { label: "Sexo biológico", value: patient.biological_sex },
                 { label: "Celular", value: patient.cellphone },
               ].map(({ label, value }) => (
                 <div key={label}>
@@ -156,7 +141,7 @@ const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
             <div className="flex items-center justify-between gap-2 mb-4">
               <div className="flex items-center gap-2">
                 <span className="h-5 w-1 bg-blue-500 rounded-full" />
-                <h3 className="text-lg font-semibold text-gray-800 tracking-tight">Evaluacion clinica</h3>
+                <h3 className="text-lg font-semibold text-gray-800 tracking-tight">Evaluación clínica</h3>
               </div>
               {!isConfirmed && (
                 <button
@@ -192,7 +177,7 @@ const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
                 <div className="border-t border-gray-100 mt-2" />
               </div>
             </div>
-            <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wide mb-1">Antecedentes medicos</p>
+            <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wide mb-1">Antecedentes médicos</p>
             <div className="bg-gray-50 rounded-xl p-4 text-sm">
               <p className="text-gray-700">{evaluation.medical_background}</p>
             </div>
@@ -233,13 +218,13 @@ const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
                     ))}
                   </tbody>
                 </table>
-                <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wide mb-1">Notas clinicas</p>
+                <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wide mb-1">Notas clínicas</p>
                 <div className="bg-white border border-gray-200 rounded-xl p-4 text-sm italic text-gray-600">
                   {proc.notes}
                 </div>
                 <div className="text-right">
                   <div className="border-t border-gray-100 mt-1 mb-4" />
-                  <p className="text-[10px] uppercase font-bold text-gray-400 tracking-widest mb-1">Valor clinico total</p>
+                  <p className="text-[10px] uppercase font-bold text-gray-400 tracking-widest mb-1">Valor clínico total</p>
                   <p className="text-4xl font-extrabold text-green-500">
                     ${Number(proc.total_amount).toLocaleString("es-CO")}
                   </p>

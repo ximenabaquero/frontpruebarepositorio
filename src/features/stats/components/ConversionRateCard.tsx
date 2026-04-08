@@ -2,6 +2,7 @@
 
 import useSWR from "swr";
 import { endpoints } from "../services/StatsService";
+import InfoTooltip from "@/components/InfoTooltip";
 
 const fetcher = (url: string) =>
   fetch(url, {
@@ -59,8 +60,9 @@ export default function ConversionRateCard() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-sm font-semibold text-gray-900">
+          <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-1">
             Estado de Evaluaciones
+            <InfoTooltip text="distribución de evaluaciones médicas del periodo: cuántas fueron confirmadas, están pendientes o fueron canceladas." />
           </h2>
           <p className="text-[10px] uppercase tracking-wider text-gray-400 mt-0.5">
             Registros clínicos del periodo actual

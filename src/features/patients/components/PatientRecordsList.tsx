@@ -207,9 +207,9 @@ export default function PatientRecordsList({ patientId }: Props) {
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between px-5 pb-4">
+            <div className="flex flex-col gap-2 px-5 pb-4">
               <span
-                className={`inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full ${cfg.badge}`}
+                className={`inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full w-fit ${cfg.badge}`}
               >
                 <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
                 {cfg.label}
@@ -219,10 +219,10 @@ export default function PatientRecordsList({ patientId }: Props) {
                 onClick={() =>
                   router.push(`/patients/${patientId}/records/${record.id}`)
                 }
-                className="flex items-center gap-1 text-xs font-medium text-gray-400 hover:text-emerald-600 transition-colors duration-200 group-hover:text-emerald-600"
+                className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-colors duration-200"
               >
                 Ver detalles
-                <ArrowRightIcon className="w-3 h-3 transition-transform duration-200 group-hover:translate-x-0.5" />
+                <ArrowRightIcon className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
               </button>
             </div>
           </div>

@@ -12,6 +12,7 @@ import {
   ArrowUpIcon,
   ArrowDownIcon,
 } from "@heroicons/react/24/outline";
+import InfoTooltip from "@/components/InfoTooltip";
 
 function formatCOP(value: number) {
   return new Intl.NumberFormat("es-CO", {
@@ -49,6 +50,7 @@ export default function InventorySummaryCards({ month, year, isAdmin }: Props) {
     ? [
         {
           label: "Ingreso Total",
+          tooltip: "suma de todos los ingresos registrados en la clínica durante este mes.",
           value: formatCOP(data.total_income ?? 0),
           variation: data.income_variation,
           icon: BanknotesIcon,
@@ -58,6 +60,7 @@ export default function InventorySummaryCards({ month, year, isAdmin }: Props) {
         },
         {
           label: "Gastos Totales",
+          tooltip: "total gastado en compras de insumos y materiales este mes. flecha roja hacia arriba significa que se gastó más que el mes pasado.",
           value: formatCOP(data.total_expenses),
           variation: data.expenses_variation,
           icon: ShoppingCartIcon,
@@ -68,6 +71,7 @@ export default function InventorySummaryCards({ month, year, isAdmin }: Props) {
         },
         {
           label: "Utilidad Neta",
+          tooltip: "resultado del mes: ingresos menos gastos. si es negativa, los gastos superaron los ingresos.",
           value: formatCOP(data.net_profit ?? 0),
           variation: data.profit_variation,
           icon: ArrowTrendingUpIcon,
@@ -79,6 +83,7 @@ export default function InventorySummaryCards({ month, year, isAdmin }: Props) {
     : [
         {
           label: "Mis gastos del mes",
+          tooltip: "total de compras que tú registraste este mes. no incluye gastos de otros usuarios.",
           value: formatCOP(data.total_expenses),
           variation: data.expenses_variation,
           icon: ShoppingCartIcon,
@@ -106,15 +111,24 @@ export default function InventorySummaryCards({ month, year, isAdmin }: Props) {
             <card.icon className={`w-5 h-5 ${card.iconColor}`} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-gray-500 font-medium">{card.label}</p>
+            <p className="text-xs text-gray-500 font-medium flex items-center gap-1">
+              {card.label}
+              <InfoTooltip text={card.tooltip} />
+            </p>
             <p className="text-lg font-bold text-gray-800">{card.value}</p>
           </div>
           {v != null && (
             <div className={`flex items-center gap-0.5 text-xs font-semibold ${goodColor}`}>
-              {isPositive
-                ? <ArrowUpIcon className="w-3 h-3" />
-                : <ArrowDownIcon className="w-3 h-3" />}
-              {Math.abs(v)}%
+              <span className="relative group inline-flex items-center gap-0.5 cursor-default">
+                {isPositive
+                  ? <ArrowUpIcon className="w-3 h-3" />
+                  : <ArrowDownIcon className="w-3 h-3" />}
+                {Math.abs(v)}%
+                <span className="pointer-events-none absolute bottom-full right-0 mb-1.5 w-44 rounded-lg bg-gray-800 px-3 py-2 text-xs text-white leading-snug opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 shadow-lg font-normal">
+                  variación respecto al mes anterior.
+                  <span className="absolute top-full right-3 border-4 border-transparent border-t-gray-800" />
+                </span>
+              </span>
             </div>
           )}
         </div>

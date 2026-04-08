@@ -3,6 +3,7 @@
 import useSWR from "swr";
 import { endpoints } from "../services/StatsService";
 import { ReceiptPercentIcon } from "@heroicons/react/24/outline";
+import InfoTooltip from "@/components/InfoTooltip";
 
 const fetcher = (url: string) =>
   fetch(url, {
@@ -34,7 +35,10 @@ export default function TicketPromedioCard() {
           <ReceiptPercentIcon className="w-5 h-5 text-amber-600" />
         </div>
         <div>
-          <p className="text-xs uppercase tracking-wider text-gray-400 font-semibold">Ticket promedio</p>
+          <p className="text-xs uppercase tracking-wider text-gray-400 font-semibold flex items-center gap-1">
+            Ticket promedio
+            <InfoTooltip text="ingreso promedio generado por cada sesión confirmada. se calcula dividiendo los ingresos totales entre el número de sesiones." />
+          </p>
           <p className="text-[10px] text-gray-400">Por sesión confirmada</p>
         </div>
       </div>

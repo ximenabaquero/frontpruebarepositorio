@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import useSWR from "swr";
 import { endpoints } from "../services/StatsService";
+import { useAuth } from "@/features/auth/AuthContext";
+import Cookies from "js-cookie";
 import {
   AreaChart,
   Area,
@@ -11,14 +13,18 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
 } from "recharts";
 import {
   BanknotesIcon,
   UserGroupIcon,
   ClipboardDocumentCheckIcon,
   ScissorsIcon,
+  LockClosedIcon,
+  EyeIcon,
+  EyeSlashIcon,
 } from "@heroicons/react/24/outline";
+
+const API = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
 
 const fetcher = (url: string) =>
   fetch(url, {
@@ -105,8 +111,57 @@ function CustomTooltip({ active, payload, metric }: any) {
 }
 
 export default function MonthComparisonChart() {
-  const [activeMetric, setActiveMetric] = useState<Metric>("income");
+  const [activeMetric, setActiveMetric] = useState<Metric>("patients");
   const { data, error, isLoading } = useSWR(endpoints.monthComparison, fetcher);
+  const { user } = useAuth();
+
+  const [incomeRevealed, setIncomeRevealed] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [password, setPassword] = useState("");
+  const [showPass, setShowPass] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [authLoading, setAuthLoading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  function handleTabClick(key: Metric) {
+    if (key === "income" && !incomeRevealed) {
+      setAuthError(null);
+      setPassword("");
+      setShowModal(true);
+      setTimeout(() => inputRef.current?.focus(), 50);
+    } else {
+      setActiveMetric(key);
+    }
+  }
+
+  async function handleVerify(e: React.FormEvent) {
+    e.preventDefault();
+    if (!user?.email) return;
+    setAuthLoading(true);
+    setAuthError(null);
+    try {
+      await fetch(`${API}/sanctum/csrf-cookie`, { credentials: "include" });
+      const token = Cookies.get("XSRF-TOKEN") ?? "";
+      const res = await fetch(`${API}/api/v1/login`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "X-XSRF-TOKEN": token,
+        },
+        body: JSON.stringify({ email: user.email, password }),
+      });
+      if (!res.ok) { setAuthError("Contraseña incorrecta."); return; }
+      setIncomeRevealed(true);
+      setActiveMetric("income");
+      setShowModal(false);
+    } catch {
+      setAuthError("Error de conexión.");
+    } finally {
+      setAuthLoading(false);
+    }
+  }
 
   const metric = METRICS.find((m) => m.key === activeMetric)!;
 
@@ -163,23 +218,24 @@ export default function MonthComparisonChart() {
 
       {/* Metric selector */}
       <div className="flex items-center gap-2 mb-5 flex-wrap">
-        {METRICS.map((m) => (
-          <button
-            key={m.key}
-            onClick={() => setActiveMetric(m.key)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
-              activeMetric === m.key
-                ? "text-white shadow-sm"
-                : "text-gray-500 bg-gray-50 hover:bg-gray-100"
-            }`}
-            style={
-              activeMetric === m.key ? { backgroundColor: m.colorCurrent } : {}
-            }
-          >
-            {m.icon}
-            {m.label}
-          </button>
-        ))}
+        {METRICS.map((m) => {
+          const isLocked = m.key === "income" && !incomeRevealed;
+          return (
+            <button
+              key={m.key}
+              onClick={() => handleTabClick(m.key)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
+                activeMetric === m.key
+                  ? "text-white shadow-sm"
+                  : "text-gray-500 bg-gray-50 hover:bg-gray-100"
+              }`}
+              style={activeMetric === m.key ? { backgroundColor: m.colorCurrent } : {}}
+            >
+              {isLocked ? <LockClosedIcon className="w-4 h-4" /> : m.icon}
+              {m.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Chart */}
@@ -285,6 +341,60 @@ export default function MonthComparisonChart() {
             />
           </AreaChart>
         </ResponsiveContainer>
+      )}
+
+      {/* Modal verificación ingresos */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4 border border-gray-100">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-9 h-9 rounded-xl bg-violet-50 flex items-center justify-center shrink-0">
+                <LockClosedIcon className="w-5 h-5 text-violet-500" />
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900 text-sm">Verificar identidad</p>
+                <p className="text-xs text-gray-400">Ingresa tu contraseña para ver los ingresos.</p>
+              </div>
+            </div>
+            <form onSubmit={handleVerify} className="space-y-4">
+              <div className="relative">
+                <input
+                  ref={inputRef}
+                  type={showPass ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Contraseña"
+                  required
+                  className="w-full px-4 py-2.5 pr-10 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300 focus:border-transparent"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showPass ? <EyeSlashIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
+                </button>
+              </div>
+              {authError && <p className="text-xs text-red-500 font-medium">{authError}</p>}
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="flex-1 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={authLoading || !password}
+                  className="flex-1 py-2 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {authLoading ? "Verificando..." : "Confirmar"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );

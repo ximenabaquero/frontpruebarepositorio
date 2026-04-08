@@ -124,40 +124,60 @@ export default function PatientRecordDetail({ patientId, evaluationId }: Props) 
               />
 
               <h1 className="mt-3 text-2xl sm:text-3xl font-bold text-gray-900">
-                Registro clinico del paciente
+                Registro clínico del paciente
               </h1>
               <p className="mt-2 text-sm text-gray-600">
-                Historial medico con procedimientos, notas clinicas y costos asociados.
+                Historial médico con procedimientos, notas clínicas y costos asociados.
               </p>
 
               <div className="mt-4 flex flex-wrap items-center justify-between gap-3 mb-6">
                 <BackButton />
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${statusCfg.classes}`}>
-                    {status === "CONFIRMADO" && <CheckCircleIcon className="h-3.5 w-3.5" />}
-                    {status === "CANCELADO" && <XCircleIcon className="h-3.5 w-3.5" />}
-                    {statusCfg.label}
-                  </span>
-                  {!isConfirmed && (
+                  {/* Segmented status control */}
+                  <div className="flex items-center rounded-xl border border-gray-200 bg-white shadow-sm p-1 gap-1">
+                    {/* En espera */}
+                    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                      status === "EN_ESPERA"
+                        ? "bg-yellow-100 text-yellow-700"
+                        : "text-gray-400 opacity-50"
+                    }`}>
+                      <span className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
+                      En espera
+                    </div>
+
+                    <div className="w-px h-4 bg-gray-200" />
+
+                    {/* Confirmar */}
                     <button
-                      onClick={() => setShowConfirmModal(true)}
-                      disabled={isChangingStatus}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition disabled:opacity-50"
+                      onClick={() => !isConfirmed && setShowConfirmModal(true)}
+                      disabled={isChangingStatus || isConfirmed}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                        isConfirmed
+                          ? "bg-emerald-100 text-emerald-700"
+                          : "text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 disabled:opacity-50"
+                      }`}
                     >
-                      <CheckCircleIcon className="h-4 w-4" />
+                      <CheckCircleIcon className="h-3.5 w-3.5" />
                       Confirmar
                     </button>
-                  )}
-                  {!isCanceled && (
+
+                    <div className="w-px h-4 bg-gray-200" />
+
+                    {/* Cancelar */}
                     <button
-                      onClick={() => setShowCancelModal(true)}
-                      disabled={isChangingStatus}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition disabled:opacity-50"
+                      onClick={() => !isCanceled && setShowCancelModal(true)}
+                      disabled={isChangingStatus || isCanceled}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                        isCanceled
+                          ? "bg-red-100 text-red-600"
+                          : "text-gray-400 hover:bg-red-50 hover:text-red-500 disabled:opacity-50"
+                      }`}
                     >
-                      <XCircleIcon className="h-4 w-4" />
+                      <XCircleIcon className="h-3.5 w-3.5" />
                       Cancelar
                     </button>
-                  )}
+                  </div>
+
                   <ExportButton
                     targetRef={invoiceRef}
                     filename={`factura-paciente-${patientId}.pdf`}
