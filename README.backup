@@ -1,1 +1,2 @@
-# coldesthetic
+# coldesthetic 
+para correr en docker -> docker compose up --build
