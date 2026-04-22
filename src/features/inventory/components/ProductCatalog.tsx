@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { CubeIcon } from "@heroicons/react/24/outline";
+import { CubeIcon, PlusIcon } from "@heroicons/react/24/outline";
 import type { InventoryProduct } from "../types";
 
 interface Props {
   products: InventoryProduct[];
   onRefresh: () => void;
+  isAdmin?: boolean;
+  onAddProduct?: () => void;
 }
 
 function StockBadge({ stock }: { stock: number }) {
@@ -36,7 +38,7 @@ function StockBadge({ stock }: { stock: number }) {
 
 const COP = new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 });
 
-export default function ProductCatalog({ products }: Props) {
+export default function ProductCatalog({ products, isAdmin, onAddProduct }: Props) {
   const [filterActive, setFilterActive] = useState<"all" | "active" | "inactive">("active");
 
   const visible = products.filter((p) => {
@@ -57,15 +59,26 @@ export default function ProductCatalog({ products }: Props) {
             ({products.length} {products.length === 1 ? "producto" : "productos"})
           </span>
         </div>
-        <select
-          value={filterActive}
-          onChange={(e) => setFilterActive(e.target.value as "all" | "active" | "inactive")}
-          className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400"
-        >
-          <option value="active">Solo activos</option>
-          <option value="inactive">Solo inactivos</option>
-          <option value="all">Todos</option>
-        </select>
+        <div className="flex items-center gap-2">
+          {isAdmin && onAddProduct && (
+            <button
+              onClick={onAddProduct}
+              className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors shadow-sm"
+            >
+              <PlusIcon className="w-4 h-4" />
+              Agregar producto
+            </button>
+          )}
+          <select
+            value={filterActive}
+            onChange={(e) => setFilterActive(e.target.value as "all" | "active" | "inactive")}
+            className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          >
+            <option value="active">Solo activos</option>
+            <option value="inactive">Solo inactivos</option>
+            <option value="all">Todos</option>
+          </select>
+        </div>
       </div>
 
       {visible.length === 0 ? (
@@ -89,7 +102,7 @@ export default function ProductCatalog({ products }: Props) {
                 <tr key={product.id} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-5 py-3">
                     <div className="font-medium text-gray-900">{product.name}</div>
-                    {product.description && (
+                    {product.description && product.description !== "" && (
                       <div className="text-xs text-gray-400 mt-0.5">{product.description}</div>
                     )}
                   </td>
@@ -103,7 +116,11 @@ export default function ProductCatalog({ products }: Props) {
                     )}
                   </td>
                   <td className="px-5 py-3 text-right text-gray-700 font-medium">
-                    {COP.format(product.unit_price)}
+                    {product.unit_price && product.unit_price > 0 ? (
+                      COP.format(product.unit_price)
+                    ) : (
+                      <span className="text-xs text-gray-400">Sin precio</span>
+                    )}
                   </td>
                   <td className="px-5 py-3 text-center">
                     <StockBadge stock={product.stock} />

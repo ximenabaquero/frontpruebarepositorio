@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { XMarkIcon, UserIcon, NoSymbolIcon } from "@heroicons/react/24/outline";
+import { useState, useMemo } from "react";
+import { XMarkIcon, UserIcon, NoSymbolIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import toast from "react-hot-toast";
 import { createUsage } from "../services/inventoryService";
 import type { InventoryProduct, UsageFormValues, UsageItem, UsageApiError } from "../types";
@@ -23,12 +23,24 @@ export default function UsageForm({ products, onClose, onSaved }: Props) {
 
   const [items, setItems] = useState<UsageItem[]>(() => buildEmptyItems(products));
   const [usageDate, setUsageDate] = useState(new Date().toISOString().split("T")[0]);
-  const [status, setStatus] = useState<UsageFormValues["status"]>("");
+  const [status, setStatus] = useState<UsageFormValues["status"]>("con_paciente");
   const [reason, setReason] = useState("");
   const [notes, setNotes] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errorType, setErrorType] = useState<UsageApiError["error_code"] | null>(null);
+
+  // Filtrar productos según búsqueda
+  const filteredProducts = useMemo(() => {
+    if (!searchTerm.trim()) return activeProducts;
+    const term = searchTerm.toLowerCase();
+    return activeProducts.filter(
+      (p) =>
+        p.name.toLowerCase().includes(term) ||
+        p.category?.name.toLowerCase().includes(term)
+    );
+  }, [activeProducts, searchTerm]);
 
   function updateQuantity(productId: number, value: string) {
     setItems((prev) =>
@@ -49,6 +61,11 @@ export default function UsageForm({ products, onClose, onSaved }: Props) {
 
     if (filledItems.length === 0) {
       setError("Ingresa la cantidad de al menos un producto.");
+      return;
+    }
+
+    if (!status) {
+      setError("Selecciona si el consumo es con paciente o sin paciente.");
       return;
     }
 
@@ -109,18 +126,86 @@ export default function UsageForm({ products, onClose, onSaved }: Props) {
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
           <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
 
-            {/* Lista de productos */}
+            {/* Estado - Lo primero y más importante */}
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-2">
+                ¿Consumo con paciente o sin paciente? <span className="text-red-400">*</span>
+              </label>
+              <div className="flex gap-2">
+                {[
+                  {
+                    value: "con_paciente",
+                    label: "Con paciente",
+                    icon: UserIcon,
+                    active: "bg-blue-600 text-white border-blue-600 shadow-md",
+                    inactive: "bg-white text-gray-600 border-gray-200 hover:border-blue-300",
+                  },
+                  {
+                    value: "sin_paciente",
+                    label: "Sin paciente",
+                    icon: NoSymbolIcon,
+                    active: "bg-gray-600 text-white border-gray-600 shadow-md",
+                    inactive: "bg-white text-gray-600 border-gray-200 hover:border-gray-400",
+                  },
+                ].map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setStatus(opt.value as UsageFormValues["status"])}
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg border text-sm font-medium transition-all ${
+                      status === opt.value ? opt.active : opt.inactive
+                    }`}
+                  >
+                    <opt.icon className="w-4 h-4" />
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Fecha */}
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                Fecha <span className="text-red-400">*</span>
+              </label>
+              <input
+                type="date"
+                value={usageDate}
+                onChange={(e) => setUsageDate(e.target.value)}
+                required
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+            </div>
+
+            {/* Lista de productos con buscador */}
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-2">
                 Productos consumidos <span className="text-red-400">*</span>
               </label>
+              
+              {/* Buscador */}
+              <div className="relative mb-2">
+                <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Buscar producto por nombre o categoría..."
+                  className="w-full rounded-lg border border-gray-200 pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                />
+              </div>
+
               {activeProducts.length === 0 ? (
                 <p className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2">
                   No hay productos activos con stock disponible.
                 </p>
+              ) : filteredProducts.length === 0 ? (
+                <p className="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
+                  No se encontraron productos con "{searchTerm}".
+                </p>
               ) : (
-                <div className="max-h-[280px] overflow-y-auto rounded-xl border border-gray-200 divide-y divide-gray-100">
-                  {activeProducts.map((product) => {
+                <div className="max-h-[240px] overflow-y-auto rounded-xl border border-gray-200 divide-y divide-gray-100">
+                  {filteredProducts.map((product) => {
                     const item = items.find((i) => i.product_id === product.id);
                     const qty = item?.quantity ?? "";
                     return (
@@ -133,10 +218,7 @@ export default function UsageForm({ products, onClose, onSaved }: Props) {
                           <p className="text-xs text-gray-400">
                             Stock: {product.stock} und.
                             {product.category && (
-                              <span
-                                className="ml-2 inline-block rounded-full px-1.5 py-0.5 text-[10px] font-medium text-white"
-                                style={{ backgroundColor: product.category.color }}
-                              >
+                              <span className="ml-2 inline-block rounded-full px-1.5 py-0.5 text-[10px] font-medium bg-gray-100 text-gray-700">
                                 {product.category.name}
                               </span>
                             )}
@@ -158,88 +240,50 @@ export default function UsageForm({ products, onClose, onSaved }: Props) {
               )}
             </div>
 
-            {/* Fecha */}
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                Fecha <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="date"
-                value={usageDate}
-                onChange={(e) => setUsageDate(e.target.value)}
-                required
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              />
-            </div>
-
-            {/* Estado */}
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-2">
-                Estado del consumo
-              </label>
-              <div className="flex gap-2">
-                {[
-                  {
-                    value: "con_paciente",
-                    label: "Con paciente",
-                    icon: UserIcon,
-                    active: "bg-blue-600 text-white border-blue-600",
-                    inactive: "bg-white text-gray-600 border-gray-200 hover:border-blue-300",
-                  },
-                  {
-                    value: "sin_paciente",
-                    label: "Sin paciente",
-                    icon: NoSymbolIcon,
-                    active: "bg-gray-600 text-white border-gray-600",
-                    inactive: "bg-white text-gray-600 border-gray-200 hover:border-gray-400",
-                  },
-                ].map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() =>
-                      setStatus((prev) =>
-                        prev === opt.value ? "" : (opt.value as UsageFormValues["status"])
-                      )
+            {/* Detalles adicionales - Colapsable */}
+            <details className="group">
+              <summary className="cursor-pointer text-xs font-medium text-gray-500 hover:text-gray-700 flex items-center gap-1">
+                <span className="group-open:rotate-90 transition-transform">▶</span>
+                Detalles adicionales
+                {status === "sin_paciente" && <span className="text-red-400"> (motivo obligatorio)</span>}
+              </summary>
+              <div className="mt-3 space-y-3 pl-4 border-l-2 border-gray-200">
+                {/* Motivo / Procedimiento */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    {status === "con_paciente" 
+                      ? "Procedimiento realizado" 
+                      : "Motivo del consumo"}
+                    {status === "sin_paciente" && <span className="text-red-400"> *</span>}
+                  </label>
+                  <textarea
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                    placeholder={
+                      status === "con_paciente"
+                        ? "Ej: Liposucción, Rinoplastia, Botox..."
+                        : "Ej: Limpieza de equipos, Prueba de producto, Daño/vencimiento..."
                     }
-                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border text-xs font-medium transition-all ${
-                      status === opt.value ? opt.active : opt.inactive
-                    }`}
-                  >
-                    <opt.icon className="w-3.5 h-3.5" />
-                    {opt.label}
-                  </button>
-                ))}
+                    rows={2}
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
+                  />
+                </div>
+
+                {/* Notas */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    Notas
+                  </label>
+                  <textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Observaciones adicionales..."
+                    rows={2}
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
+                  />
+                </div>
               </div>
-            </div>
-
-            {/* Motivo */}
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                Motivo / Razón{status === "sin_paciente" && <span className="text-red-400"> *</span>}
-              </label>
-              <textarea
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                placeholder="Ej: Curación post-operatoria, Reposición de stock..."
-                rows={2}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
-              />
-            </div>
-
-            {/* Notas */}
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                Notas (opcional)
-              </label>
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Observaciones adicionales..."
-                rows={2}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
-              />
-            </div>
+            </details>
 
             {/* Error */}
             {error && (

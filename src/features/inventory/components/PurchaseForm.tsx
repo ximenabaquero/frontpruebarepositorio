@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
-import { createPurchase, getDistributors } from "../services/inventoryService";
+import { XMarkIcon, SparklesIcon } from "@heroicons/react/24/outline";
+import { createPurchase, getDistributors, getLastPurchase } from "../services/inventoryService";
 import type {
   InventoryCategory,
   InventoryProduct,
@@ -31,26 +31,53 @@ const EMPTY: PurchaseFormValues = {
 
 export default function PurchaseForm({ categories, products, onClose, onSaved }: Props) {
   const [form, setForm] = useState<PurchaseFormValues>(EMPTY);
-  const [isNewProduct, setIsNewProduct] = useState(false);
   const [distributors, setDistributors] = useState<Distributor[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loadingLastPurchase, setLoadingLastPurchase] = useState(false);
+  const [priceMode, setPriceMode] = useState<"unit" | "total">("unit");
+  const [totalPrice, setTotalPrice] = useState("");
 
   useEffect(() => {
     getDistributors().then(setDistributors).catch(() => setDistributors([]));
   }, []);
 
-  const total =
-    form.quantity !== "" && form.unit_price !== ""
-      ? (Number(form.quantity) * Number(form.unit_price)).toLocaleString("es-CO")
-      : "—";
+  const calculatedValue =
+    priceMode === "unit"
+      ? form.quantity !== "" && form.unit_price !== ""
+        ? (Number(form.quantity) * Number(form.unit_price)).toLocaleString("es-CO")
+        : "—"
+      : totalPrice !== "" && form.quantity !== "" && Number(form.quantity) > 0
+        ? (Number(totalPrice) / Number(form.quantity)).toLocaleString("es-CO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        : "—";
 
-  function handleProductSelect(e: React.ChangeEvent<HTMLSelectElement>) {
+  const calculatedLabel = priceMode === "unit" ? "Total" : "Precio unitario";
+
+  async function handleProductSelect(e: React.ChangeEvent<HTMLSelectElement>) {
     const val = e.target.value;
     if (val === "") {
-      setForm((prev) => ({ ...prev, product_id: null }));
-    } else {
-      setForm((prev) => ({ ...prev, product_id: Number(val) }));
+      setForm((prev) => ({ ...prev, product_id: null, unit_price: "", distributor_id: null }));
+      return;
+    }
+
+    const productId = Number(val);
+    setForm((prev) => ({ ...prev, product_id: productId }));
+
+    // Auto-completar precio y distribuidor de la última compra
+    setLoadingLastPurchase(true);
+    try {
+      const lastPurchase = await getLastPurchase(productId);
+      if (lastPurchase) {
+        setForm((prev) => ({
+          ...prev,
+          unit_price: lastPurchase.unit_price,
+          distributor_id: lastPurchase.distributor_id,
+        }));
+      }
+    } catch (err) {
+      console.error("Error loading last purchase:", err);
+    } finally {
+      setLoadingLastPurchase(false);
     }
   }
 
@@ -61,36 +88,67 @@ export default function PurchaseForm({ categories, products, onClose, onSaved }:
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
-  function toggleNewProduct(val: boolean) {
-    setIsNewProduct(val);
-    setForm((prev) => ({
-      ...prev,
-      product_id: val ? null : prev.product_id,
-      name: "",
-      category_id: "",
-      type: "",
-      description: "",
-    }));
+  function handlePriceChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const value = e.target.value;
+    
+    if (priceMode === "unit") {
+      setForm((prev) => ({ ...prev, unit_price: value === "" ? "" : Number(value) }));
+      // Calcular total automáticamente
+      if (value && form.quantity) {
+        const calculatedTotal = Number(value) * Number(form.quantity);
+        setTotalPrice(calculatedTotal.toString());
+      } else {
+        setTotalPrice("");
+      }
+    } else {
+      // Modo total: calcular precio unitario
+      setTotalPrice(value);
+      if (value && form.quantity && Number(form.quantity) > 0) {
+        const calculatedUnit = Number(value) / Number(form.quantity);
+        setForm((prev) => ({ ...prev, unit_price: calculatedUnit }));
+      }
+    }
+  }
+
+  function handleQuantityChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const value = e.target.value;
+    setForm((prev) => ({ ...prev, quantity: value === "" ? "" : Number(value) }));
+
+    // Recalcular según el modo
+    if (priceMode === "unit" && form.unit_price && value) {
+      const calculatedTotal = Number(form.unit_price) * Number(value);
+      setTotalPrice(calculatedTotal.toString());
+    } else if (priceMode === "total" && totalPrice && value && Number(value) > 0) {
+      const calculatedUnit = Number(totalPrice) / Number(value);
+      setForm((prev) => ({ ...prev, unit_price: calculatedUnit }));
+    }
+  }
+
+  function togglePriceMode() {
+    const newMode = priceMode === "unit" ? "total" : "unit";
+    setPriceMode(newMode);
+    
+    // Sincronizar valores al cambiar de modo
+    if (newMode === "total" && form.quantity && form.unit_price) {
+      const calculatedTotal = Number(form.quantity) * Number(form.unit_price);
+      setTotalPrice(calculatedTotal.toString());
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
 
-    if (!isNewProduct && !form.product_id) {
-      setError("Selecciona un producto existente o crea uno nuevo.");
+    if (!form.product_id) {
+      setError("Selecciona un producto.");
       return;
     }
-    if (isNewProduct && !form.name.trim()) {
-      setError("El nombre del producto es requerido.");
+    if (!form.quantity || Number(form.quantity) <= 0) {
+      setError("Ingresa una cantidad válida.");
       return;
     }
-    if (isNewProduct && !form.category_id) {
-      setError("La categoría es requerida para el nuevo producto.");
-      return;
-    }
-    if (isNewProduct && !form.type) {
-      setError("El tipo de producto es requerido.");
+    if (!form.unit_price || Number(form.unit_price) <= 0) {
+      setError("Ingresa un precio válido.");
       return;
     }
 
@@ -118,142 +176,39 @@ export default function PurchaseForm({ categories, products, onClose, onSaved }:
 
         <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4 max-h-[80vh] overflow-y-auto">
 
-          {/* Toggle: producto existente vs nuevo */}
-          <div className="flex rounded-lg border border-gray-200 overflow-hidden text-sm font-medium">
-            <button
-              type="button"
-              onClick={() => toggleNewProduct(false)}
-              className={`flex-1 py-2 transition-colors ${!isNewProduct ? "bg-indigo-600 text-white" : "bg-white text-gray-600 hover:bg-gray-50"}`}
+          {/* Selector de producto */}
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1.5">
+              Producto <span className="text-rose-400">*</span>
+              <SparklesIcon 
+                className="w-3.5 h-3.5 text-indigo-500" 
+                title="Autocompletamos precio y distribuidor de tu última compra"
+              />
+            </label>
+            <select
+              value={form.product_id ?? ""}
+              onChange={handleProductSelect}
+              required
+              disabled={loadingLastPurchase}
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:opacity-50 disabled:cursor-wait"
             >
-              Producto existente
-            </button>
-            <button
-              type="button"
-              onClick={() => toggleNewProduct(true)}
-              className={`flex-1 py-2 transition-colors ${isNewProduct ? "bg-indigo-600 text-white" : "bg-white text-gray-600 hover:bg-gray-50"}`}
-            >
-              Nuevo producto
-            </button>
+              <option value="">Selecciona un producto...</option>
+              {products.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name} — Stock: {p.stock}
+                </option>
+              ))}
+            </select>
+            {loadingLastPurchase && (
+              <p className="text-xs text-indigo-600 mt-1 flex items-center gap-1">
+                <SparklesIcon className="w-3 h-3 animate-pulse" />
+                Autocompletando precio y distribuidor...
+              </p>
+            )}
+            <p className="text-xs text-gray-500 mt-1">
+              ¿No encuentras el producto? Agrégalo desde la sección <span className="font-medium">Catálogo</span>
+            </p>
           </div>
-
-          {/* Selector de producto existente */}
-          {!isNewProduct && (
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                Producto <span className="text-rose-400">*</span>
-              </label>
-              <select
-                value={form.product_id ?? ""}
-                onChange={handleProductSelect}
-                required
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              >
-                <option value="">Selecciona un producto...</option>
-                {products.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} {p.category ? `(${p.category.name})` : ""} — Stock: {p.stock}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {/* Campos para nuevo producto */}
-          {isNewProduct && (
-            <>
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Nombre del producto <span className="text-rose-400">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  required
-                  maxLength={100}
-                  placeholder="Ej: Fajas Stage 2 talla M, Lidocaína..."
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
-                    Categoría <span className="text-rose-400">*</span>
-                  </label>
-                  <select
-                    name="category_id"
-                    value={form.category_id}
-                    onChange={handleChange}
-                    required
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                  >
-                    <option value="">Seleccionar...</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>{cat.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
-                    Tipo <span className="text-rose-400">*</span>
-                  </label>
-                  <select
-                    name="type"
-                    value={form.type}
-                    onChange={handleChange}
-                    required
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                  >
-                    <option value="">Seleccionar...</option>
-                    <option value="insumo">Insumo</option>
-                    <option value="equipo">Equipo</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Descripción (opcional)
-                </label>
-                <input
-                  type="text"
-                  name="description"
-                  value={form.description}
-                  onChange={handleChange}
-                  maxLength={255}
-                  placeholder="Descripción breve del producto..."
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                />
-              </div>
-            </>
-          )}
-
-          {/* Distribuidor */}
-          {distributors.length > 0 && (
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                Distribuidor (opcional)
-              </label>
-              <select
-                name="distributor_id"
-                value={form.distributor_id ?? ""}
-                onChange={(e) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    distributor_id: e.target.value ? Number(e.target.value) : null,
-                  }))
-                }
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              >
-                <option value="">Sin distribuidor</option>
-                {distributors.map((d) => (
-                  <option key={d.id} value={d.id}>{d.name}</option>
-                ))}
-              </select>
-            </div>
-          )}
 
           {/* Cantidad y precio */}
           <div className="grid grid-cols-2 gap-4">
@@ -263,56 +218,104 @@ export default function PurchaseForm({ categories, products, onClose, onSaved }:
               </label>
               <input
                 type="number"
-                name="quantity"
                 value={form.quantity}
-                onChange={handleChange}
+                onChange={handleQuantityChange}
                 required
                 min={1}
                 placeholder="0"
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                autoFocus
+                className="w-full rounded-lg border-2 border-indigo-200 px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                Precio unitario (COP) <span className="text-rose-400">*</span>
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-xs font-medium text-gray-600 flex items-center gap-1">
+                  {priceMode === "unit" ? "Precio unitario" : "Precio total"} (COP)
+                  <span className="text-rose-400">*</span>
+                  {form.product_id && form.unit_price !== "" && priceMode === "unit" && (
+                    <SparklesIcon className="w-3 h-3 text-indigo-500" title="Autocompletado de última compra" />
+                  )}
+                </label>
+                <button
+                  type="button"
+                  onClick={togglePriceMode}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold text-indigo-700 bg-indigo-100 hover:bg-indigo-200 transition-colors border border-indigo-300"
+                  title={priceMode === "unit" ? "Cambiar a modo precio total" : "Cambiar a modo precio unitario"}
+                >
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 16 16" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h8M8 4l4 4-4 4M8 4v8" />
+                  </svg>
+                  {priceMode === "unit" ? "Total" : "Unitario"}
+                </button>
+              </div>
               <input
                 type="number"
-                name="unit_price"
-                value={form.unit_price}
-                onChange={handleChange}
+                value={priceMode === "unit" ? form.unit_price : totalPrice}
+                onChange={handlePriceChange}
                 required
                 min={0}
                 step="0.01"
                 placeholder="0"
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full rounded-lg border-2 border-indigo-200 px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
           </div>
 
-          {/* Total calculado */}
-          <div className="rounded-lg bg-gray-50 border border-gray-200 px-4 py-2 flex justify-between items-center">
-            <span className="text-xs text-gray-500 font-medium">Total estimado</span>
-            <span className="text-sm font-bold text-gray-800">
-              {total !== "—" ? `$${total}` : "—"}
+          {/* Total calculado - Más prominente */}
+          <div className="rounded-lg bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200 px-4 py-3 flex justify-between items-center">
+            <span className="text-sm text-indigo-700 font-semibold">{calculatedLabel}</span>
+            <span className="text-xl font-extrabold text-indigo-900">
+              {calculatedValue !== "—" ? `$${calculatedValue}` : "—"}
             </span>
           </div>
 
-          {/* Notas */}
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              Notas (opcional)
-            </label>
-            <textarea
-              name="notes"
-              value={form.notes}
-              onChange={handleChange}
-              rows={2}
-              maxLength={500}
-              placeholder="Observaciones adicionales..."
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
-            />
-          </div>
+          {/* Distribuidor - Colapsable/Secundario */}
+          {distributors.length > 0 && (
+            <details className="group">
+              <summary className="cursor-pointer text-xs font-medium text-gray-500 hover:text-gray-700 flex items-center gap-1">
+                <span className="group-open:rotate-90 transition-transform">▶</span>
+                Detalles adicionales (opcional)
+              </summary>
+              <div className="mt-3 space-y-3 pl-4 border-l-2 border-gray-200">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    Distribuidor
+                  </label>
+                  <select
+                    name="distributor_id"
+                    value={form.distributor_id ?? ""}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        distributor_id: e.target.value ? Number(e.target.value) : null,
+                      }))
+                    }
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  >
+                    <option value="">Sin distribuidor</option>
+                    {distributors.map((d) => (
+                      <option key={d.id} value={d.id}>{d.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    Notas
+                  </label>
+                  <textarea
+                    name="notes"
+                    value={form.notes}
+                    onChange={handleChange}
+                    rows={2}
+                    maxLength={500}
+                    placeholder="Observaciones adicionales..."
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
+                  />
+                </div>
+              </div>
+            </details>
+          )}
 
           {error && <p className="text-xs text-rose-500">{error}</p>}
 

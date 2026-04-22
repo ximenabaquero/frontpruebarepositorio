@@ -116,6 +116,20 @@ export async function createPurchase(data: PurchaseFormValues): Promise<Inventor
   return json.data;
 }
 
+export async function getLastPurchase(productId: number): Promise<{
+  unit_price: number;
+  distributor_id: number | null;
+  purchase_date: string;
+} | null> {
+  const res = await fetch(`${BASE}/purchases/last/${productId}`, {
+    credentials: "include",
+    headers: readHeaders(),
+  });
+  if (!res.ok) return null;
+  const json = await res.json();
+  return json.data;
+}
+
 // ── Resumen ───────────────────────────────────────────────────
 export async function getInventorySummary(): Promise<InventorySummaryData> {
   const res = await fetch(`${BASE}/summary`, {
@@ -136,6 +150,23 @@ export async function getProducts(): Promise<InventoryProduct[]> {
   if (!res.ok) throw new Error("Error al cargar productos");
   const json = await res.json();
   return json.data || [];
+}
+
+export async function createProduct(data: {
+  name: string;
+  category_id: number;
+  type: "insumo" | "equipo";
+  description?: string;
+}): Promise<InventoryProduct> {
+  const res = await fetch(`${BASE}/products`, {
+    method: "POST",
+    credentials: "include",
+    headers: xsrfHeaders(),
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Error al crear producto");
+  const json = await res.json();
+  return json.data;
 }
 
 // ── Consumos ──────────────────────────────────────────────────

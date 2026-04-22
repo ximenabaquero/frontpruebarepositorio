@@ -139,11 +139,10 @@ export default function InventorySummaryCards({ isAdmin }: Props) {
         {unlocked && (
           <button
             onClick={handleLock}
-            title="Bloquear resumen financiero"
-            className="absolute -top-1 right-0 z-10 inline-flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+            title="Clic para bloquear"
+            className="absolute -top-2 -right-2 z-10 w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors group"
           >
-            <LockOpenIcon className="w-3.5 h-3.5" />
-            Bloquear
+            <LockOpenIcon className="w-3 h-3 text-gray-400 group-hover:text-gray-600 transition-colors" />
           </button>
         )}
 
@@ -171,18 +170,15 @@ export default function InventorySummaryCards({ isAdmin }: Props) {
 
         {/* Overlay de bloqueo */}
         {!unlocked && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl bg-white/70 backdrop-blur-sm">
+          <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-white/60 backdrop-blur-sm">
             <button
               onClick={() => setShowModal(true)}
-              className="inline-flex flex-col items-center gap-2 group"
+              className="inline-flex items-center gap-2 group px-4 py-2.5 rounded-lg bg-white/80 border border-gray-200 hover:border-indigo-300 hover:bg-white shadow-sm transition-all"
             >
-              <div className="rounded-full bg-gray-100 p-4 group-hover:bg-indigo-100 transition-colors shadow-sm">
-                <LockClosedIcon className="w-6 h-6 text-gray-500 group-hover:text-indigo-600 transition-colors" />
-              </div>
-              <span className="text-sm font-medium text-gray-600 group-hover:text-indigo-600 transition-colors">
+              <LockClosedIcon className="w-4 h-4 text-gray-400 group-hover:text-indigo-500 transition-colors" />
+              <span className="text-xs font-medium text-gray-600 group-hover:text-indigo-600 transition-colors">
                 Ver resumen financiero
               </span>
-              <span className="text-xs text-gray-400">Requiere contraseña de administrador</span>
             </button>
           </div>
         )}
