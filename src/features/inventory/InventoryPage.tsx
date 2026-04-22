@@ -2,36 +2,36 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { PlusIcon } from "@heroicons/react/24/outline";
-import toast from "react-hot-toast";
-import ConfirmModal from "@/components/ConfirmModal";
 
 import MainLayout from "@/layouts/MainLayout";
 import AuthGuard from "@/components/AuthGuard";
 import RegisterHeaderBar from "@/features/post-login/components/RegisterHeaderBar";
 import { useAuth } from "@/features/auth/AuthContext";
 
+import InventorySidebar from "./components/InventorySidebar";
 import InventorySummaryCards from "./components/InventorySummaryCards";
-import CategoryManager from "./components/CategoryManager";
-import ProductCatalog from "./components/ProductCatalog";
+import StockTab from "./components/StockTab";
+import ConsumosTab from "./components/ConsumosTab";
+import ComprasTab from "./components/ComprasTab";
+import ReportesTab from "./components/ReportesTab";
+import CatalogoTab from "./components/CatalogoTab";
+import DistribuidoresTab from "./components/DistribuidoresTab";
 import PurchaseForm from "./components/PurchaseForm";
-import PurchaseTable from "./components/PurchaseTable";
-import UsageTable from "./components/UsageTable";
 import UsageForm from "./components/UsageForm";
 
 import {
   getCategories,
   getPurchases,
-  deletePurchase,
   getProducts,
   getUsages,
-  deleteUsage,
+  getDistributors,
 } from "./services/inventoryService";
 import type {
   InventoryCategory,
   InventoryProduct,
   InventoryPurchase,
   InventoryUsage,
+  Distributor,
 } from "./types";
 
 const MONTHS = [
@@ -39,7 +39,7 @@ const MONTHS = [
   "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre",
 ];
 
-type Tab = "compras" | "consumos";
+type TabType = "stock" | "consumos" | "compras" | "reportes" | "catalogo" | "distribuidores";
 
 export default function InventoryPage() {
   const router = useRouter();
@@ -54,18 +54,16 @@ export default function InventoryPage() {
   const [products, setProducts] = useState<InventoryProduct[]>([]);
   const [purchases, setPurchases] = useState<InventoryPurchase[]>([]);
   const [usages, setUsages] = useState<InventoryUsage[]>([]);
+  const [distributors, setDistributors] = useState<Distributor[]>([]);
 
   const [loadingPurchases, setLoadingPurchases] = useState(true);
   const [loadingUsages, setLoadingUsages] = useState(true);
 
-  const [activeTab, setActiveTab] = useState<Tab>("compras");
+  const [activeTab, setActiveTab] = useState<TabType>("stock");
 
   const [showPurchaseForm, setShowPurchaseForm] = useState(false);
-  const [editingPurchase, setEditingPurchase] = useState<InventoryPurchase | null>(null);
-  const [confirmDeletePurchase, setConfirmDeletePurchase] = useState<InventoryPurchase | null>(null);
-
   const [showUsageForm, setShowUsageForm] = useState(false);
-  const [confirmDeleteUsage, setConfirmDeleteUsage] = useState<InventoryUsage | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<InventoryProduct | undefined>();
 
   const years = Array.from({ length: 4 }, (_, i) => now.getFullYear() - i);
 
@@ -91,37 +89,49 @@ export default function InventoryPage() {
     finally { setLoadingUsages(false); }
   }, [month, year]);
 
+  const loadDistributors = useCallback(async () => {
+    try { setDistributors(await getDistributors()); } catch { setDistributors([]); }
+  }, []);
+
   useEffect(() => { loadCategories(); }, [loadCategories]);
   useEffect(() => { loadProducts(); }, [loadProducts]);
   useEffect(() => { loadPurchases(); }, [loadPurchases]);
   useEffect(() => { loadUsages(); }, [loadUsages]);
+  useEffect(() => { loadDistributors(); }, [loadDistributors]);
 
-  async function handleConfirmDeletePurchase() {
-    if (!confirmDeletePurchase) return;
-    try {
-      await deletePurchase(confirmDeletePurchase.id);
-      toast.success("Compra eliminada");
-      loadPurchases();
-    } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : "Error al eliminar");
-    } finally {
-      setConfirmDeletePurchase(null);
-    }
-  }
+  // Calculate stats for sidebar
+  const insumos = products.filter((p) => p.type === "insumo");
+  const criticalCount = insumos.filter((p) => p.stock === 0 || p.stock < 5).length;
+  const lowCount = insumos.filter((p) => p.stock >= 5 && p.stock < 10).length;
 
-  async function handleConfirmDeleteUsage() {
-    if (!confirmDeleteUsage) return;
-    try {
-      await deleteUsage(confirmDeleteUsage.id);
-      toast.success("Consumo eliminado");
-      loadUsages();
-      loadProducts(); // stock se restaura
-    } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : "Error al eliminar");
-    } finally {
-      setConfirmDeleteUsage(null);
-    }
-  }
+  const todayUsages = usages.filter((u) => {
+    const usageDate = new Date(u.usage_date);
+    return (
+      usageDate.getDate() === now.getDate() &&
+      usageDate.getMonth() === now.getMonth() &&
+      usageDate.getFullYear() === now.getFullYear()
+    );
+  });
+
+  const handleOpenPurchase = (product?: InventoryProduct) => {
+    setSelectedProduct(product);
+    setShowPurchaseForm(true);
+  };
+
+  const handleOpenConsume = (product?: InventoryProduct) => {
+    setSelectedProduct(product);
+    setShowUsageForm(true);
+  };
+
+  const handleClosePurchase = () => {
+    setShowPurchaseForm(false);
+    setSelectedProduct(undefined);
+  };
+
+  const handleCloseUsage = () => {
+    setShowUsageForm(false);
+    setSelectedProduct(undefined);
+  };
 
   return (
     <AuthGuard>
@@ -139,13 +149,13 @@ export default function InventoryPage() {
             />
 
             {/* Título + filtros mes/año */}
-            <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
+            <div className="mt-3 flex flex-wrap items-start justify-between gap-3 mb-6">
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                  Consumos Registrados
+                  Gestión de Inventario
                 </h1>
                 <p className="mt-1 text-sm text-gray-500">
-                  Gestión de inventario y trazabilidad de insumos médicos.
+                  Control completo de stock, compras y consumos.
                 </p>
               </div>
               <div className="flex items-center gap-2 mt-1">
@@ -168,156 +178,98 @@ export default function InventoryPage() {
               </div>
             </div>
 
-            {/* Tarjetas de resumen */}
-            <div className="mt-6">
-              <InventorySummaryCards month={month} year={year} isAdmin={isAdmin} />
-            </div>
-
-            {/* Categorías como pills + botón crear */}
-            {categories.length > 0 && (
-              <div className="mb-5">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Categorías de Consumo
-                  </p>
-                  {isAdmin && (
-                    <CategoryManager
-                      categories={categories}
-                      onRefresh={loadCategories}
-                      compact
-                    />
-                  )}
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {categories.map((cat) => (
-                    <span
-                      key={cat.id}
-                      className="inline-flex items-center gap-1.5 rounded-full border bg-white px-3 py-1 text-xs font-medium text-gray-700 shadow-sm"
-                      style={{ borderColor: cat.color }}
-                    >
-                      <span
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: cat.color }}
-                      />
-                      {cat.name}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Catálogo de productos (solo admin, colapsable) */}
+            {/* Tarjetas de resumen (solo admin) */}
             {isAdmin && (
-              <ProductCatalog
-                products={products}
-                categories={categories}
-                onRefresh={loadProducts}
-              />
-            )}
-
-            {/* Tabs + botón acción */}
-            <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
-              <div className="flex items-center gap-1 bg-white rounded-xl p-1 border border-gray-200 shadow-sm">
-                <button
-                  onClick={() => setActiveTab("compras")}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    activeTab === "compras"
-                      ? "bg-indigo-600 text-white shadow-sm"
-                      : "text-gray-500 hover:text-indigo-600 hover:bg-indigo-50"
-                  }`}
-                >
-                  Historial de Compras
-                </button>
-                <button
-                  onClick={() => setActiveTab("consumos")}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    activeTab === "consumos"
-                      ? "bg-indigo-600 text-white shadow-sm"
-                      : "text-gray-500 hover:text-indigo-600 hover:bg-indigo-50"
-                  }`}
-                >
-                  Consumos Registrados
-                </button>
+              <div className="mb-6">
+                <InventorySummaryCards isAdmin={isAdmin} />
               </div>
-
-              {activeTab === "compras" ? (
-                <button
-                  onClick={() => { setEditingPurchase(null); setShowPurchaseForm(true); }}
-                  disabled={categories.length === 0}
-                  title={categories.length === 0 ? "No hay categorías disponibles" : ""}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-colors"
-                >
-                  <PlusIcon className="w-4 h-4" />
-                  Registrar compra
-                </button>
-              ) : (
-                <button
-                  onClick={() => setShowUsageForm(true)}
-                  disabled={products.filter((p) => p.active && p.stock > 0).length === 0}
-                  title={products.filter((p) => p.active && p.stock > 0).length === 0 ? "No hay productos con stock" : ""}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-colors"
-                >
-                  <PlusIcon className="w-4 h-4" />
-                  Registrar Consumo
-                </button>
-              )}
-            </div>
-
-            {/* Contenido del tab activo */}
-            {activeTab === "compras" ? (
-              <PurchaseTable
-                purchases={purchases}
-                isAdmin={isAdmin}
-                currentUserId={user?.id ?? 0}
-                onEdit={(p) => { setEditingPurchase(p); setShowPurchaseForm(true); }}
-                onDelete={(p) => setConfirmDeletePurchase(p)}
-                loading={loadingPurchases}
-              />
-            ) : (
-              <UsageTable
-                usages={usages}
-                onDelete={(u) => setConfirmDeleteUsage(u)}
-                loading={loadingUsages}
-              />
             )}
+
+            {/* Main Layout: Sidebar + Content */}
+            <div className="grid grid-cols-[220px_1fr] gap-0 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden min-h-[calc(100vh-300px)]">
+              {/* Sidebar */}
+              <InventorySidebar
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+                productsCount={products.length}
+                distributorsCount={distributors.length}
+                criticalCount={criticalCount}
+                lowCount={lowCount}
+                consumosToday={todayUsages.length}
+                comprasThisMonth={purchases.length}
+              />
+
+              {/* Main Content Area */}
+              <main className="py-6 px-7 min-w-0 overflow-auto">
+                {activeTab === "stock" && (
+                  <StockTab
+                    products={products}
+                    categories={categories}
+                    onOpenPurchase={handleOpenPurchase}
+                    onOpenConsume={handleOpenConsume}
+                    isAdmin={isAdmin}
+                  />
+                )}
+                {activeTab === "consumos" && (
+                  <ConsumosTab
+                    usages={usages}
+                    loading={loadingUsages}
+                    onOpenConsume={() => handleOpenConsume()}
+                  />
+                )}
+                {activeTab === "compras" && (
+                  <ComprasTab
+                    purchases={purchases}
+                    loading={loadingPurchases}
+                    isAdmin={isAdmin}
+                    onOpenPurchase={() => handleOpenPurchase()}
+                  />
+                )}
+                {activeTab === "reportes" && (
+                  <ReportesTab
+                    month={month}
+                    year={year}
+                    products={products}
+                  />
+                )}
+                {activeTab === "catalogo" && (
+                  <CatalogoTab
+                    products={products}
+                    categories={categories}
+                    isAdmin={isAdmin}
+                    onRefreshCategories={loadCategories}
+                    onRefreshProducts={loadProducts}
+                  />
+                )}
+                {activeTab === "distribuidores" && (
+                  <DistribuidoresTab distributors={distributors} />
+                )}
+              </main>
+            </div>
           </div>
         </div>
 
         {/* Modales */}
-        <ConfirmModal
-          isOpen={confirmDeletePurchase !== null}
-          title="Eliminar compra"
-          message={`¿Eliminar "${confirmDeletePurchase?.item_name}"? Esta acción no se puede deshacer.`}
-          confirmLabel="Eliminar"
-          variant="danger"
-          onConfirm={handleConfirmDeletePurchase}
-          onCancel={() => setConfirmDeletePurchase(null)}
-        />
-
-        <ConfirmModal
-          isOpen={confirmDeleteUsage !== null}
-          title="Eliminar consumo"
-          message={`¿Eliminar el consumo de "${confirmDeleteUsage?.product?.name}"? El stock se restaurará.`}
-          confirmLabel="Eliminar"
-          variant="danger"
-          onConfirm={handleConfirmDeleteUsage}
-          onCancel={() => setConfirmDeleteUsage(null)}
-        />
-
         {showPurchaseForm && (
           <PurchaseForm
             categories={categories}
-            editing={editingPurchase}
-            onClose={() => setShowPurchaseForm(false)}
-            onSaved={loadPurchases}
+            products={products}
+            onClose={handleClosePurchase}
+            onSaved={() => {
+              loadPurchases();
+              loadProducts();
+            }}
           />
         )}
 
         {showUsageForm && (
           <UsageForm
             products={products}
-            onClose={() => setShowUsageForm(false)}
-            onSaved={() => { loadUsages(); loadProducts(); }}
+            onClose={handleCloseUsage}
+            onSaved={() => {
+              loadUsages();
+              loadProducts();
+            }}
           />
         )}
       </MainLayout>

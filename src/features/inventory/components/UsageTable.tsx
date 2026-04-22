@@ -1,7 +1,6 @@
 "use client";
 
 import type { InventoryUsage } from "../types";
-import { TrashIcon } from "@heroicons/react/24/outline";
 
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString("es-CO", {
@@ -13,7 +12,6 @@ function formatDate(dateStr: string): string {
 
 type Props = {
   usages: InventoryUsage[];
-  onDelete: (u: InventoryUsage) => void;
   loading: boolean;
 };
 
@@ -38,11 +36,9 @@ function StatusBadge({ status }: { status: InventoryUsage["status"] }) {
 function UsageSection({
   title,
   usages,
-  onDelete,
 }: {
   title: string;
   usages: InventoryUsage[];
-  onDelete: (u: InventoryUsage) => void;
 }) {
   if (usages.length === 0) return null;
 
@@ -68,7 +64,6 @@ function UsageSection({
                 "Estado",
                 "Paciente",
                 "Motivo",
-                "",
               ].map((h) => (
                 <th
                   key={h}
@@ -81,10 +76,7 @@ function UsageSection({
           </thead>
           <tbody className="bg-white divide-y divide-gray-50">
             {usages.map((u) => {
-              const patient = u.medical_evaluation?.patient;
-              const patientName = patient
-                ? `${patient.first_name} ${patient.last_name}`
-                : "—";
+              const patientName = u.medical_evaluation?.id ? `Cita #${u.medical_evaluation.id}` : "—";
 
               return (
                 <tr key={u.id} className="hover:bg-gray-50 transition-colors">
@@ -92,9 +84,7 @@ function UsageSection({
                     {u.product?.name ?? "—"}
                   </td>
                   <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
-                    {u.user
-                      ? `${u.user.first_name} ${u.user.last_name}`
-                      : "—"}
+                    {u.user?.name ?? "—"}
                   </td>
                   <td className="px-4 py-3 text-gray-700 font-medium">
                     {u.quantity} und.
@@ -111,15 +101,6 @@ function UsageSection({
                   <td className="px-4 py-3 text-gray-500 max-w-[180px] truncate">
                     {u.reason ?? "—"}
                   </td>
-                  <td className="px-4 py-3">
-                    <button
-                      onClick={() => onDelete(u)}
-                      className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                      title="Eliminar consumo"
-                    >
-                      <TrashIcon className="w-4 h-4" />
-                    </button>
-                  </td>
                 </tr>
               );
             })}
@@ -130,7 +111,7 @@ function UsageSection({
   );
 }
 
-export default function UsageTable({ usages, onDelete, loading }: Props) {
+export default function UsageTable({ usages, loading }: Props) {
   if (loading) {
     return (
       <p className="text-sm text-gray-400 italic py-8 text-center">
@@ -152,8 +133,8 @@ export default function UsageTable({ usages, onDelete, loading }: Props) {
 
   return (
     <div>
-      <UsageSection title="Insumos Médicos" usages={insumos} onDelete={onDelete} />
-      <UsageSection title="Equipos & Mobiliario" usages={equipos} onDelete={onDelete} />
+      <UsageSection title="Insumos Médicos" usages={insumos} />
+      <UsageSection title="Equipos & Mobiliario" usages={equipos} />
     </div>
   );
 }

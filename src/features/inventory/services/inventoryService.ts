@@ -1,13 +1,17 @@
 import Cookies from "js-cookie";
 import type {
+  Distributor,
   InventoryCategory,
   InventoryProduct,
   InventoryPurchase,
   InventoryUsage,
   InventorySummaryData,
-  ProductFormValues,
   PurchaseFormValues,
   UsageFormValues,
+  UsageApiError,
+  SpendByCategory,
+  SpendByDistributor,
+  PriceHistoryPoint,
 } from "../types";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
@@ -40,9 +44,7 @@ export async function getCategories(): Promise<InventoryCategory[]> {
   return json.data || [];
 }
 
-export async function createCategory(
-  data: { name: string; color: string }
-): Promise<InventoryCategory> {
+export async function createCategory(data: { name: string }): Promise<InventoryCategory> {
   const res = await fetch(`${BASE}/categories`, {
     method: "POST",
     credentials: "include",
@@ -56,7 +58,7 @@ export async function createCategory(
 
 export async function updateCategory(
   id: number,
-  data: { name?: string; color?: string }
+  data: { name: string }
 ): Promise<InventoryCategory> {
   const res = await fetch(`${BASE}/categories/${id}`, {
     method: "PUT",
@@ -69,27 +71,28 @@ export async function updateCategory(
   return json.data;
 }
 
-export async function deleteCategory(id: number): Promise<void> {
-  const res = await fetch(`${BASE}/categories/${id}`, {
-    method: "DELETE",
+// ── Distribuidores ────────────────────────────────────────────
+export async function getDistributors(): Promise<Distributor[]> {
+  const res = await fetch(`${BASE}/distributors`, {
     credentials: "include",
-    headers: xsrfHeaders(),
+    headers: readHeaders(),
   });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || "Error al eliminar categoría");
-  }
+  if (!res.ok) throw new Error("Error al cargar distribuidores");
+  const json = await res.json();
+  return json.data || [];
 }
 
 // ── Compras ───────────────────────────────────────────────────
 export async function getPurchases(params?: {
   month?: number;
   year?: number;
+  search?: string;
   category_id?: number;
 }): Promise<InventoryPurchase[]> {
   const qs = new URLSearchParams();
   if (params?.month) qs.set("month", String(params.month));
   if (params?.year) qs.set("year", String(params.year));
+  if (params?.search) qs.set("search", params.search);
   if (params?.category_id) qs.set("category_id", String(params.category_id));
 
   const res = await fetch(`${BASE}/purchases?${qs}`, {
@@ -101,9 +104,7 @@ export async function getPurchases(params?: {
   return json.data || [];
 }
 
-export async function createPurchase(
-  data: PurchaseFormValues
-): Promise<InventoryPurchase> {
+export async function createPurchase(data: PurchaseFormValues): Promise<InventoryPurchase> {
   const res = await fetch(`${BASE}/purchases`, {
     method: "POST",
     credentials: "include",
@@ -115,36 +116,9 @@ export async function createPurchase(
   return json.data;
 }
 
-export async function updatePurchase(
-  id: number,
-  data: Partial<PurchaseFormValues>
-): Promise<InventoryPurchase> {
-  const res = await fetch(`${BASE}/purchases/${id}`, {
-    method: "PUT",
-    credentials: "include",
-    headers: xsrfHeaders(),
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error("Error al actualizar compra");
-  const json = await res.json();
-  return json.data;
-}
-
-export async function deletePurchase(id: number): Promise<void> {
-  const res = await fetch(`${BASE}/purchases/${id}`, {
-    method: "DELETE",
-    credentials: "include",
-    headers: xsrfHeaders(),
-  });
-  if (!res.ok) throw new Error("Error al eliminar compra");
-}
-
 // ── Resumen ───────────────────────────────────────────────────
-export async function getInventorySummary(
-  month: number,
-  year: number
-): Promise<InventorySummaryData> {
-  const res = await fetch(`${BASE}/summary?month=${month}&year=${year}`, {
+export async function getInventorySummary(): Promise<InventorySummaryData> {
+  const res = await fetch(`${BASE}/summary`, {
     credentials: "include",
     headers: readHeaders(),
   });
@@ -153,7 +127,7 @@ export async function getInventorySummary(
   return json.data || {};
 }
 
-// ── Productos (catálogo) ──────────────────────────────────────
+// ── Productos (catálogo, solo lectura) ────────────────────────
 export async function getProducts(): Promise<InventoryProduct[]> {
   const res = await fetch(`${BASE}/products`, {
     credentials: "include",
@@ -164,63 +138,18 @@ export async function getProducts(): Promise<InventoryProduct[]> {
   return json.data || [];
 }
 
-export async function createProduct(
-  data: ProductFormValues
-): Promise<InventoryProduct> {
-  const res = await fetch(`${BASE}/products`, {
-    method: "POST",
-    credentials: "include",
-    headers: xsrfHeaders(),
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || "Error al crear producto");
-  }
-  const json = await res.json();
-  return json.data;
-}
-
-export async function updateProduct(
-  id: number,
-  data: Partial<ProductFormValues>
-): Promise<InventoryProduct> {
-  const res = await fetch(`${BASE}/products/${id}`, {
-    method: "PUT",
-    credentials: "include",
-    headers: xsrfHeaders(),
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || "Error al actualizar producto");
-  }
-  const json = await res.json();
-  return json.data;
-}
-
-export async function deleteProduct(id: number): Promise<void> {
-  const res = await fetch(`${BASE}/products/${id}`, {
-    method: "DELETE",
-    credentials: "include",
-    headers: xsrfHeaders(),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || "Error al eliminar producto");
-  }
-}
-
 // ── Consumos ──────────────────────────────────────────────────
 export async function getUsages(params?: {
   month?: number;
   year?: number;
-  product_id?: number;
+  search?: string;
+  category_id?: number;
 }): Promise<InventoryUsage[]> {
   const qs = new URLSearchParams();
   if (params?.month) qs.set("month", String(params.month));
   if (params?.year) qs.set("year", String(params.year));
-  if (params?.product_id) qs.set("product_id", String(params.product_id));
+  if (params?.search) qs.set("search", params.search);
+  if (params?.category_id) qs.set("category_id", String(params.category_id));
 
   const res = await fetch(`${BASE}/usages?${qs}`, {
     credentials: "include",
@@ -231,31 +160,72 @@ export async function getUsages(params?: {
   return json.data || [];
 }
 
-export async function createUsage(
-  data: UsageFormValues
-): Promise<InventoryUsage> {
+export async function createUsage(data: UsageFormValues): Promise<InventoryUsage[]> {
   const res = await fetch(`${BASE}/usages`, {
     method: "POST",
     credentials: "include",
     headers: xsrfHeaders(),
     body: JSON.stringify(data),
   });
+
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
+    if (res.status === 422 && err.error_code) {
+      const apiError: UsageApiError = {
+        message: err.message || "Error al registrar consumo",
+        error_code: err.error_code,
+        product_name: err.product_name,
+      };
+      throw apiError;
+    }
     throw new Error(err.message || "Error al registrar consumo");
   }
+
   const json = await res.json();
   return json.data;
 }
 
-export async function deleteUsage(id: number): Promise<void> {
-  const res = await fetch(`${BASE}/usages/${id}`, {
-    method: "DELETE",
+// ── Reportes ──────────────────────────────────────────────────
+export async function getSpendByCategory(params?: {
+  month?: number;
+  year?: number;
+}): Promise<SpendByCategory[]> {
+  const qs = new URLSearchParams();
+  if (params?.month) qs.set("month", String(params.month));
+  if (params?.year) qs.set("year", String(params.year));
+
+  const res = await fetch(`${BASE}/reports/spend-by-category?${qs}`, {
     credentials: "include",
-    headers: xsrfHeaders(),
+    headers: readHeaders(),
   });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || "Error al eliminar consumo");
-  }
+  if (!res.ok) throw new Error("Error al cargar reporte por categoría");
+  const json = await res.json();
+  return json.data || [];
+}
+
+export async function getSpendByDistributor(params?: {
+  month?: number;
+  year?: number;
+}): Promise<SpendByDistributor[]> {
+  const qs = new URLSearchParams();
+  if (params?.month) qs.set("month", String(params.month));
+  if (params?.year) qs.set("year", String(params.year));
+
+  const res = await fetch(`${BASE}/reports/spend-by-distributor?${qs}`, {
+    credentials: "include",
+    headers: readHeaders(),
+  });
+  if (!res.ok) throw new Error("Error al cargar reporte por distribuidor");
+  const json = await res.json();
+  return json.data || [];
+}
+
+export async function getPriceHistory(productId: number): Promise<PriceHistoryPoint[]> {
+  const res = await fetch(`${BASE}/reports/price-history/${productId}`, {
+    credentials: "include",
+    headers: readHeaders(),
+  });
+  if (!res.ok) throw new Error("Error al cargar histórico de precios");
+  const json = await res.json();
+  return json.data || [];
 }

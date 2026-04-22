@@ -2,7 +2,7 @@ export interface InventoryCategory {
   id: number;
   user_id: number;
   name: string;
-  color: string;
+  products_count?: number;
   created_at: string;
   updated_at: string;
 }
@@ -21,12 +21,16 @@ export interface InventoryProduct {
   category?: InventoryCategory;
 }
 
+export interface Distributor {
+  id: number;
+  name: string;
+}
+
 export interface InventoryPurchase {
   id: number;
   user_id: number;
-  category_id: number;
-  product_id: number | null;
-  item_name: string;
+  product_id: number;
+  distributor_id: number | null;
   quantity: number;
   unit_price: number;
   total_price: number;
@@ -34,9 +38,9 @@ export interface InventoryPurchase {
   notes: string | null;
   created_at: string;
   updated_at: string;
-  category?: InventoryCategory;
-  product?: InventoryProduct | null;
-  user?: { id: number; first_name: string; last_name: string; name: string };
+  product?: InventoryProduct & { category?: InventoryCategory };
+  user?: { id: number; name: string };
+  distributor?: Distributor | null;
 }
 
 export interface InventoryUsage {
@@ -52,49 +56,67 @@ export interface InventoryUsage {
   created_at: string;
   updated_at: string;
   product?: InventoryProduct & { category?: InventoryCategory };
-  user?: { id: number; first_name: string; last_name: string; name: string };
-  medical_evaluation?: {
-    patient?: { id: number; first_name: string; last_name: string };
-  };
+  user?: { id: number; name: string };
+  medical_evaluation?: { id: number };
 }
 
 export interface InventorySummaryData {
-  month: number;
-  year: number;
+  total_income: number;
   total_expenses: number;
-  expenses_variation?: number | null;
-  by_category: { category: string; color: string; total: number }[];
-  // solo admin:
-  total_income?: number;
-  income_variation?: number | null;
-  net_profit?: number;
-  profit_variation?: number | null;
+  net_profit: number;
 }
 
 export interface PurchaseFormValues {
-  category_id: number | "";
   product_id: number | null;
-  item_name: string;
+  // Campos para nuevo producto (solo cuando product_id es null)
+  name: string;
+  category_id: number | "";
+  type: "insumo" | "equipo" | "";
+  description: string;
+  // Campos de compra
+  distributor_id: number | null;
   quantity: number | "";
   unit_price: number | "";
-  purchase_date: string;
   notes: string;
 }
 
-export interface ProductFormValues {
-  category_id: number | "";
-  name: string;
-  description: string;
-  unit_price: number | "";
-  stock: number | "";
-}
+export type UsageItem = {
+  product_id: number;
+  quantity: number | "";
+};
 
 export interface UsageFormValues {
-  product_id: number | "";
-  quantity: number | "";
+  items: UsageItem[];
   usage_date: string;
   status: "con_paciente" | "sin_paciente" | "";
   reason: string;
   medical_evaluation_id: number | null;
   notes: string;
+}
+
+export interface UsageApiError {
+  message: string;
+  error_code: "insufficient_stock" | "equipo_no_consumible";
+  product_name?: string;
+}
+
+// Reports types
+export interface SpendByCategory {
+  category_id: number;
+  category_name: string;
+  amount: number;
+  count: number;
+}
+
+export interface SpendByDistributor {
+  distributor_id: number;
+  distributor_name: string;
+  amount: number;
+  count: number;
+}
+
+export interface PriceHistoryPoint {
+  date: string;
+  price: number;
+  purchase_id: number;
 }

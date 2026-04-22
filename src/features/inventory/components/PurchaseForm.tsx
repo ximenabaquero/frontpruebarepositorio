@@ -2,50 +2,57 @@
 
 import { useState, useEffect } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import { createPurchase, updatePurchase } from "../services/inventoryService";
+import { createPurchase, getDistributors } from "../services/inventoryService";
 import type {
   InventoryCategory,
-  InventoryPurchase,
+  InventoryProduct,
+  Distributor,
   PurchaseFormValues,
 } from "../types";
 
 type Props = {
   categories: InventoryCategory[];
-  editing?: InventoryPurchase | null;
+  products: InventoryProduct[];
   onClose: () => void;
   onSaved: () => void;
 };
 
 const EMPTY: PurchaseFormValues = {
-  category_id: "",
   product_id: null,
-  item_name: "",
+  name: "",
+  category_id: "",
+  type: "",
+  description: "",
+  distributor_id: null,
   quantity: "",
   unit_price: "",
-  purchase_date: new Date().toISOString().slice(0, 10),
   notes: "",
 };
 
-export default function PurchaseForm({ categories, editing, onClose, onSaved }: Props) {
+export default function PurchaseForm({ categories, products, onClose, onSaved }: Props) {
   const [form, setForm] = useState<PurchaseFormValues>(EMPTY);
+  const [isNewProduct, setIsNewProduct] = useState(false);
+  const [distributors, setDistributors] = useState<Distributor[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (editing) {
-      setForm({
-        category_id: editing.category_id,
-        product_id: null,
-        item_name: editing.item_name,
-        quantity: editing.quantity,
-        unit_price: editing.unit_price,
-        purchase_date: editing.purchase_date.slice(0, 10),
-        notes: editing.notes ?? "",
-      });
+    getDistributors().then(setDistributors).catch(() => setDistributors([]));
+  }, []);
+
+  const total =
+    form.quantity !== "" && form.unit_price !== ""
+      ? (Number(form.quantity) * Number(form.unit_price)).toLocaleString("es-CO")
+      : "—";
+
+  function handleProductSelect(e: React.ChangeEvent<HTMLSelectElement>) {
+    const val = e.target.value;
+    if (val === "") {
+      setForm((prev) => ({ ...prev, product_id: null }));
     } else {
-      setForm(EMPTY);
+      setForm((prev) => ({ ...prev, product_id: Number(val) }));
     }
-  }, [editing]);
+  }
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -54,22 +61,42 @@ export default function PurchaseForm({ categories, editing, onClose, onSaved }: 
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
-  const total =
-    form.quantity !== "" && form.unit_price !== ""
-      ? (Number(form.quantity) * Number(form.unit_price)).toLocaleString("es-CO")
-      : "—";
+  function toggleNewProduct(val: boolean) {
+    setIsNewProduct(val);
+    setForm((prev) => ({
+      ...prev,
+      product_id: val ? null : prev.product_id,
+      name: "",
+      category_id: "",
+      type: "",
+      description: "",
+    }));
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.category_id) { setError("Selecciona una categoría."); return; }
-    setSaving(true);
     setError(null);
+
+    if (!isNewProduct && !form.product_id) {
+      setError("Selecciona un producto existente o crea uno nuevo.");
+      return;
+    }
+    if (isNewProduct && !form.name.trim()) {
+      setError("El nombre del producto es requerido.");
+      return;
+    }
+    if (isNewProduct && !form.category_id) {
+      setError("La categoría es requerida para el nuevo producto.");
+      return;
+    }
+    if (isNewProduct && !form.type) {
+      setError("El tipo de producto es requerido.");
+      return;
+    }
+
+    setSaving(true);
     try {
-      if (editing) {
-        await updatePurchase(editing.id, form);
-      } else {
-        await createPurchase(form);
-      }
+      await createPurchase(form);
       onSaved();
       onClose();
     } catch (err: unknown) {
@@ -82,54 +109,151 @@ export default function PurchaseForm({ categories, editing, onClose, onSaved }: 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
       <div className="w-full max-w-lg rounded-2xl bg-white shadow-xl overflow-hidden">
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h3 className="font-semibold text-gray-800">
-            {editing ? "Editar compra" : "Registrar compra"}
-          </h3>
+          <h3 className="font-semibold text-gray-800">Registrar compra</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
             <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
-          {/* Categoría */}
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              Categoría <span className="text-rose-400">*</span>
-            </label>
-            <select
-              name="category_id"
-              value={form.category_id}
-              onChange={handleChange}
-              required
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4 max-h-[80vh] overflow-y-auto">
+
+          {/* Toggle: producto existente vs nuevo */}
+          <div className="flex rounded-lg border border-gray-200 overflow-hidden text-sm font-medium">
+            <button
+              type="button"
+              onClick={() => toggleNewProduct(false)}
+              className={`flex-1 py-2 transition-colors ${!isNewProduct ? "bg-indigo-600 text-white" : "bg-white text-gray-600 hover:bg-gray-50"}`}
             >
-              <option value="">Selecciona una categoría...</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
+              Producto existente
+            </button>
+            <button
+              type="button"
+              onClick={() => toggleNewProduct(true)}
+              className={`flex-1 py-2 transition-colors ${isNewProduct ? "bg-indigo-600 text-white" : "bg-white text-gray-600 hover:bg-gray-50"}`}
+            >
+              Nuevo producto
+            </button>
           </div>
 
-          {/* Nombre del ítem */}
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              Descripción / Producto <span className="text-rose-400">*</span>
-            </label>
-            <input
-              type="text"
-              name="item_name"
-              value={form.item_name}
-              onChange={handleChange}
-              required
-              maxLength={200}
-              placeholder="Ej: Fajas Stage 2 talla M, Anestesia lidocaína..."
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            />
-          </div>
+          {/* Selector de producto existente */}
+          {!isNewProduct && (
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                Producto <span className="text-rose-400">*</span>
+              </label>
+              <select
+                value={form.product_id ?? ""}
+                onChange={handleProductSelect}
+                required
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              >
+                <option value="">Selecciona un producto...</option>
+                {products.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} {p.category ? `(${p.category.name})` : ""} — Stock: {p.stock}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Campos para nuevo producto */}
+          {isNewProduct && (
+            <>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">
+                  Nombre del producto <span className="text-rose-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  required
+                  maxLength={100}
+                  placeholder="Ej: Fajas Stage 2 talla M, Lidocaína..."
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    Categoría <span className="text-rose-400">*</span>
+                  </label>
+                  <select
+                    name="category_id"
+                    value={form.category_id}
+                    onChange={handleChange}
+                    required
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  >
+                    <option value="">Seleccionar...</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    Tipo <span className="text-rose-400">*</span>
+                  </label>
+                  <select
+                    name="type"
+                    value={form.type}
+                    onChange={handleChange}
+                    required
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  >
+                    <option value="">Seleccionar...</option>
+                    <option value="insumo">Insumo</option>
+                    <option value="equipo">Equipo</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">
+                  Descripción (opcional)
+                </label>
+                <input
+                  type="text"
+                  name="description"
+                  value={form.description}
+                  onChange={handleChange}
+                  maxLength={255}
+                  placeholder="Descripción breve del producto..."
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                />
+              </div>
+            </>
+          )}
+
+          {/* Distribuidor */}
+          {distributors.length > 0 && (
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                Distribuidor (opcional)
+              </label>
+              <select
+                name="distributor_id"
+                value={form.distributor_id ?? ""}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    distributor_id: e.target.value ? Number(e.target.value) : null,
+                  }))
+                }
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              >
+                <option value="">Sin distribuidor</option>
+                {distributors.map((d) => (
+                  <option key={d.id} value={d.id}>{d.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Cantidad y precio */}
           <div className="grid grid-cols-2 gap-4">
@@ -168,25 +292,10 @@ export default function PurchaseForm({ categories, editing, onClose, onSaved }: 
 
           {/* Total calculado */}
           <div className="rounded-lg bg-gray-50 border border-gray-200 px-4 py-2 flex justify-between items-center">
-            <span className="text-xs text-gray-500 font-medium">Total calculado</span>
+            <span className="text-xs text-gray-500 font-medium">Total estimado</span>
             <span className="text-sm font-bold text-gray-800">
               {total !== "—" ? `$${total}` : "—"}
             </span>
-          </div>
-
-          {/* Fecha */}
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              Fecha de compra <span className="text-rose-400">*</span>
-            </label>
-            <input
-              type="date"
-              name="purchase_date"
-              value={form.purchase_date}
-              onChange={handleChange}
-              required
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            />
           </div>
 
           {/* Notas */}
@@ -199,15 +308,14 @@ export default function PurchaseForm({ categories, editing, onClose, onSaved }: 
               value={form.notes}
               onChange={handleChange}
               rows={2}
-              maxLength={1000}
-              placeholder="Proveedor, observaciones..."
+              maxLength={500}
+              placeholder="Observaciones adicionales..."
               className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
             />
           </div>
 
           {error && <p className="text-xs text-rose-500">{error}</p>}
 
-          {/* Botones */}
           <div className="flex justify-end gap-2 pt-1">
             <button
               type="button"
@@ -221,7 +329,7 @@ export default function PurchaseForm({ categories, editing, onClose, onSaved }: 
               disabled={saving}
               className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
             >
-              {saving ? "Guardando..." : editing ? "Actualizar" : "Registrar"}
+              {saving ? "Guardando..." : "Registrar"}
             </button>
           </div>
         </form>
