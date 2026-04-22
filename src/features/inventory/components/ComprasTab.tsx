@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDownTrayIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import PageHeader from "./PageHeader";
 import PurchaseTable from "./PurchaseTable";
 import type { InventoryPurchase } from "../types";
@@ -35,13 +35,6 @@ export default function ComprasTab({
         title="Compras"
         subtitle="Historial de órdenes y proveedores."
         actions={[
-          <button
-            key="export"
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            <ArrowDownTrayIcon className="w-4 h-4" />
-            Exportar
-          </button>,
           <button
             key="purchase"
             onClick={onOpenPurchase}
