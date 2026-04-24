@@ -87,11 +87,9 @@ export type UsageItem = {
 
 export interface UsageFormValues {
   items: UsageItem[];
-  usage_date: string;
   status: "con_paciente" | "sin_paciente" | "";
   reason: string;
   medical_evaluation_id: number | null;
-  notes: string;
 }
 
 export interface UsageApiError {

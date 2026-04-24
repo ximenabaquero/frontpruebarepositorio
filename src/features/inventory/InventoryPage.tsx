@@ -34,11 +34,6 @@ import type {
   Distributor,
 } from "./types";
 
-const MONTHS = [
-  "Enero","Febrero","Marzo","Abril","Mayo","Junio",
-  "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre",
-];
-
 type TabType = "stock" | "consumos" | "compras" | "reportes" | "catalogo" | "distribuidores";
 
 export default function InventoryPage() {
@@ -47,8 +42,6 @@ export default function InventoryPage() {
   const isAdmin = user?.role === "ADMIN";
 
   const now = new Date();
-  const [month, setMonth] = useState(now.getMonth() + 1);
-  const [year, setYear] = useState(now.getFullYear());
 
   const [categories, setCategories] = useState<InventoryCategory[]>([]);
   const [products, setProducts] = useState<InventoryProduct[]>([]);
@@ -65,8 +58,6 @@ export default function InventoryPage() {
   const [showUsageForm, setShowUsageForm] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<InventoryProduct | undefined>();
 
-  const years = Array.from({ length: 4 }, (_, i) => now.getFullYear() - i);
-
   const loadCategories = useCallback(async () => {
     try { setCategories(await getCategories()); } catch { /* silencioso */ }
   }, []);
@@ -77,17 +68,17 @@ export default function InventoryPage() {
 
   const loadPurchases = useCallback(async () => {
     setLoadingPurchases(true);
-    try { setPurchases(await getPurchases({ month, year })); }
+    try { setPurchases(await getPurchases()); }
     catch { setPurchases([]); }
     finally { setLoadingPurchases(false); }
-  }, [month, year]);
+  }, []);
 
   const loadUsages = useCallback(async () => {
     setLoadingUsages(true);
-    try { setUsages(await getUsages({ month, year })); }
+    try { setUsages(await getUsages()); }
     catch { setUsages([]); }
     finally { setLoadingUsages(false); }
-  }, [month, year]);
+  }, []);
 
   const loadDistributors = useCallback(async () => {
     try { setDistributors(await getDistributors()); } catch { setDistributors([]); }
@@ -148,34 +139,14 @@ export default function InventoryPage() {
               active="inventory"
             />
 
-            {/* Título + filtros mes/año */}
-            <div className="mt-3 flex flex-wrap items-start justify-between gap-3 mb-6">
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                  Gestión de Inventario
-                </h1>
-                <p className="mt-1 text-sm text-gray-500">
-                  Control completo de stock, compras y consumos.
-                </p>
-              </div>
-              <div className="flex items-center gap-2 mt-1">
-                <select
-                  value={month}
-                  onChange={(e) => setMonth(Number(e.target.value))}
-                  className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                >
-                  {MONTHS.map((m, i) => (
-                    <option key={i + 1} value={i + 1}>{m}</option>
-                  ))}
-                </select>
-                <select
-                  value={year}
-                  onChange={(e) => setYear(Number(e.target.value))}
-                  className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                >
-                  {years.map((y) => <option key={y} value={y}>{y}</option>)}
-                </select>
-              </div>
+            {/* Título */}
+            <div className="mt-3 mb-6">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                Gestión de Inventario
+              </h1>
+              <p className="mt-1 text-sm text-gray-500">
+                Control completo de stock, compras y consumos.
+              </p>
             </div>
 
             {/* Tarjetas de resumen (solo admin) */}
@@ -227,8 +198,6 @@ export default function InventoryPage() {
                 )}
                 {activeTab === "reportes" && (
                   <ReportesTab
-                    month={month}
-                    year={year}
                     products={products}
                   />
                 )}

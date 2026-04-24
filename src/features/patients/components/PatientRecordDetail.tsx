@@ -16,9 +16,11 @@ import ClinicalRecordView from "./ClinicalRecordView";
 import ConfirmacionModal from "./ConfirmacionModal";
 import EditarEvaluacionModal from "./EditarEvaluacionModal";
 import EditarProcedimientoModal from "./EditarProcedimientoModal";
+import SuppliesRegistrationModal from "./SuppliesRegistrationModal";
 import InvoicePdf from "./InvoicePdf";
 import HistoriaClinicaPdf from "./HistoriaClinicaPdf";
 import type { Procedure } from "../types";
+import type { InventoryProduct } from "@/features/inventory/types";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
 
@@ -51,12 +53,19 @@ export default function PatientRecordDetail({ patientId, evaluationId }: Props) 
   const [editingProc, setEditingProc] = useState<Procedure | null>(null);
   const [isChangingStatus, setIsChangingStatus] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [showSuppliesModal, setShowSuppliesModal] = useState(false);
 
   const { data, error, isLoading, mutate } = useSWR(
     evaluationId
       ? `${apiBaseUrl}/api/v1/patients/${patientId}/clinical-records/${evaluationId}`
       : null,
     fetcher,
+  );
+
+  // Fetch de productos de inventario
+  const { data: productsData } = useSWR<{ data: InventoryProduct[] }>(
+    `${apiBaseUrl}/api/v1/inventory/products`,
+    fetcher
   );
 
   const handleStatusChange = async (action: "confirmar" | "cancelar") => {
@@ -223,6 +232,7 @@ export default function PatientRecordDetail({ patientId, evaluationId }: Props) 
                 status={status}
                 onEditEval={() => setShowEditEval(true)}
                 onEditProc={(proc) => setEditingProc(proc)}
+                onRegisterSupplies={() => setShowSuppliesModal(true)}
               />
             </div>
           </div>
@@ -304,6 +314,18 @@ export default function PatientRecordDetail({ patientId, evaluationId }: Props) 
           }}
           onClose={() => setEditingProc(null)}
           onSaved={() => mutate()}
+        />
+      )}
+
+      {showSuppliesModal && productsData?.data && (
+        <SuppliesRegistrationModal
+          evaluationId={evaluationId}
+          products={productsData.data}
+          onClose={() => setShowSuppliesModal(false)}
+          onSaved={() => {
+            mutate();
+            setShowSuppliesModal(false);
+          }}
         />
       )}
 

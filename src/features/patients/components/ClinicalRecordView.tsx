@@ -11,10 +11,11 @@ type Props = {
   status?: "EN_ESPERA" | "CONFIRMADO" | "CANCELADO";
   onEditEval: () => void;
   onEditProc: (proc: Procedure) => void;
+  onRegisterSupplies?: () => void;
 };
 
 const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
-  ({ evaluation, currentYear, isConfirmed, status = "EN_ESPERA", onEditEval, onEditProc }, ref) => {
+  ({ evaluation, currentYear, isConfirmed, status = "EN_ESPERA", onEditEval, onEditProc, onRegisterSupplies }, ref) => {
     const { patient, procedures } = evaluation;
 
     const procedureDate = procedures?.[0]?.procedure_date ?? evaluation.created_at;
@@ -185,9 +186,20 @@ const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
 
           {/* Procedimientos */}
           <section>
-            <div className="flex items-center gap-2 mb-4">
-              <span className="h-5 w-1 bg-emerald-500 rounded-full" />
-              <h3 className="text-lg font-semibold text-gray-800 tracking-tight">Procedimientos y precios</h3>
+            <div className="flex items-center justify-between gap-2 mb-4">
+              <div className="flex items-center gap-2">
+                <span className="h-5 w-1 bg-emerald-500 rounded-full" />
+                <h3 className="text-lg font-semibold text-gray-800 tracking-tight">Procedimientos y precios</h3>
+              </div>
+              {onRegisterSupplies && status !== "CANCELADO" && (
+                <button
+                  onClick={onRegisterSupplies}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition print:hidden"
+                >
+                  <span className="text-base">💉</span>
+                  Registrar insumos
+                </button>
+              )}
             </div>
             {procedures.map((proc) => (
               <div key={proc.id} className="space-y-4 mb-8">

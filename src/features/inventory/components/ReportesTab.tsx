@@ -19,12 +19,10 @@ import type {
 } from "../types";
 
 interface ReportesTabProps {
-  month: number;
-  year: number;
   products: InventoryProduct[];
 }
 
-export default function ReportesTab({ month, year, products }: ReportesTabProps) {
+export default function ReportesTab({ products }: ReportesTabProps) {
   const [spendByCategory, setSpendByCategory] = useState<SpendByCategory[]>([]);
   const [spendByDistributor, setSpendByDistributor] = useState<SpendByDistributor[]>([]);
   const [priceHistory, setPriceHistory] = useState<PriceHistoryPoint[]>([]);
@@ -39,8 +37,8 @@ export default function ReportesTab({ month, year, products }: ReportesTabProps)
       setLoading(true);
       try {
         const [categoryData, distributorData] = await Promise.all([
-          getSpendByCategory({ month, year }),
-          getSpendByDistributor({ month, year }),
+          getSpendByCategory(),
+          getSpendByDistributor(),
         ]);
         setSpendByCategory(categoryData);
         setSpendByDistributor(distributorData);
@@ -51,7 +49,7 @@ export default function ReportesTab({ month, year, products }: ReportesTabProps)
       }
     };
     load();
-  }, [month, year]);
+  }, []);
 
   // Load price history when product changes
   useEffect(() => {
