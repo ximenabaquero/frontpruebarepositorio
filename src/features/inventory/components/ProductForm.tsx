@@ -1,192 +1,182 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import type { InventoryCategory, InventoryProduct, ProductFormValues } from "../types";
-import { createProduct, updateProduct } from "../services/inventoryService";
+import toast from "react-hot-toast";
+import { createProduct } from "../services/inventoryService";
+import type { InventoryCategory } from "../types";
 
-interface Props {
+type Props = {
   categories: InventoryCategory[];
-  editing: InventoryProduct | null;
   onClose: () => void;
   onSaved: () => void;
-}
-
-const EMPTY: ProductFormValues = {
-  category_id: "",
-  name: "",
-  description: "",
-  unit_price: "",
-  stock: "",
 };
 
-export default function ProductForm({ categories, editing, onClose, onSaved }: Props) {
-  const [form, setForm] = useState<ProductFormValues>(EMPTY);
+type ProductFormData = {
+  name: string;
+  category_id: string;
+  type: "insumo" | "equipo" | "";
+  description: string;
+};
+
+const EMPTY: ProductFormData = {
+  name: "",
+  category_id: "",
+  type: "",
+  description: "",
+};
+
+export default function ProductForm({ categories, onClose, onSaved }: Props) {
+  const [form, setForm] = useState<ProductFormData>(EMPTY);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (editing) {
-      setForm({
-        category_id: editing.category_id,
-        name: editing.name,
-        description: editing.description ?? "",
-        unit_price: editing.unit_price,
-        stock: editing.stock,
-      });
-    } else {
-      setForm(EMPTY);
-    }
-    setError("");
-  }, [editing]);
-
-  function set<K extends keyof ProductFormValues>(key: K, value: ProductFormValues[K]) {
-    setForm((prev) => ({ ...prev, [key]: value }));
+  function handleChange(
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
+    setError(null);
 
-    if (!form.category_id) { setError("Selecciona una categoría."); return; }
-    if (!form.name.trim()) { setError("El nombre es requerido."); return; }
-    if (form.unit_price === "" || Number(form.unit_price) < 0) { setError("El precio unitario debe ser ≥ 0."); return; }
-    if (form.stock === "" || Number(form.stock) < 0) { setError("El stock inicial debe ser ≥ 0."); return; }
+    if (!form.name.trim()) {
+      setError("El nombre del producto es obligatorio.");
+      return;
+    }
+    if (!form.category_id) {
+      setError("Selecciona una categoría.");
+      return;
+    }
+    if (!form.type) {
+      setError("Selecciona el tipo de producto.");
+      return;
+    }
 
     setSaving(true);
     try {
-      if (editing) {
-        await updateProduct(editing.id, form);
-      } else {
-        await createProduct(form);
-      }
+      await createProduct({
+        name: form.name.trim(),
+        category_id: Number(form.category_id),
+        type: form.type as "insumo" | "equipo",
+        description: form.description.trim(),
+      });
+      toast.success("Producto creado correctamente");
       onSaved();
       onClose();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Error al guardar");
+      setError(err instanceof Error ? err.message : "Error al crear producto");
     } finally {
       setSaving(false);
     }
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-          <h2 className="text-lg font-semibold text-gray-900">
-            {editing ? "Editar producto" : "Nuevo producto"}
-          </h2>
-          <button
-            onClick={onClose}
-            className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
-          >
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
+      <div className="w-full max-w-lg rounded-2xl bg-white shadow-xl overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <h3 className="font-semibold text-gray-800">Agregar producto nuevo</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
             <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {error && (
-            <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-              {error}
-            </div>
-          )}
-
+        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Categoría <span className="text-red-500">*</span>
-            </label>
-            <select
-              value={form.category_id}
-              onChange={(e) => set("category_id", e.target.value !== "" ? Number(e.target.value) : "")}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              required
-            >
-              <option value="">Seleccionar...</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nombre <span className="text-red-500">*</span>
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              Nombre del producto <span className="text-rose-400">*</span>
             </label>
             <input
               type="text"
+              name="name"
               value={form.name}
-              onChange={(e) => set("name", e.target.value)}
-              maxLength={200}
-              placeholder="Ej: Lidocaína 2%"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              onChange={handleChange}
               required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Descripción
-            </label>
-            <textarea
-              value={form.description}
-              onChange={(e) => set("description", e.target.value)}
-              maxLength={500}
-              rows={2}
-              placeholder="Opcional — presentación, concentración, etc."
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
+              maxLength={100}
+              placeholder="Ej: Fajas Stage 2 talla M, Lidocaína..."
+              autoFocus
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Precio unitario <span className="text-red-500">*</span>
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                Categoría <span className="text-rose-400">*</span>
               </label>
-              <input
-                type="number"
-                min={0}
-                step={0.01}
-                value={form.unit_price}
-                onChange={(e) => set("unit_price", e.target.value !== "" ? Number(e.target.value) : "")}
-                placeholder="0"
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              <select
+                name="category_id"
+                value={form.category_id}
+                onChange={handleChange}
                 required
-              />
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              >
+                <option value="">Seleccionar...</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Stock inicial <span className="text-red-500">*</span>
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                Tipo <span className="text-rose-400">*</span>
               </label>
-              <input
-                type="number"
-                min={0}
-                step={1}
-                value={form.stock}
-                onChange={(e) => set("stock", e.target.value !== "" ? Number(e.target.value) : "")}
-                placeholder="0"
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              <select
+                name="type"
+                value={form.type}
+                onChange={handleChange}
                 required
-              />
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              >
+                <option value="">Seleccionar...</option>
+                <option value="insumo">Insumo</option>
+                <option value="equipo">Equipo</option>
+              </select>
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-2">
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              Descripción (opcional)
+            </label>
+            <textarea
+              name="description"
+              value={form.description}
+              onChange={handleChange}
+              maxLength={255}
+              rows={2}
+              placeholder="Descripción breve del producto..."
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
+            />
+          </div>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
+            <p className="text-xs text-blue-700">
+              <strong>Nota:</strong> El producto se creará con stock inicial de 0. 
+              Después puedes registrar la primera compra desde "Registrar compra".
+            </p>
+          </div>
+
+          {error && <p className="text-xs text-rose-500">{error}</p>}
+
+          <div className="flex justify-end gap-2 pt-1">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
             >
-              {saving ? "Guardando..." : editing ? "Guardar cambios" : "Crear producto"}
+              {saving ? "Creando..." : "Crear producto"}
             </button>
           </div>
         </form>

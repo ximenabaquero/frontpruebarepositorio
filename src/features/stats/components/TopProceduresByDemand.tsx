@@ -38,6 +38,11 @@ export default function TopProceduresByDemand() {
       </p>
 
       {/* Lista */}
+      {data.length === 0 ? (
+        <p className="text-sm text-gray-400 italic text-center py-4">
+          Sin datos para el periodo actual.
+        </p>
+      ) : (
       <div className="space-y-3">
         {data.map((item: any, index: number) => {
           const color = numberColors[index % numberColors.length];
@@ -65,6 +70,7 @@ export default function TopProceduresByDemand() {
           );
         })}
       </div>
+      )}
     </div>
   );
 }

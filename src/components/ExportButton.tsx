@@ -7,12 +7,16 @@ interface Props {
   targetRef?: React.RefObject<HTMLDivElement | null>;
   filename?: string;
   label?: string;
+  className?: string;
+  onExportStart?: () => void;
 }
 
 export default function ExportButton({
   targetRef,
   filename = "historia-clinica.pdf",
   label,
+  className,
+  onExportStart,
 }: Props) {
   const [isExporting, setIsExporting] = useState(false);
 
@@ -23,6 +27,7 @@ export default function ExportButton({
       return;
     }
 
+    onExportStart?.();
     setIsExporting(true);
     try {
       const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
@@ -80,9 +85,9 @@ export default function ExportButton({
       type="button"
       onClick={handleExport}
       disabled={isExporting}
-      className="inline-flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:shadow-lg hover:shadow-blue-300 transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-60 disabled:cursor-not-allowed"
+      className={className ?? "inline-flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:shadow-lg hover:shadow-blue-300 transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-60 disabled:cursor-not-allowed"}
     >
-      <ArrowDownTrayIcon className="h-5 w-5" />
+      <ArrowDownTrayIcon className={className ? "h-4 w-4 text-gray-400" : "h-5 w-5"} />
       {isExporting ? "Exportando..." : (label ?? "Exportar a PDF")}
     </button>
   );

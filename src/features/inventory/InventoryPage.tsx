@@ -2,37 +2,39 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { PlusIcon, FunnelIcon } from "@heroicons/react/24/outline";
-import toast from "react-hot-toast";
-import ConfirmModal from "@/components/ConfirmModal";
 
 import MainLayout from "@/layouts/MainLayout";
 import AuthGuard from "@/components/AuthGuard";
 import RegisterHeaderBar from "@/features/post-login/components/RegisterHeaderBar";
 import { useAuth } from "@/features/auth/AuthContext";
 
+import InventorySidebar from "./components/InventorySidebar";
 import InventorySummaryCards from "./components/InventorySummaryCards";
-import CategoryManager from "./components/CategoryManager";
-import ProductCatalog from "./components/ProductCatalog";
+import StockTab from "./components/StockTab";
+import ConsumosTab from "./components/ConsumosTab";
+import ComprasTab from "./components/ComprasTab";
+import ReportesTab from "./components/ReportesTab";
+import CatalogoTab from "./components/CatalogoTab";
+import DistribuidoresTab from "./components/DistribuidoresTab";
 import PurchaseForm from "./components/PurchaseForm";
-import PurchaseTable from "./components/PurchaseTable";
+import UsageForm from "./components/UsageForm";
 
 import {
   getCategories,
   getPurchases,
-  deletePurchase,
   getProducts,
+  getUsages,
+  getDistributors,
 } from "./services/inventoryService";
 import type {
   InventoryCategory,
   InventoryProduct,
   InventoryPurchase,
+  InventoryUsage,
+  Distributor,
 } from "./types";
 
-const MONTHS = [
-  "Enero","Febrero","Marzo","Abril","Mayo","Junio",
-  "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre",
-];
+type TabType = "stock" | "consumos" | "compras" | "reportes" | "catalogo" | "distribuidores";
 
 export default function InventoryPage() {
   const router = useRouter();
@@ -40,76 +42,87 @@ export default function InventoryPage() {
   const isAdmin = user?.role === "ADMIN";
 
   const now = new Date();
-  const [month, setMonth] = useState(now.getMonth() + 1);
-  const [year, setYear] = useState(now.getFullYear());
-  const [filterCategory, setFilterCategory] = useState<number | "">("");
 
   const [categories, setCategories] = useState<InventoryCategory[]>([]);
   const [products, setProducts] = useState<InventoryProduct[]>([]);
   const [purchases, setPurchases] = useState<InventoryPurchase[]>([]);
+  const [usages, setUsages] = useState<InventoryUsage[]>([]);
+  const [distributors, setDistributors] = useState<Distributor[]>([]);
+
   const [loadingPurchases, setLoadingPurchases] = useState(true);
+  const [loadingUsages, setLoadingUsages] = useState(true);
+
+  const [activeTab, setActiveTab] = useState<TabType>("stock");
 
   const [showPurchaseForm, setShowPurchaseForm] = useState(false);
-  const [editingPurchase, setEditingPurchase] = useState<InventoryPurchase | null>(null);
-  const [confirmDeletePurchase, setConfirmDeletePurchase] = useState<InventoryPurchase | null>(null);
-
-  const years = Array.from({ length: 4 }, (_, i) => now.getFullYear() - i);
+  const [showUsageForm, setShowUsageForm] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<InventoryProduct | undefined>();
 
   const loadCategories = useCallback(async () => {
-    try {
-      const data = await getCategories();
-      setCategories(data);
-    } catch {
-      // silencioso
-    }
+    try { setCategories(await getCategories()); } catch { /* silencioso */ }
   }, []);
 
   const loadProducts = useCallback(async () => {
-    try {
-      const data = await getProducts();
-      setProducts(data);
-    } catch {
-      setProducts([]);
-    }
+    try { setProducts(await getProducts()); } catch { setProducts([]); }
   }, []);
 
   const loadPurchases = useCallback(async () => {
     setLoadingPurchases(true);
-    try {
-      const data = await getPurchases({
-        month,
-        year,
-        category_id: filterCategory !== "" ? filterCategory : undefined,
-      });
-      setPurchases(data);
-    } catch {
-      setPurchases([]);
-    } finally {
-      setLoadingPurchases(false);
-    }
-  }, [month, year, filterCategory]);
+    try { setPurchases(await getPurchases()); }
+    catch { setPurchases([]); }
+    finally { setLoadingPurchases(false); }
+  }, []);
+
+  const loadUsages = useCallback(async () => {
+    setLoadingUsages(true);
+    try { setUsages(await getUsages()); }
+    catch { setUsages([]); }
+    finally { setLoadingUsages(false); }
+  }, []);
+
+  const loadDistributors = useCallback(async () => {
+    try { setDistributors(await getDistributors()); } catch { setDistributors([]); }
+  }, []);
 
   useEffect(() => { loadCategories(); }, [loadCategories]);
   useEffect(() => { loadProducts(); }, [loadProducts]);
   useEffect(() => { loadPurchases(); }, [loadPurchases]);
+  useEffect(() => { loadUsages(); }, [loadUsages]);
+  useEffect(() => { loadDistributors(); }, [loadDistributors]);
 
-  function handleEdit(p: InventoryPurchase) {
-    setEditingPurchase(p);
+  // Calculate stats for sidebar
+  const insumos = products.filter((p) => p.type === "insumo");
+  const criticalCount = insumos.filter((p) => p.stock === 0 || p.stock < 5).length;
+  const lowCount = insumos.filter((p) => p.stock >= 5 && p.stock < 10).length;
+
+  const todayUsages = usages.filter((u) => {
+    const usageDate = new Date(u.usage_date);
+    return (
+      usageDate.getDate() === now.getDate() &&
+      usageDate.getMonth() === now.getMonth() &&
+      usageDate.getFullYear() === now.getFullYear()
+    );
+  });
+
+  const handleOpenPurchase = (product?: InventoryProduct) => {
+    setSelectedProduct(product);
     setShowPurchaseForm(true);
-  }
+  };
 
-  async function handleConfirmDeletePurchase() {
-    if (!confirmDeletePurchase) return;
-    try {
-      await deletePurchase(confirmDeletePurchase.id);
-      toast.success(isAdmin ? "Compra eliminada" : "Gasto eliminado");
-      loadPurchases();
-    } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : "Error al eliminar");
-    } finally {
-      setConfirmDeletePurchase(null);
-    }
-  }
+  const handleOpenConsume = (product?: InventoryProduct) => {
+    setSelectedProduct(product);
+    setShowUsageForm(true);
+  };
+
+  const handleClosePurchase = () => {
+    setShowPurchaseForm(false);
+    setSelectedProduct(undefined);
+  };
+
+  const handleCloseUsage = () => {
+    setShowUsageForm(false);
+    setSelectedProduct(undefined);
+  };
 
   return (
     <AuthGuard>
@@ -126,112 +139,106 @@ export default function InventoryPage() {
               active="inventory"
             />
 
-            <h1 className="mt-3 text-2xl sm:text-3xl font-bold text-gray-900">
-              {isAdmin ? "Inventario y gastos" : "Mis gastos"}
-            </h1>
-            <p className="mt-1 text-sm text-gray-500">
-              {isAdmin
-                ? "Registra y controla los gastos de la clínica. Ve ingresos vs gastos y tu ganancia neta."
-                : "Registra los insumos y materiales que usaste en la clínica este mes."}
-            </p>
+            {/* Título */}
+            <div className="mt-3 mb-6">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                Gestión de Inventario
+              </h1>
+              <p className="mt-1 text-sm text-gray-500">
+                Control completo de stock, compras y consumos.
+              </p>
+            </div>
 
-            {/* Filtros de periodo */}
-            <div className="mt-5 flex flex-wrap items-center gap-3 mb-6">
-              <div className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 bg-white border border-gray-200 rounded-lg px-3 py-2">
-                <FunnelIcon className="w-3.5 h-3.5" />
-                Filtrar por:
+            {/* Tarjetas de resumen (solo admin) */}
+            {isAdmin && (
+              <div className="mb-6">
+                <InventorySummaryCards isAdmin={isAdmin} />
               </div>
-              <select
-                value={month}
-                onChange={(e) => setMonth(Number(e.target.value))}
-                className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              >
-                {MONTHS.map((m, i) => (
-                  <option key={i + 1} value={i + 1}>{m}</option>
-                ))}
-              </select>
-              <select
-                value={year}
-                onChange={(e) => setYear(Number(e.target.value))}
-                className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              >
-                {years.map((y) => <option key={y} value={y}>{y}</option>)}
-              </select>
-              {categories.length > 0 && (
-                <select
-                  value={filterCategory}
-                  onChange={(e) =>
-                    setFilterCategory(e.target.value !== "" ? Number(e.target.value) : "")
-                  }
-                  className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                >
-                  <option value="">Todas las categorías</option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
-              )}
-            </div>
-
-            {/* Tarjetas de resumen */}
-            <InventorySummaryCards month={month} year={year} isAdmin={isAdmin} />
-
-            {/* Gestión de categorías (solo admin) */}
-            {isAdmin && (
-              <CategoryManager categories={categories} onRefresh={loadCategories} />
             )}
 
-            {/* Catálogo de productos (solo admin) */}
-            {isAdmin && (
-              <ProductCatalog
-                products={products}
-                categories={categories}
-                onRefresh={loadProducts}
+            {/* Main Layout: Sidebar + Content */}
+            <div className="grid grid-cols-[220px_1fr] gap-0 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden min-h-[calc(100vh-300px)]">
+              {/* Sidebar */}
+              <InventorySidebar
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+                productsCount={products.length}
+                distributorsCount={distributors.length}
+                criticalCount={criticalCount}
+                lowCount={lowCount}
+                consumosToday={todayUsages.length}
+                comprasThisMonth={purchases.length}
               />
-            )}
 
-            {/* Compras / Gastos */}
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                {isAdmin ? "Compras registradas" : "Mis gastos registrados"}
-              </h2>
-              <button
-                onClick={() => { setEditingPurchase(null); setShowPurchaseForm(true); }}
-                disabled={categories.length === 0}
-                title={categories.length === 0 ? "No hay categorías disponibles aún" : ""}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <PlusIcon className="w-4 h-4" />
-                {isAdmin ? "Registrar compra" : "Registrar gasto"}
-              </button>
+              {/* Main Content Area */}
+              <main className="py-6 px-7 min-w-0 overflow-auto">
+                {activeTab === "stock" && (
+                  <StockTab
+                    products={products}
+                    categories={categories}
+                    onOpenPurchase={handleOpenPurchase}
+                    onOpenConsume={handleOpenConsume}
+                    isAdmin={isAdmin}
+                  />
+                )}
+                {activeTab === "consumos" && (
+                  <ConsumosTab
+                    usages={usages}
+                    loading={loadingUsages}
+                    onOpenConsume={() => handleOpenConsume()}
+                  />
+                )}
+                {activeTab === "compras" && (
+                  <ComprasTab
+                    purchases={purchases}
+                    loading={loadingPurchases}
+                    isAdmin={isAdmin}
+                    onOpenPurchase={() => handleOpenPurchase()}
+                  />
+                )}
+                {activeTab === "reportes" && (
+                  <ReportesTab
+                    products={products}
+                  />
+                )}
+                {activeTab === "catalogo" && (
+                  <CatalogoTab
+                    products={products}
+                    categories={categories}
+                    isAdmin={isAdmin}
+                    onRefreshCategories={loadCategories}
+                    onRefreshProducts={loadProducts}
+                  />
+                )}
+                {activeTab === "distribuidores" && (
+                  <DistribuidoresTab distributors={distributors} />
+                )}
+              </main>
             </div>
-            <PurchaseTable
-              purchases={purchases}
-              isAdmin={isAdmin}
-              currentUserId={user?.id ?? 0}
-              onEdit={handleEdit}
-              onDelete={(p) => setConfirmDeletePurchase(p)}
-              loading={loadingPurchases}
-            />
           </div>
         </div>
 
-        <ConfirmModal
-          isOpen={confirmDeletePurchase !== null}
-          title={isAdmin ? "Eliminar compra" : "Eliminar gasto"}
-          message={`¿Eliminar "${confirmDeletePurchase?.item_name}"? Esta acción no se puede deshacer.`}
-          confirmLabel="Eliminar"
-          variant="danger"
-          onConfirm={handleConfirmDeletePurchase}
-          onCancel={() => setConfirmDeletePurchase(null)}
-        />
-
+        {/* Modales */}
         {showPurchaseForm && (
           <PurchaseForm
             categories={categories}
-            editing={editingPurchase}
-            onClose={() => setShowPurchaseForm(false)}
-            onSaved={loadPurchases}
+            products={products}
+            onClose={handleClosePurchase}
+            onSaved={() => {
+              loadPurchases();
+              loadProducts();
+            }}
+          />
+        )}
+
+        {showUsageForm && (
+          <UsageForm
+            products={products}
+            onClose={handleCloseUsage}
+            onSaved={() => {
+              loadUsages();
+              loadProducts();
+            }}
           />
         )}
       </MainLayout>

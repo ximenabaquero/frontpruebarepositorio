@@ -17,6 +17,7 @@ import ConversionRateCard from "./components/ConversionRateCard";
 import PatientsMonthlyChart from "./components/PatientsMonthlyChart";
 import AnnualComparisonChart from "./components/AnnualComparisonChart";
 import MonthComparisonChart from "./components/MonthComparisonChart";
+import RevenueForecastCard from "./components/RevenueForecastCard";
 
 import AuthGuard from "@/components/AuthGuard";
 import RoleGuard from "@/components/RoleGuard";
@@ -133,28 +134,15 @@ export default function StatsPage() {
                       </div>
                     </div>
 
-                    {/* Predicciones — placeholder */}
+                    {/* Predicciones */}
                     <div className="mt-8">
                       <div className="flex items-center gap-2 mb-3">
                         <SparklesIcon className="w-5 h-5 text-violet-400" />
                         <h2 className="text-base font-semibold text-gray-900">
                           Predicciones
                         </h2>
-                        <span className="ml-1 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-violet-100 text-violet-600 rounded-full">
-                          Próximamente
-                        </span>
                       </div>
-                      <div className="rounded-2xl border-2 border-dashed border-violet-200 bg-violet-50/40 p-8 flex flex-col items-center text-center gap-3">
-                        <SparklesIcon className="w-10 h-10 text-violet-300" />
-                        <p className="text-sm font-medium text-violet-700">
-                          Análisis predictivo basado en tendencias
-                        </p>
-                        <p className="text-xs text-violet-400 max-w-sm">
-                          Pronto podrás ver proyecciones de ingresos, demanda de
-                          procedimientos y comportamiento de pacientes basadas
-                          en tus datos históricos.
-                        </p>
-                      </div>
+                      <RevenueForecastCard />
                     </div>
                   </>
                 ) : (

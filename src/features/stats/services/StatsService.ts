@@ -16,4 +16,7 @@ export const endpoints = {
   incomeByProcedure: `${apiBaseUrl}/api/v1/stats/income-by-procedure`,
   monthlyIncome: `${apiBaseUrl}/api/v1/stats/income-monthly`,
   weeklyIncome: `${apiBaseUrl}/api/v1/stats/income-weekly`,
+
+  revenueForecast: `${apiBaseUrl}/api/v1/stats/revenue-forecast?periods=3`,
+  revenueTrend: `${apiBaseUrl}/api/v1/stats/revenue-trend`,
 };

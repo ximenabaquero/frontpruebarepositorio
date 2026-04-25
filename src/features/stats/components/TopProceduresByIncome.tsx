@@ -19,7 +19,7 @@ export default function TopProceduresByIncome() {
     return <p className="text-red-500">Error al cargar procedimientos.</p>;
 
   // Tomamos el mayor ingreso para calcular proporciones
-  const maxRevenue = Math.max(...data.map((p: any) => Number(p.total_revenue)));
+  const maxRevenue = data.length > 0 ? Math.max(...data.map((p: any) => Number(p.total_revenue))) : 0;
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-md p-6">
@@ -32,6 +32,11 @@ export default function TopProceduresByIncome() {
       </p>
 
       {/* Lista */}
+      {data.length === 0 ? (
+        <p className="text-sm text-gray-400 italic text-center py-4">
+          Sin datos para el periodo actual.
+        </p>
+      ) : (
       <div className="space-y-4">
         {data.map((proc: any) => {
           const revenue = Number(proc.total_revenue);
@@ -57,6 +62,7 @@ export default function TopProceduresByIncome() {
           );
         })}
       </div>
+      )}
     </div>
   );
 }

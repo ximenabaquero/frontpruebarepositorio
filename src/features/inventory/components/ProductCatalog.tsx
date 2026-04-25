@@ -1,22 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import {
-  PlusIcon,
-  PencilSquareIcon,
-  TrashIcon,
-  CubeIcon,
-} from "@heroicons/react/24/outline";
-import toast from "react-hot-toast";
-import ConfirmModal from "@/components/ConfirmModal";
-import type { InventoryCategory, InventoryProduct } from "../types";
-import { deleteProduct } from "../services/inventoryService";
-import ProductForm from "./ProductForm";
+import { CubeIcon, PlusIcon } from "@heroicons/react/24/outline";
+import type { InventoryProduct } from "../types";
 
 interface Props {
   products: InventoryProduct[];
-  categories: InventoryCategory[];
   onRefresh: () => void;
+  isAdmin?: boolean;
+  onAddProduct?: () => void;
 }
 
 function StockBadge({ stock }: { stock: number }) {
@@ -46,33 +38,14 @@ function StockBadge({ stock }: { stock: number }) {
 
 const COP = new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 });
 
-export default function ProductCatalog({ products, categories, onRefresh }: Props) {
-  const [showForm, setShowForm] = useState(false);
-  const [editing, setEditing] = useState<InventoryProduct | null>(null);
-  const [deletingId, setDeletingId] = useState<number | null>(null);
+export default function ProductCatalog({ products, isAdmin, onAddProduct }: Props) {
   const [filterActive, setFilterActive] = useState<"all" | "active" | "inactive">("active");
-  const [confirmTarget, setConfirmTarget] = useState<InventoryProduct | null>(null);
 
   const visible = products.filter((p) => {
     if (filterActive === "active") return p.active;
     if (filterActive === "inactive") return !p.active;
     return true;
   });
-
-  async function handleConfirmDelete() {
-    if (!confirmTarget) return;
-    setDeletingId(confirmTarget.id);
-    try {
-      await deleteProduct(confirmTarget.id);
-      toast.success(`Producto "${confirmTarget.name}" eliminado`);
-      onRefresh();
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Error al eliminar");
-    } finally {
-      setDeletingId(null);
-      setConfirmTarget(null);
-    }
-  }
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white shadow-sm mb-6">
@@ -87,6 +60,15 @@ export default function ProductCatalog({ products, categories, onRefresh }: Prop
           </span>
         </div>
         <div className="flex items-center gap-2">
+          {isAdmin && onAddProduct && (
+            <button
+              onClick={onAddProduct}
+              className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors shadow-sm"
+            >
+              <PlusIcon className="w-4 h-4" />
+              Agregar producto
+            </button>
+          )}
           <select
             value={filterActive}
             onChange={(e) => setFilterActive(e.target.value as "all" | "active" | "inactive")}
@@ -96,25 +78,12 @@ export default function ProductCatalog({ products, categories, onRefresh }: Prop
             <option value="inactive">Solo inactivos</option>
             <option value="all">Todos</option>
           </select>
-          <button
-            onClick={() => { setEditing(null); setShowForm(true); }}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700 transition-colors"
-          >
-            <PlusIcon className="w-3.5 h-3.5" />
-            Nuevo producto
-          </button>
         </div>
       </div>
 
       {visible.length === 0 ? (
         <div className="px-5 py-10 text-center text-sm text-gray-400">
-          No hay productos en el catálogo.{" "}
-          <button
-            onClick={() => { setEditing(null); setShowForm(true); }}
-            className="text-indigo-600 hover:underline font-medium"
-          >
-            Agrega el primero
-          </button>
+          No hay productos en el catálogo.
         </div>
       ) : (
         <div className="overflow-x-auto">
@@ -126,7 +95,6 @@ export default function ProductCatalog({ products, categories, onRefresh }: Prop
                 <th className="px-5 py-3 text-right font-medium">Precio unit.</th>
                 <th className="px-5 py-3 text-center font-medium">Stock</th>
                 <th className="px-5 py-3 text-center font-medium">Estado</th>
-                <th className="px-5 py-3 text-right font-medium">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -134,16 +102,13 @@ export default function ProductCatalog({ products, categories, onRefresh }: Prop
                 <tr key={product.id} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-5 py-3">
                     <div className="font-medium text-gray-900">{product.name}</div>
-                    {product.description && (
+                    {product.description && product.description !== "" && (
                       <div className="text-xs text-gray-400 mt-0.5">{product.description}</div>
                     )}
                   </td>
                   <td className="px-5 py-3">
                     {product.category ? (
-                      <span
-                        className="inline-block rounded-full px-2.5 py-0.5 text-xs font-medium text-white"
-                        style={{ backgroundColor: product.category.color }}
-                      >
+                      <span className="inline-block rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-700">
                         {product.category.name}
                       </span>
                     ) : (
@@ -151,7 +116,11 @@ export default function ProductCatalog({ products, categories, onRefresh }: Prop
                     )}
                   </td>
                   <td className="px-5 py-3 text-right text-gray-700 font-medium">
-                    {COP.format(product.unit_price)}
+                    {product.unit_price && product.unit_price > 0 ? (
+                      COP.format(product.unit_price)
+                    ) : (
+                      <span className="text-xs text-gray-400">Sin precio</span>
+                    )}
                   </td>
                   <td className="px-5 py-3 text-center">
                     <StockBadge stock={product.stock} />
@@ -167,49 +136,11 @@ export default function ProductCatalog({ products, categories, onRefresh }: Prop
                       {product.active ? "Activo" : "Inactivo"}
                     </span>
                   </td>
-                  <td className="px-5 py-3">
-                    <div className="flex items-center justify-end gap-1">
-                      <button
-                        onClick={() => { setEditing(product); setShowForm(true); }}
-                        className="rounded-lg p-1.5 text-gray-400 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                        title="Editar"
-                      >
-                        <PencilSquareIcon className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => setConfirmTarget(product)}
-                        disabled={deletingId === product.id}
-                        className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-40"
-                        title="Eliminar (solo si stock = 0)"
-                      >
-                        <TrashIcon className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-      )}
-
-      <ConfirmModal
-        isOpen={confirmTarget !== null}
-        title="Eliminar producto"
-        message={`¿Eliminar "${confirmTarget?.name}"? Solo es posible si tiene 0 unidades en stock.`}
-        confirmLabel="Eliminar"
-        variant="danger"
-        onConfirm={handleConfirmDelete}
-        onCancel={() => setConfirmTarget(null)}
-      />
-
-      {showForm && (
-        <ProductForm
-          categories={categories}
-          editing={editing}
-          onClose={() => setShowForm(false)}
-          onSaved={onRefresh}
-        />
       )}
     </div>
   );
