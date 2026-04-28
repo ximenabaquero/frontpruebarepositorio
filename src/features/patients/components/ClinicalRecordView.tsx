@@ -110,7 +110,22 @@ const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
             </div>
           </div>
         </div>
-        <div className="border-t border-gray-100 mt-1 mb-3" />
+        {/* Barra de estado + acción */}
+        <div className="flex items-center justify-between px-4 sm:px-8 py-3 border-t border-gray-100">
+          <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm font-medium ${currentStatus.bgColor} ${currentStatus.borderColor} ${currentStatus.textColor}`}>
+            <StatusIcon className={`w-4 h-4 ${currentStatus.iconColor}`} />
+            {currentStatus.label}
+          </div>
+          {onRegisterSupplies && status === "CONFIRMADO" && (
+            <button
+              onClick={onRegisterSupplies}
+              className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition print:hidden"
+            >
+              <span className="text-base">💉</span>
+              Registrar insumos
+            </button>
+          )}
+        </div>
 
         <div className="px-4 sm:px-8 py-6 space-y-10">
 
@@ -186,20 +201,9 @@ const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
 
           {/* Procedimientos */}
           <section>
-            <div className="flex items-center justify-between gap-2 mb-4">
-              <div className="flex items-center gap-2">
-                <span className="h-5 w-1 bg-emerald-500 rounded-full" />
-                <h3 className="text-lg font-semibold text-gray-800 tracking-tight">Procedimientos y precios</h3>
-              </div>
-              {onRegisterSupplies && status !== "CANCELADO" && (
-                <button
-                  onClick={onRegisterSupplies}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition print:hidden"
-                >
-                  <span className="text-base">💉</span>
-                  Registrar insumos
-                </button>
-              )}
+            <div className="flex items-center gap-2 mb-4">
+              <span className="h-5 w-1 bg-emerald-500 rounded-full" />
+              <h3 className="text-lg font-semibold text-gray-800 tracking-tight">Procedimientos y precios</h3>
             </div>
             {procedures.map((proc) => (
               <div key={proc.id} className="space-y-4 mb-8">

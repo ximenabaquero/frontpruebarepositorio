@@ -24,6 +24,8 @@ export interface InventoryProduct {
 export interface Distributor {
   id: number;
   name: string;
+  cellphone: string | null;
+  email: string | null;
 }
 
 export interface InventoryPurchase {
