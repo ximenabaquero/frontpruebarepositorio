@@ -25,6 +25,9 @@ import {
   getProducts,
   getUsages,
   getDistributors,
+  createDistributor,
+  updateDistributor,
+  deleteDistributor,
 } from "./services/inventoryService";
 import type {
   InventoryCategory,
@@ -211,7 +214,15 @@ export default function InventoryPage() {
                   />
                 )}
                 {activeTab === "distribuidores" && (
-                  <DistribuidoresTab distributors={distributors} />
+                  <DistribuidoresTab
+                    distributors={distributors}
+                    onCreate={createDistributor}
+                    onUpdate={updateDistributor}
+                    onDelete={deleteDistributor}
+                    onCreated={(d) => setDistributors((prev) => [...prev, d].sort((a, b) => a.name.localeCompare(b.name)))}
+                    onUpdated={(d) => setDistributors((prev) => prev.map((x) => (x.id === d.id ? d : x)))}
+                    onDeleted={(id) => setDistributors((prev) => prev.filter((x) => x.id !== id))}
+                  />
                 )}
               </main>
             </div>
