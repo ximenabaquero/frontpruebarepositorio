@@ -26,6 +26,24 @@ export default function ReferrerStats() {
 
   const allRefs = Array.isArray(data) ? data : [];
 
+  // Calcular totales
+  const totals = allRefs.reduce(
+    (acc, ref: any) => ({
+      total_patients_month: acc.total_patients_month + (ref.total_patients_month || 0),
+      total_confirmed_month: acc.total_confirmed_month + (ref.total_confirmed_month || 0),
+      total_canceled_month: acc.total_canceled_month + (ref.total_canceled_month || 0),
+      confirmed_income_month: acc.confirmed_income_month + (ref.confirmed_income_month || 0),
+      confirmed_income_year: acc.confirmed_income_year + (ref.confirmed_income_year || 0),
+    }),
+    {
+      total_patients_month: 0,
+      total_confirmed_month: 0,
+      total_canceled_month: 0,
+      confirmed_income_month: 0,
+      confirmed_income_year: 0,
+    }
+  );
+
   const {
     currentPage,
     totalPages,
@@ -107,6 +125,38 @@ export default function ReferrerStats() {
                     className="px-5 py-6 text-sm text-gray-400 italic text-center"
                   >
                     No hay datos de remitentes.
+                  </td>
+                </tr>
+              )}
+              {allRefs.length > 0 && (
+                <tr className="bg-gray-50 font-bold border-t-2 border-gray-200">
+                  <td className="px-5 py-4">
+                    <p className="text-gray-900">TOTAL</p>
+                  </td>
+                  <td className="px-5 py-4 text-center">
+                    <span className="text-sm text-gray-900">
+                      {totals.total_patients_month}
+                    </span>
+                  </td>
+                  <td className="px-5 py-4 text-center hidden sm:table-cell">
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700">
+                      {totals.total_confirmed_month}
+                    </span>
+                  </td>
+                  <td className="px-5 py-4 text-center hidden sm:table-cell">
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-red-100 text-red-600">
+                      {totals.total_canceled_month}
+                    </span>
+                  </td>
+                  <td className="px-5 py-4 text-right hidden md:table-cell">
+                    <span className="text-sm text-gray-900 font-semibold">
+                      {formatCopInput(totals.confirmed_income_month)}
+                    </span>
+                  </td>
+                  <td className="px-5 py-4 text-right">
+                    <span className="text-sm text-gray-900 font-semibold">
+                      {formatCopInput(totals.confirmed_income_year)}
+                    </span>
                   </td>
                 </tr>
               )}
