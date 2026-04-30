@@ -42,7 +42,7 @@ const contactInfo = [
     text: "info@coldesthetic.com",
     href: "mailto:info@coldesthetic.com",
   },
-  { icon: <MapPin className="w-4 h-4" />, text: "Bogotá, Colombia", href: "#" },
+  { icon: <MapPin className="w-4 h-4" />, text: "Medellín, Colombia", href: "#" },
   {
     icon: <Clock className="w-4 h-4" />,
     text: "Lun-Vie: 9AM - 7PM | Sáb: 9AM - 2PM",
@@ -54,20 +54,19 @@ const socialLinks = [
   {
     icon: <MessageCircle className="w-5 h-5" />,
     href: "https://wa.me/573001434089",
-    color: "bg-emerald-500 hover:bg-emerald-600",
+    color: "bg-gradient-to-br from-teal-400 to-cyan-500 hover:from-teal-500 hover:to-cyan-600",
     name: "WhatsApp",
   },
   {
     icon: <Facebook className="w-5 h-5" />,
     href: "https://facebook.com/coldesthetic",
-    color: "bg-blue-600 hover:bg-blue-700",
+    color: "bg-gradient-to-br from-cyan-400 to-teal-500 hover:from-cyan-500 hover:to-teal-600",
     name: "Facebook",
   },
   {
     icon: <Instagram className="w-5 h-5" />,
     href: "https://www.instagram.com/coldesthetic",
-    color:
-      "bg-gradient-to-r from-emerald-500 to-blue-600 hover:from-emerald-600 hover:to-blue-700",
+    color: "bg-gradient-to-br from-teal-400 to-cyan-500 hover:from-teal-500 hover:to-cyan-600",
     name: "Instagram",
   },
 ];
@@ -93,7 +92,7 @@ export default function Footer() {
       </div>
 
       {/* Top gradient accent */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-blue-600 to-emerald-500"></div>
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-400 via-cyan-500 to-teal-400"></div>
 
       {/* Main footer content */}
       <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
@@ -101,11 +100,11 @@ export default function Footer() {
           {/* Brand & Description */}
           <div className="space-y-6">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-blue-600 flex items-center justify-center shadow-lg">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center shadow-lg">
                 <Heart className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-300 to-blue-300 bg-clip-text text-transparent">
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-teal-300 to-cyan-300 bg-clip-text text-transparent">
                   Coldesthetic
                 </h2>
                 <p className="text-sm text-gray-300">
@@ -139,7 +138,7 @@ export default function Footer() {
           {/* Quick Links */}
           <div>
             <h3 className="text-lg font-semibold mb-6 pb-3 border-b border-gray-700 flex items-center gap-2">
-              <span className="bg-gradient-to-r from-emerald-500 to-blue-600 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-teal-400 to-cyan-500 bg-clip-text text-transparent">
                 Enlaces Rápidos
               </span>
             </h3>
@@ -150,7 +149,7 @@ export default function Footer() {
                     href={link.href}
                     className="text-gray-300 hover:text-white transition-colors duration-300 flex items-center gap-2 group"
                   >
-                    <ArrowUp className="w-3 h-3 rotate-90 text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <ArrowUp className="w-3 h-3 rotate-90 text-teal-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                     <span className="group-hover:translate-x-1 transition-transform">
                       {link.name}
                     </span>
@@ -163,7 +162,7 @@ export default function Footer() {
           {/* Services */}
           <div>
             <h3 className="text-lg font-semibold mb-6 pb-3 border-b border-gray-700">
-              <span className="bg-gradient-to-r from-emerald-500 to-blue-600 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-teal-400 to-cyan-500 bg-clip-text text-transparent">
                 Nuestros Servicios
               </span>
             </h3>
@@ -174,7 +173,7 @@ export default function Footer() {
                     href="#servicios"
                     className="text-gray-300 hover:text-white transition-colors duration-300 flex items-center gap-2 group"
                   >
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div className="w-1.5 h-1.5 rounded-full bg-teal-400 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <span>{service.name}</span>
                   </a>
                 </li>
@@ -185,7 +184,7 @@ export default function Footer() {
           {/* Contact Info */}
           <div>
             <h3 className="text-lg font-semibold mb-6 pb-3 border-b border-gray-700">
-              <span className="bg-gradient-to-r from-emerald-500 to-blue-600 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-teal-400 to-cyan-500 bg-clip-text text-transparent">
                 Contacto
               </span>
             </h3>
@@ -196,7 +195,7 @@ export default function Footer() {
                     href={info.href}
                     className="text-gray-300 hover:text-white transition-colors duration-300 flex items-start gap-3 group"
                   >
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-800 to-gray-700 flex items-center justify-center flex-shrink-0 group-hover:bg-gradient-to-br group-hover:from-emerald-500 group-hover:to-blue-600 transition-all">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-800 to-gray-700 flex items-center justify-center flex-shrink-0 group-hover:bg-gradient-to-br group-hover:from-teal-400 group-hover:to-cyan-500 transition-all">
                       {info.icon}
                     </div>
                     <span className="text-sm md:text-base leading-relaxed">
@@ -225,7 +224,7 @@ export default function Footer() {
                 href="https://wa.me/573001434089"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group inline-flex items-center gap-3 bg-gradient-to-r from-emerald-500 to-blue-600 text-white font-semibold py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                className="group inline-flex items-center gap-3 bg-gradient-to-r from-teal-400 to-cyan-500 text-white font-semibold py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               >
                 <MessageCircle className="w-5 h-5" />
                 <span>Agendar Consulta Gratis</span>
