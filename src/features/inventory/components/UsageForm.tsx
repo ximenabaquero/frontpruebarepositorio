@@ -149,7 +149,7 @@ export default function UsageForm({ products, onClose, onSaved }: Props) {
                 </p>
               ) : filteredProducts.length === 0 ? (
                 <p className="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
-                  No se encontraron productos con "{searchTerm}".
+                  No se encontraron productos con &quot;{searchTerm}&quot;.
                 </p>
               ) : (
                 <div className="max-h-[240px] overflow-y-auto rounded-xl border border-gray-200 divide-y divide-gray-100">

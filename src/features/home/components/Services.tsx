@@ -9,7 +9,7 @@ const services = [
     description: "Moldea y elimina grasa localizada con energía láser de precisión, sin cirugía ni incapacidad.",
     benefit: "Resultados visibles desde la primera sesión",
     icon: <Zap className="w-6 h-6" />,
-    gradient: "from-emerald-400 to-blue-500",
+    gradient: "from-teal-400 to-cyan-500",
     color: "pink",
     highlight: true,
   },
@@ -18,7 +18,7 @@ const services = [
     description: "Tecnología avanzada que estimula colágeno y elastina para una piel más firme y definida.",
     benefit: "Efecto tensor inmediato y progresivo",
     icon: <Sparkles className="w-6 h-6" />,
-    gradient: "from-blue-400 to-emerald-500",
+    gradient: "from-cyan-400 to-teal-500",
     color: "purple",
   },
   {
@@ -26,7 +26,7 @@ const services = [
     description: "Hidratación profunda y volumen natural para armonizar rasgos sin perder expresividad.",
     benefit: "Resultados naturales y seguros",
     icon: <Droplets className="w-6 h-6" />,
-    gradient: "from-blue-400 to-emerald-500",
+    gradient: "from-teal-400 to-cyan-500",
     color: "blue",
   },
   {
@@ -34,7 +34,7 @@ const services = [
     description: "Reafirma y levanta tejidos con bioestimulación de colágeno, sin quirófano.",
     benefit: "Efecto lifting y estimulación de colágeno",
     icon: <Scissors className="w-6 h-6" />,
-    gradient: "from-emerald-400 to-blue-500",
+    gradient: "from-cyan-400 to-teal-500",
     color: "emerald",
   },
   {
@@ -42,7 +42,7 @@ const services = [
     description: "Regenera y mejora textura cutánea con tus propios factores de crecimiento.",
     benefit: "Mejora de textura y luminosidad",
     icon: <Activity className="w-6 h-6" />,
-    gradient: "from-emerald-400 to-blue-500",
+    gradient: "from-teal-400 to-cyan-500",
     color: "amber",
   },
   {
@@ -50,7 +50,7 @@ const services = [
     description: "Suaviza líneas de expresión manteniendo gestos naturales con técnica precisa.",
     benefit: "Resultados naturales y controlados",
     icon: <Eye className="w-6 h-6" />,
-    gradient: "from-blue-500 to-emerald-400",
+    gradient: "from-cyan-500 to-teal-400",
     color: "violet",
   },
 ];
@@ -95,15 +95,19 @@ export default function Services() {
                 key={service.title}
                 className={`group relative h-full transition-all duration-500 ${
                   hoveredCard === index ? 'transform -translate-y-2' : ''
-                }`}
+                } ${service.highlight ? 'md:col-span-2 lg:col-span-1' : ''}`}
                 onMouseEnter={() => setHoveredCard(index)}
                 onMouseLeave={() => setHoveredCard(null)}
               >
                 {/* Card Background */}
-                <div className={`absolute inset-0 rounded-3xl bg-gradient-to-br ${service.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}></div>
-                
+                <div className={`absolute inset-0 rounded-3xl bg-gradient-to-br ${service.gradient} ${service.highlight ? 'opacity-10' : 'opacity-0 group-hover:opacity-10'} transition-opacity duration-500`}></div>
+
                 {/* Card */}
-                <div className="relative h-full bg-white/80 backdrop-blur-sm rounded-3xl border border-gray-100 p-8 shadow-lg hover:shadow-2xl transition-all duration-500 group-hover:border-emerald-100">
+                <div className={`relative h-full backdrop-blur-sm rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 ${
+                  service.highlight
+                    ? `bg-white border-2 border-teal-400/60 group-hover:border-teal-400`
+                    : 'bg-white/80 border border-gray-100 group-hover:border-teal-100'
+                }`}>
                   {/* Icon */}
                   <div className={`mb-6 inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br ${service.gradient} shadow-lg group-hover:scale-110 transition-transform duration-500`}>
                     <div className="text-white">
@@ -114,17 +118,14 @@ export default function Services() {
                   {/* Badge */}
                   {service.highlight && (
                     <div className="absolute top-6 right-6">
-                      <div className="relative">
-                        <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-blue-600 rounded-full blur animate-pulse"></div>
-                        <span className="relative px-3 py-1 text-xs font-bold text-white bg-gradient-to-r from-emerald-500 to-blue-600 rounded-full">
-                          MÁS POPULAR
-                        </span>
-                      </div>
+                      <span className="px-3 py-1 text-xs font-bold text-white bg-gradient-to-r from-teal-400 to-cyan-500 rounded-full shadow-md">
+                        MÁS POPULAR
+                      </span>
                     </div>
                   )}
 
                   {/* Title */}
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-emerald-600 transition-colors duration-300">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-teal-600 transition-colors duration-300">
                     {service.title}
                   </h3>
 
@@ -133,13 +134,19 @@ export default function Services() {
                     {service.description}
                   </p>
 
-                  {/* Benefit */}
+                  {/* Benefit — pill badge */}
                   <div className="mt-auto pt-6 border-t border-gray-100">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${service.gradient}`}></div>
-                      <span className={`font-semibold bg-gradient-to-r ${service.gradient} bg-clip-text text-transparent`}>
-                        {service.benefit}
-                      </span>
+                    <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r ${service.gradient} bg-opacity-10`}
+                      style={{ background: 'none' }}>
+                      <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full`}
+                        style={{ background: 'linear-gradient(to right, rgb(45 212 191 / 0.12), rgb(6 182 212 / 0.12))' }}>
+                        <svg className="w-4 h-4 text-teal-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span className={`text-sm font-semibold bg-gradient-to-r ${service.gradient} bg-clip-text text-transparent`}>
+                          {service.benefit}
+                        </span>
+                      </div>
                     </div>
                   </div>
 

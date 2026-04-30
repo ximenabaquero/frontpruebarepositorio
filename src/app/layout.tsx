@@ -12,6 +12,10 @@ export const metadata: Metadata = {
   title: "Coldesthetic - Estética Médica Avanzada",
   description:
     "Lipólisis láser asistida. Procedimiento mínimamente invasivo para reducción de grasa localizada con tecnología médica certificada",
+  icons: {
+    icon: "/coldestheticlogo.png",
+    apple: "/coldestheticlogo.png",
+  },
 };
 
 export default function RootLayout({

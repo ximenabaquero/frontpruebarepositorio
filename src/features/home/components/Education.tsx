@@ -8,21 +8,21 @@ const topics = [
     title: "¿Cómo se forma la fibrosis?",
     body: "Tras un procedimiento, el tejido se inflama y puede generar fibras duras si no hay drenaje, compresión adecuada o movimiento suave. El control médico y el masaje correcto evitan que ese tejido cicatrice de forma irregular.",
     icon: <AlertCircle className="w-6 h-6" />,
-    gradient: "from-emerald-400 to-blue-500",
+    gradient: "from-teal-400 to-cyan-500",
     tag: "Cuidado Post-tratamiento"
   },
   {
     title: "¿Por qué la grasa localizada no desaparece solo con ejercicio?",
     body: "Los adipocitos en ciertas zonas tienen más receptores para almacenar que para liberar grasa. El ejercicio ayuda a reducir volumen general, pero la distribución depende de receptores hormonales y genética; por eso necesitamos tecnologías focalizadas como la lipólisis láser.",
     icon: <Brain className="w-6 h-6" />,
-    gradient: "from-blue-400 to-emerald-500",
+    gradient: "from-cyan-400 to-teal-500",
     tag: "Ciencia Médica"
   },
   {
     title: "Beneficios de la faja en post-lipólisis",
     body: "La compresión uniforme reduce inflamación, ayuda a que la piel se adhiera al nuevo contorno y disminuye el riesgo de seromas y fibrosis. Usarla según indicación médica acelera una recuperación más segura y estética.",
     icon: <Shield className="w-6 h-6" />,
-    gradient: "from-blue-400 to-emerald-500",
+    gradient: "from-teal-400 to-cyan-500",
     tag: "Recuperación Óptima"
   },
 ];

@@ -82,6 +82,45 @@ export async function getDistributors(): Promise<Distributor[]> {
   return json.data || [];
 }
 
+export async function createDistributor(
+  data: { name: string; cellphone?: string | null; email?: string | null }
+): Promise<Distributor> {
+  const res = await fetch(`${BASE}/distributors`, {
+    method: "POST",
+    credentials: "include",
+    headers: xsrfHeaders(),
+    body: JSON.stringify(data),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || "Error al crear distribuidor");
+  return json.data;
+}
+
+export async function updateDistributor(
+  id: number,
+  data: { name: string; cellphone?: string | null; email?: string | null }
+): Promise<Distributor> {
+  const res = await fetch(`${BASE}/distributors/${id}`, {
+    method: "PUT",
+    credentials: "include",
+    headers: xsrfHeaders(),
+    body: JSON.stringify(data),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || "Error al actualizar distribuidor");
+  return json.data;
+}
+
+export async function deleteDistributor(id: number): Promise<void> {
+  const res = await fetch(`${BASE}/distributors/${id}`, {
+    method: "DELETE",
+    credentials: "include",
+    headers: xsrfHeaders(),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || "Error al eliminar distribuidor");
+}
+
 // ── Compras ───────────────────────────────────────────────────
 export async function getPurchases(params?: {
   month?: number;

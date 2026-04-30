@@ -157,7 +157,7 @@ export default function ProductForm({ categories, onClose, onSaved }: Props) {
           <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
             <p className="text-xs text-blue-700">
               <strong>Nota:</strong> El producto se creará con stock inicial de 0. 
-              Después puedes registrar la primera compra desde "Registrar compra".
+              Después puedes registrar la primera compra desde &quot;Registrar compra&quot;.
             </p>
           </div>
 
