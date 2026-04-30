@@ -120,8 +120,8 @@ export default function Hero() {
                 priority
               />
 
-              {/* Floating card 1 - bottom left - Hidden on mobile, visible on tablet+ */}
-              <div className="hidden sm:block absolute bottom-[15%] -left-2 md:bottom-[18%] md:-left-4 bg-gradient-to-br from-white/80 to-teal-50/70 backdrop-blur-md rounded-xl md:rounded-2xl p-2.5 md:p-3.5 shadow-lg border border-teal-200/50">
+              {/* Floating cards — solo en sm+ */}
+              <div className="hidden sm:block absolute bottom-[15%] left-0 md:bottom-[18%] md:-left-4 bg-gradient-to-br from-white/80 to-teal-50/70 backdrop-blur-md rounded-xl md:rounded-2xl p-2.5 md:p-3.5 shadow-lg border border-teal-200/50">
                 <div className="flex items-center gap-2 md:gap-3">
                   <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center shadow-sm">
                     <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-white" />
@@ -133,8 +133,7 @@ export default function Hero() {
                 </div>
               </div>
 
-              {/* Floating card 2 - top right */}
-              <div className="absolute top-[8%] sm:top-[12%] -right-2 md:-right-4 bg-gradient-to-br from-white/80 to-cyan-50/70 backdrop-blur-md rounded-xl md:rounded-2xl p-2.5 md:p-3.5 shadow-lg border border-cyan-200/50">
+              <div className="hidden sm:block absolute top-[12%] right-0 md:-right-4 bg-gradient-to-br from-white/80 to-cyan-50/70 backdrop-blur-md rounded-xl md:rounded-2xl p-2.5 md:p-3.5 shadow-lg border border-cyan-200/50">
                 <div className="flex items-center gap-2 md:gap-3">
                   <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-gradient-to-br from-cyan-400 to-teal-500 flex items-center justify-center shadow-sm">
                     <Shield className="w-4 h-4 md:w-5 md:h-5 text-white" />
