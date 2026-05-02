@@ -13,11 +13,8 @@ const InvoicePdf = forwardRef<HTMLDivElement, Props>(
       evaluation?.procedures?.[0]?.procedure_date ?? evaluation?.created_at;
 
     const formattedDate = procedureDate
-      ? new Date(procedureDate).toLocaleDateString("es-CO", {
-          day: "2-digit",
-          month: "long",
-          year: "numeric",
-        })
+        ? new Date(/^\d{4}-\d{2}-\d{2}$/.test(procedureDate) ? `${procedureDate}T00:00:00` : procedureDate)
+          .toLocaleDateString("es-CO", { day: "2-digit", month: "long", year: "numeric" })
       : "";
 
     const total = evaluation?.procedures

@@ -304,12 +304,11 @@ export default function PatientRecordDetail({ patientId, evaluationId }: Props) 
         <EditarProcedimientoModal
           procedureId={editingProc.id}
           initialData={{
-            procedure_date: editingProc.procedure_date?.slice(0, 10) ?? "",
             notes: editingProc.notes ?? "",
             items: editingProc.items.map((i) => ({
               id: i.id,
               item_name: i.item_name,
-              price: String(i.price),
+              price: Math.round(parseFloat(String(i.price))).toLocaleString("es-CO"),
             })),
           }}
           onClose={() => setEditingProc(null)}

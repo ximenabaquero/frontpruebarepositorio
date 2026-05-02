@@ -143,9 +143,14 @@ export default function ClinicalImageFormModal({ image, onClose, onSaved }: Prop
         <div className="overflow-y-auto flex-1 px-6 py-5">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
-                Título *
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                  Título *
+                </label>
+                <span className={`text-xs ${title.length >= 100 ? "text-red-500 font-semibold" : "text-gray-400"}`}>
+                  {title.length}/100
+                </span>
+              </div>
               <input
                 type="text"
                 value={title}
@@ -154,8 +159,8 @@ export default function ClinicalImageFormModal({ image, onClose, onSaved }: Prop
                   if (errors.title) setErrors({ ...errors, title: "" });
                 }}
                 className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:outline-none ${
-                  errors.title 
-                    ? "border-red-300 focus:ring-red-400" 
+                  errors.title
+                    ? "border-red-300 focus:ring-red-400"
                     : "border-gray-200 focus:ring-emerald-400"
                 }`}
                 maxLength={100}
@@ -167,14 +172,20 @@ export default function ClinicalImageFormModal({ image, onClose, onSaved }: Prop
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
-                Descripción
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                  Descripción <span className="normal-case font-normal text-gray-400">(opcional)</span>
+                </label>
+                <span className={`text-xs ${description.length >= 300 ? "text-red-500 font-semibold" : "text-gray-400"}`}>
+                  {description.length}/300
+                </span>
+              </div>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none resize-none"
                 rows={2}
+                maxLength={300}
                 placeholder="Breve descripción del tratamiento..."
               />
             </div>

@@ -12,6 +12,7 @@ import {
   ArrowUp,
 } from "lucide-react";
 import { useState } from "react";
+import Image from "next/image";
 
 const quickLinks = [
   { name: "Inicio", href: "#inicio" },
@@ -100,8 +101,14 @@ export default function Footer() {
           {/* Brand & Description */}
           <div className="space-y-6">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center shadow-lg">
-                <Heart className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 flex items-center justify-center flex-shrink-0">
+                <Image
+                  src="/coldestheticlogo.png"
+                  alt="Coldesthetic"
+                  width={48}
+                  height={48}
+                  className="w-full h-full object-contain"
+                />
               </div>
               <div>
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-teal-300 to-cyan-300 bg-clip-text text-transparent">

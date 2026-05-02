@@ -21,10 +21,11 @@ const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
     const procedureDate = procedures?.[0]?.procedure_date ?? evaluation.created_at;
     const formattedDate = procedureDate
       ? (() => {
-          const f = new Date(procedureDate).toLocaleString("es-ES", {
-            dateStyle: "medium",
-            timeStyle: "short",
-          });
+          const isDateOnly = /^\d{4}-\d{2}-\d{2}$/.test(procedureDate);
+          const d = new Date(isDateOnly ? `${procedureDate}T00:00:00` : procedureDate);
+          const f = isDateOnly
+            ? d.toLocaleDateString("es-ES", { dateStyle: "medium" })
+            : d.toLocaleString("es-ES", { dateStyle: "medium", timeStyle: "short" });
           return f.charAt(0).toUpperCase() + f.slice(1);
         })()
       : "";

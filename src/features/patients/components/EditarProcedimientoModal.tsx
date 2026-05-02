@@ -16,7 +16,6 @@ type ProcedureItem = {
 };
 
 type ProcForm = {
-  procedure_date: string;
   notes: string;
   items: ProcedureItem[];
 };
@@ -29,7 +28,6 @@ type Props = {
 };
 
 export default function EditarProcedimientoModal({ procedureId, initialData, onClose, onSaved }: Props) {
-  const [procedureDate, setProcedureDate] = useState(initialData.procedure_date);
   const [notes, setNotes] = useState(initialData.notes);
   const [items, setItems] = useState<ProcedureItem[]>(initialData.items);
   const [isSaving, setIsSaving] = useState(false);
@@ -37,11 +35,6 @@ export default function EditarProcedimientoModal({ procedureId, initialData, onC
   const clearSubmitError = () => {};
 
   const handleSave = async () => {
-    if (!procedureDate) {
-      toast.error("La fecha del procedimiento es obligatoria");
-      return;
-    }
-
     if (!notes.trim()) {
       toast.error("Las notas clínicas son obligatorias");
       return;
@@ -69,7 +62,6 @@ export default function EditarProcedimientoModal({ procedureId, initialData, onC
           "X-XSRF-TOKEN": token,
         },
         body: JSON.stringify({
-          procedure_date: procedureDate,
           notes: notes,
           items: items.map((i) => ({
             item_name: i.item_name.trim(),
@@ -110,18 +102,6 @@ export default function EditarProcedimientoModal({ procedureId, initialData, onC
         </div>
 
         <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
-              Fecha del procedimiento *
-            </label>
-            <input
-              type="date"
-              value={procedureDate}
-              onChange={(e) => setProcedureDate(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none"
-            />
-          </div>
-
           <ProceduresSelector
             procedureItems={items}
             setProcedureItems={setItems}

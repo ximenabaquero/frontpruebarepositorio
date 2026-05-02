@@ -64,7 +64,7 @@ export default function RegisterHeaderBar({
           </button>
         )}
 
-        {onImagesClick && (
+        {user?.role === "ADMIN" && onImagesClick && (
           <button
             type="button"
             onClick={onImagesClick}
@@ -84,7 +84,7 @@ export default function RegisterHeaderBar({
           </button>
         )}
 
-        {onInventoryClick && (
+        {user?.role === "ADMIN" && onInventoryClick && (
           <button
             type="button"
             onClick={onInventoryClick}
