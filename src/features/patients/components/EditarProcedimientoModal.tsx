@@ -16,7 +16,6 @@ type ProcedureItem = {
 };
 
 type ProcForm = {
-  procedure_date: string;
   notes: string;
   items: ProcedureItem[];
 };
@@ -29,7 +28,6 @@ type Props = {
 };
 
 export default function EditarProcedimientoModal({ procedureId, initialData, onClose, onSaved }: Props) {
-  const [procedureDate, setProcedureDate] = useState(initialData.procedure_date);
   const [notes, setNotes] = useState(initialData.notes);
   const [items, setItems] = useState<ProcedureItem[]>(initialData.items);
   const [isSaving, setIsSaving] = useState(false);
@@ -37,11 +35,6 @@ export default function EditarProcedimientoModal({ procedureId, initialData, onC
   const clearSubmitError = () => {};
 
   const handleSave = async () => {
-    if (!procedureDate) {
-      toast.error("La fecha del procedimiento es obligatoria");
-      return;
-    }
-
     if (!notes.trim()) {
       toast.error("Las notas clínicas son obligatorias");
       return;

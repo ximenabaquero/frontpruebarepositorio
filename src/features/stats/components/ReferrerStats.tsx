@@ -21,6 +21,11 @@ function formatCopInput(value: string | number): string {
   }).format(n);
 }
 
+function toNumber(value: unknown): number {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : 0;
+}
+
 export default function ReferrerStats() {
   const { data, error, isLoading } = useSWR(endpoints.referrerStats, fetcher);
 
@@ -29,11 +34,11 @@ export default function ReferrerStats() {
   // Calcular totales
   const totals = allRefs.reduce(
     (acc, ref: any) => ({
-      total_patients_month: acc.total_patients_month + (ref.total_patients_month || 0),
-      total_confirmed_month: acc.total_confirmed_month + (ref.total_confirmed_month || 0),
-      total_canceled_month: acc.total_canceled_month + (ref.total_canceled_month || 0),
-      confirmed_income_month: acc.confirmed_income_month + (ref.confirmed_income_month || 0),
-      confirmed_income_year: acc.confirmed_income_year + (ref.confirmed_income_year || 0),
+      total_patients_month: acc.total_patients_month + toNumber(ref.total_patients_month),
+      total_confirmed_month: acc.total_confirmed_month + toNumber(ref.total_confirmed_month),
+      total_canceled_month: acc.total_canceled_month + toNumber(ref.total_canceled_month),
+      confirmed_income_month: acc.confirmed_income_month + toNumber(ref.confirmed_income_month),
+      confirmed_income_year: acc.confirmed_income_year + toNumber(ref.confirmed_income_year),
     }),
     {
       total_patients_month: 0,

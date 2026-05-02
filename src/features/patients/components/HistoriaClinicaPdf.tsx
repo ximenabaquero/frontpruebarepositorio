@@ -39,11 +39,8 @@ const HistoriaClinicaPdf = forwardRef<HTMLDivElement, Props>(
 
     const procedureDate = procedures?.[0]?.procedure_date ?? evaluation.created_at;
     const formattedDate = procedureDate
-      ? new Date(procedureDate).toLocaleDateString("es-CO", {
-          day: "2-digit",
-          month: "long",
-          year: "numeric",
-        })
+        ? new Date(/^\d{4}-\d{2}-\d{2}$/.test(procedureDate) ? `${procedureDate}T00:00:00` : procedureDate)
+          .toLocaleDateString("es-CO", { day: "2-digit", month: "long", year: "numeric" })
       : "";
 
     const STATUS_LABEL: Record<string, string> = {
@@ -120,7 +117,7 @@ const HistoriaClinicaPdf = forwardRef<HTMLDivElement, Props>(
 
               {proc.procedure_date && (
                 <p style={{ fontSize: "11px", color: "#6b7280", marginBottom: "8px" }}>
-                  Fecha: {new Date(proc.procedure_date).toLocaleDateString("es-CO", { day: "2-digit", month: "long", year: "numeric" })}
+                  Fecha: {new Date(`${proc.procedure_date}T00:00:00`).toLocaleDateString("es-CO", { day: "2-digit", month: "long", year: "numeric" })}
                 </p>
               )}
 
