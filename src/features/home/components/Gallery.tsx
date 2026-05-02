@@ -28,7 +28,7 @@ const gradients = [
 ];
 
 export default function Gallery() {
-  const { data: images, error, isLoading } = useSWR<ClinicalImage[]>(
+  const { data: images, isLoading } = useSWR<ClinicalImage[]>(
     endpoints.list,
     fetcher
   );
@@ -125,17 +125,31 @@ export default function Gallery() {
           </div>
         )}
 
-        {/* Error State */}
-        {error && (
+        {/* Error State - desactivado para producción */}
+        {/* {error && (
           <div className="text-center py-12">
             <p className="text-red-500">Error al cargar las imágenes</p>
           </div>
-        )}
+        )} */}
 
         {/* Empty State */}
         {images && images.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-500">No hay imágenes disponibles</p>
+          <div className="text-center py-16 px-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-100 to-blue-100 mb-6">
+              <Camera className="w-8 h-8 text-emerald-500" />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-3">¡Pronto verás resultados increíbles aquí!</h3>
+            <p className="text-gray-500 max-w-md mx-auto mb-8">
+              Estamos documentando las transformaciones de nuestros pacientes. ¡Sé la próxima historia de éxito!
+            </p>
+            <a
+              href="https://wa.me/573001434089?text=Hola,%20quiero%20agendar%20mi%20valoración%20médica"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-semibold px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
+            >
+              Agenda tu valoración y sé la próxima
+            </a>
           </div>
         )}
 
@@ -162,9 +176,7 @@ export default function Gallery() {
               }`}
               style={{ transitionDelay: `${index * 150}ms` }}>
                 
-                {/* Card Header - REORGANIZADO */}
                 <div className="mb-6 md:mb-7">
-                  {/* Area title with icon - AHORA EN LÍNEA */}
                   <div className="flex items-center justify-start mb-4 gap-3">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br ${gradient}`}>
                       <Target className="w-5 h-5 text-white" />
@@ -254,13 +266,27 @@ export default function Gallery() {
         </div>
         )}
 
-        {/* CTA Section */}
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-0">
-          {/* Glow Effect */}
+        {images && images.length > 0 && (
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-0 mt-12">
           <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-blue-500/10 blur-xl md:blur-2xl rounded-2xl md:rounded-3xl"></div>
-          
-          
+          <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl md:rounded-3xl border border-emerald-100 p-8 md:p-12 text-center shadow-lg">
+            <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
+              ¿Lista para ver tu propio resultado?
+            </h3>
+            <p className="text-gray-600 mb-8 max-w-lg mx-auto">
+              Agenda tu valoración médica y descubre el plan personalizado para tu transformación.
+            </p>
+            <a
+              href="https://wa.me/573001434089?text=Hola,%20quiero%20agendar%20mi%20valoración%20médica"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-semibold px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
+            >
+              Agenda tu valoración médica
+            </a>
+          </div>
         </div>
+        )}
       </div>
     </section>
   );

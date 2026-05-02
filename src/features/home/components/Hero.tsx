@@ -108,45 +108,40 @@ export default function Hero() {
           </div>
 
           {/* Right Column - Image */}
-          <div className={`relative transition-all duration-700 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'}`}>
-            <div className="relative mx-auto max-w-lg">
-              {/* Main image container */}
-              <div className="relative aspect-square rounded-3xl overflow-hidden shadow-2xl border-8 border-white">
-                  <Image
-                    src="/coldestheticlogo.png"
-                  alt="Coldesthetic - Lipólisis láser sin cirugía"
-                  width={600}
-                  height={600}
-                  className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-700"
-                  priority
-                />
-                
-                {/* Overlay gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent"></div>
-              </div>
+          <div className={`relative flex items-end transition-all duration-700 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'}`}>
+            <div className="relative w-full">
+              {/* Main image */}
+              <Image
+                src="/mainfigurecoldesthetic.png"
+                alt="Coldesthetic - Lipólisis láser sin cirugía"
+                width={900}
+                height={900}
+                className="w-full h-auto max-h-[85vh] object-contain drop-shadow-xl"
+                priority
+              />
 
-              {/* Floating card 1 */}
-              <div className="absolute -bottom-6 -left-6 bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-xl border border-emerald-100">
+              {/* Floating card 1 - bottom left */}
+              <div className="absolute bottom-[18%] -left-4 bg-gradient-to-br from-white/80 to-teal-50/70 backdrop-blur-md rounded-2xl p-3.5 shadow-lg border border-teal-200/50">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-200 flex items-center justify-center">
-                    <Sparkles className="w-6 h-6 text-emerald-600" />
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center shadow-sm">
+                    <Sparkles className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <div className="text-sm font-semibold text-gray-900">Tecnología láser</div>
-                    <div className="text-xs text-emerald-600">Asistida por médico</div>
+                    <div className="text-sm font-semibold text-gray-800">Tecnología láser</div>
+                    <div className="text-xs text-teal-600">Asistida por médico</div>
                   </div>
                 </div>
               </div>
 
-              {/* Floating card 2 */}
-              <div className="absolute -top-6 -right-6 bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-xl border border-blue-100">
+              {/* Floating card 2 - top right */}
+              <div className="absolute top-[12%] -right-4 bg-gradient-to-br from-white/80 to-cyan-50/70 backdrop-blur-md rounded-2xl p-3.5 shadow-lg border border-cyan-200/50">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
-                    <Shield className="w-6 h-6 text-blue-600" />
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-teal-500 flex items-center justify-center shadow-sm">
+                    <Shield className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <div className="text-sm font-semibold text-gray-900">Reducción localizada</div>
-                    <div className="text-xs text-blue-600">Contorno controlado</div>
+                    <div className="text-sm font-semibold text-gray-800">Reducción localizada</div>
+                    <div className="text-xs text-cyan-600">Contorno controlado</div>
                   </div>
                 </div>
               </div>

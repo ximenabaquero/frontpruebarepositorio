@@ -1,7 +1,7 @@
 import Hero from "@/features/home/components/Hero";
 import Services from "@/features/home/components/Services";
 import Benefits from "@/features/home/components/Benefits";
-import Gallery from "@/features/home/components/Gallery";
+// import Gallery from "@/features/home/components/Gallery"; // TODO: activar cuando el backend esté en producción
 import Contact from "@/features/home/components/Contact";
 import Testimonials from "@/features/home/components/Testimonials";
 import Education from "@/features/home/components/Education";
@@ -16,7 +16,7 @@ export default function HomePage() {
         <Benefits />
         <Education />
         <Testimonials />
-        <Gallery />
+        {/* <Gallery /> */}{/* TODO: activar cuando el backend esté en producción */}
         <Contact />
       </main>
     </MainLayout>

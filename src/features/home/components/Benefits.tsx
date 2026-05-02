@@ -18,28 +18,28 @@ const benefits: Benefit[] = [
     description: "Láser lipólisis + láser diodo + soft laser para esculpir con precisión, estimular colágeno y proteger la piel.",
     tag: "Precisión láser",
     lucideIcon: <Target className="w-5 h-5 sm:w-6 sm:h-6" />,
-    gradient: "from-emerald-400 to-blue-500",
+    gradient: "from-teal-400 to-cyan-500",
   },
   {
     title: "Acompañamiento médico",
     description: "Protocolos personalizados, seguimiento cercano y prevención de fibrosis para una recuperación guiada y segura.",
     tag: "Seguimiento médico",
     lucideIcon: <Heart className="w-5 h-5 sm:w-6 sm:h-6" />,
-    gradient: "from-blue-400 to-emerald-500",
+    gradient: "from-cyan-400 to-teal-500",
   },
   {
     title: "Resultados visibles",
     description: "Cambios desde la primera sesión: menos volumen, mejor definición y piel más firme.",
     tag: "Impacto inmediato",
     lucideIcon: <Eye className="w-5 h-5 sm:w-6 sm:h-6" />,
-    gradient: "from-blue-400 to-emerald-500",
+    gradient: "from-teal-400 to-cyan-500",
   },
   {
     title: "Recuperación controlada",
     description: "Procedimiento mínimamente invasivo con recuperación guiada. Retoma tus actividades progresivamente.",
     tag: "Recuperación guiada",
     lucideIcon: <Clock className="w-5 h-5 sm:w-6 sm:h-6" />,
-    gradient: "from-emerald-400 to-blue-500",
+    gradient: "from-cyan-400 to-teal-500",
   },
 ];
 
@@ -98,13 +98,13 @@ export default function Benefits() {
           </h2>
           
           <p className="text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed">
-            Un bloque de beneficios diseñado para transmitir precisión médica, calidez humana y 
-            <span className="font-semibold text-emerald-700"> resultados visibles desde la primera sesión</span>.
+            Cada tratamiento está respaldado por protocolo médico, tecnología certificada y
+            <span className="font-semibold text-emerald-700"> acompañamiento personalizado en cada etapa</span>.
           </p>
         </div>
 
-        {/* Benefits Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 mb-16 md:mb-20 px-4 sm:px-0">
+        {/* Benefits Grid — 2 cols on tablet, 4 on desktop */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 md:gap-8 mb-16 md:mb-20 px-4 sm:px-0">
           {benefits.map((benefit, index) => (
             <div
               key={benefit.title}
@@ -116,43 +116,43 @@ export default function Benefits() {
             >
               {/* Hover Border Effect */}
               <div className={`absolute -inset-0.5 bg-gradient-to-r ${benefit.gradient} rounded-2xl md:rounded-3xl blur opacity-0 group-hover:opacity-30 transition duration-500`}></div>
-              
+
               {/* Card */}
-              <div className={`relative h-full bg-white/95 backdrop-blur-sm rounded-2xl md:rounded-3xl border border-gray-100 p-6 md:p-8 shadow-lg hover:shadow-xl transition-all duration-300 ${
+              <div className={`relative h-full flex flex-col bg-white/95 backdrop-blur-sm rounded-2xl md:rounded-3xl border border-gray-100 p-6 md:p-8 shadow-lg hover:shadow-xl transition-all duration-300 ${
                 visible[index] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
               }`}
               style={{ transitionDelay: `${index * 100}ms` }}>
-                
-                {/* Icon Container */}
-                <div className="relative mb-6 md:mb-8">
-                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-100 to-blue-100 rounded-xl md:rounded-2xl blur-xl opacity-50"></div>
-                  <div className={`relative w-16 h-16 md:w-20 md:h-20 rounded-xl md:rounded-2xl bg-gradient-to-br ${benefit.gradient} flex items-center justify-center shadow-md md:shadow-lg`}>
-                    <div className="text-white">
-                      {benefit.lucideIcon}
-                    </div>
+
+                {/* Icon */}
+                <div className="relative mb-5">
+                  <div className="absolute inset-0 bg-gradient-to-br from-teal-100 to-cyan-100 rounded-xl md:rounded-2xl blur-xl opacity-50"></div>
+                  <div className={`relative w-14 h-14 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br ${benefit.gradient} flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-500`}>
+                    <div className="text-white">{benefit.lucideIcon}</div>
                   </div>
                 </div>
 
-                {/* Tag */}
-                <div className="inline-flex items-center gap-1.5 md:gap-2 px-3 py-1 md:px-4 md:py-1.5 bg-gradient-to-r from-emerald-50 to-blue-50 rounded-full border border-emerald-100 mb-3 md:mb-4">
-                  <CheckCircle className="w-3 h-3 text-emerald-500" />
-                  <span className="text-xs font-bold tracking-wider text-emerald-700 uppercase">
-                    {benefit.tag}
-                  </span>
-                </div>
-
                 {/* Title */}
-                <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3 md:mb-4">
+                <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-2 group-hover:text-teal-600 transition-colors duration-300">
                   {benefit.title}
                 </h3>
 
                 {/* Description */}
-                <p className="text-sm md:text-base text-gray-600 leading-relaxed">
+                <p className="text-sm text-gray-600 leading-relaxed flex-1">
                   {benefit.description}
                 </p>
 
+                {/* Tag pill — cierre visual abajo */}
+                <div className="mt-5 pt-4 border-t border-gray-100">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-teal-200 bg-teal-50">
+                    <CheckCircle className="w-3 h-3 text-teal-500 shrink-0" />
+                    <span className="text-xs font-bold tracking-wider text-teal-700 uppercase">
+                      {benefit.tag}
+                    </span>
+                  </div>
+                </div>
+
                 {/* Hover Indicator */}
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-emerald-500 to-blue-600 group-hover:w-2/3 transition-all duration-500 rounded-full"></div>
+                <div className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r ${benefit.gradient} group-hover:w-2/3 transition-all duration-500 rounded-full`}></div>
               </div>
             </div>
           ))}

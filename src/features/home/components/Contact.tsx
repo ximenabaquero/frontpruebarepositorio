@@ -26,17 +26,17 @@ const socialLinks = [
     name: 'Teléfono',
     href: 'tel:+573001434089',
     icon: <Phone className="w-6 h-6 md:w-7 md:h-7" />,
-    color: 'bg-gradient-to-br from-blue-500 to-emerald-400',
+    color: 'bg-gradient-to-br from-teal-400 to-cyan-500',
     description: 'Llamada directa',
-    gradient: 'from-blue-400 to-emerald-500'
+    gradient: 'from-teal-400 to-cyan-500'
   },
   {
     name: 'Instagram',
     href: 'https://www.instagram.com/coldesthetic/',
     icon: <Instagram className="w-6 h-6 md:w-7 md:h-7" />,
-    color: 'bg-gradient-to-br from-emerald-500 to-blue-600',
+    color: 'bg-gradient-to-br from-cyan-400 to-teal-500',
     description: '@coldesthetic',
-    gradient: 'from-emerald-400 to-blue-600'
+    gradient: 'from-cyan-400 to-teal-500'
   }
 ];
 
@@ -176,42 +176,42 @@ export default function Contact() {
 
         {/* Information & CTA Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 mb-16 md:mb-20 px-4 sm:px-0">
-          {/* Left Column - Information */}
-          <div className="space-y-6 md:space-y-8">
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl md:rounded-3xl border border-gray-100 p-6 md:p-8 shadow-lg">
+          {/* Left Column - Information + Síguenos combined */}
+          <div>
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl md:rounded-3xl border border-gray-100 p-6 md:p-8 shadow-lg h-full">
               <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                <MapPin className="w-6 h-6 text-emerald-500" />
+                <MapPin className="w-6 h-6 text-teal-500" />
                 <span>Información de Contacto</span>
               </h3>
-              
+
               <div className="space-y-5">
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
-                    <Phone className="w-5 h-5 text-emerald-500" />
+                  <div className="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center flex-shrink-0">
+                    <Phone className="w-5 h-5 text-teal-500" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-900">Teléfono</h4>
-                    <a href="tel:+573001434089" className="text-gray-600 hover:text-emerald-600 transition-colors">
+                    <a href="tel:+573001434089" className="text-gray-600 hover:text-teal-600 transition-colors">
                       +57 (300) 143-4089
                     </a>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
-                    <Mail className="w-5 h-5 text-emerald-500" />
+                  <div className="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center flex-shrink-0">
+                    <Mail className="w-5 h-5 text-teal-500" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-900">Email</h4>
-                    <a href="mailto:info@coldesthetic.com" className="text-gray-600 hover:text-emerald-600 transition-colors">
+                    <a href="mailto:info@coldesthetic.com" className="text-gray-600 hover:text-teal-600 transition-colors">
                       info@coldesthetic.com
                     </a>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
-                    <Clock className="w-5 h-5 text-emerald-500" />
+                  <div className="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center flex-shrink-0">
+                    <Clock className="w-5 h-5 text-teal-500" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-900">Horario de Atención</h4>
@@ -220,33 +220,31 @@ export default function Contact() {
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Social Media Links */}
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl md:rounded-3xl border border-gray-100 p-6 md:p-8 shadow-lg">
-              <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                <Sparkles className="w-6 h-6 text-blue-500" />
-                <span>Síguenos</span>
-              </h3>
-              
-              <div className="flex gap-4 justify-center md:justify-start">
-                <a
-                  href="https://facebook.com/coldesthetic"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center hover:bg-blue-200 transition-colors"
-                >
-                  <Facebook className="w-6 h-6 text-blue-600" />
-                </a>
-                
-                <a
-                  href="https://www.instagram.com/coldesthetic/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-12 h-12 rounded-full bg-gradient-to-r from-emerald-100 to-blue-100 flex items-center justify-center hover:from-emerald-200 hover:to-blue-200 transition-colors"
-                >
-                  <Instagram className="w-6 h-6 text-emerald-600" />
-                </a>
+              {/* Síguenos — integrado */}
+              <div className="mt-8 pt-6 border-t border-gray-100">
+                <h4 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-teal-500" />
+                  Síguenos
+                </h4>
+                <div className="flex gap-3">
+                  <a
+                    href="https://facebook.com/coldesthetic"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-11 h-11 rounded-full bg-teal-50 border border-teal-100 flex items-center justify-center hover:bg-teal-100 transition-colors"
+                  >
+                    <Facebook className="w-5 h-5 text-teal-600" />
+                  </a>
+                  <a
+                    href="https://www.instagram.com/coldesthetic/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-11 h-11 rounded-full bg-teal-50 border border-teal-100 flex items-center justify-center hover:bg-teal-100 transition-colors"
+                  >
+                    <Instagram className="w-5 h-5 text-teal-600" />
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -258,11 +256,11 @@ export default function Contact() {
             
             {/* Main CTA Card */}
             <div className="relative bg-gradient-to-br from-white via-white to-emerald-50/50 backdrop-blur-sm rounded-2xl md:rounded-3xl border border-white/80 shadow-xl md:shadow-2xl overflow-hidden h-full">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-blue-600 to-emerald-500"></div>
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-400 via-cyan-500 to-teal-400"></div>
               
               <div className="relative z-10 p-6 md:p-8 lg:p-10 h-full flex flex-col">
                 {/* Icon */}
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-blue-600 mb-6 self-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-400 to-cyan-500 mb-6 self-center">
                   <Heart className="w-8 h-8 text-white" />
                 </div>
                 
@@ -291,7 +289,7 @@ export default function Contact() {
                   
                   <a
                     href="tel:+573001434089"
-                    className="group w-full inline-flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-emerald-500 text-white font-semibold py-3 md:py-4 px-6 md:px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                    className="group w-full inline-flex items-center justify-center gap-3 bg-gradient-to-r from-teal-400 to-cyan-500 text-white font-semibold py-3 md:py-4 px-6 md:px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                   >
                     <Phone className="w-5 h-5 md:w-6 md:h-6" />
                     <span>Llamar ahora</span>
