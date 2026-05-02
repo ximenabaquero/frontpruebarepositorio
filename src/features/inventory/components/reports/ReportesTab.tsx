@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
-import PageHeader from "./PageHeader";
+import PageHeader from "../PageHeader";
 import SpendByCategoryChart from "./SpendByCategory";
 import SpendByDistributorChart from "./SpendByDistributor";
 import PriceHistoryChart from "./PriceHistoryChart";
@@ -10,13 +10,13 @@ import {
   getSpendByCategory,
   getSpendByDistributor,
   getPriceHistory,
-} from "../services/inventoryService";
+} from "../../services/inventoryService";
 import type {
   SpendByCategory,
   SpendByDistributor,
   PriceHistoryPoint,
   InventoryProduct,
-} from "../types";
+} from "../../types";
 
 interface ReportesTabProps {
   products: InventoryProduct[];
@@ -24,12 +24,17 @@ interface ReportesTabProps {
 
 export default function ReportesTab({ products }: ReportesTabProps) {
   const [spendByCategory, setSpendByCategory] = useState<SpendByCategory[]>([]);
-  const [spendByDistributor, setSpendByDistributor] = useState<SpendByDistributor[]>([]);
+  const [spendByDistributor, setSpendByDistributor] = useState<
+    SpendByDistributor[]
+  >([]);
   const [priceHistory, setPriceHistory] = useState<PriceHistoryPoint[]>([]);
-  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
+  const [selectedProductId, setSelectedProductId] = useState<number | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
 
-  const selectedProduct = products.find((p) => p.id === selectedProductId) || null;
+  const selectedProduct =
+    products.find((p) => p.id === selectedProductId) || null;
 
   // Load spend reports
   useEffect(() => {
@@ -107,7 +112,11 @@ export default function ReportesTab({ products }: ReportesTabProps) {
               </label>
               <select
                 value={selectedProductId || ""}
-                onChange={(e) => setSelectedProductId(e.target.value ? Number(e.target.value) : null)}
+                onChange={(e) =>
+                  setSelectedProductId(
+                    e.target.value ? Number(e.target.value) : null,
+                  )
+                }
                 className="w-full max-w-md px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
                 <option value="">-- Selecciona un producto --</option>
@@ -121,7 +130,10 @@ export default function ReportesTab({ products }: ReportesTabProps) {
                   ))}
               </select>
             </div>
-            <PriceHistoryChart history={priceHistory} product={selectedProduct} />
+            <PriceHistoryChart
+              history={priceHistory}
+              product={selectedProduct}
+            />
           </div>
         </>
       )}

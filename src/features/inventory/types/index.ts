@@ -1,3 +1,7 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Entidades base
+// ─────────────────────────────────────────────────────────────────────────────
+
 export interface InventoryCategory {
   id: number;
   user_id: number;
@@ -13,11 +17,15 @@ export interface InventoryProduct {
   name: string;
   description: string | null;
   type: "insumo" | "equipo";
-  unit_price: number;
-  stock: number;
-  active: boolean;
   created_at: string;
   updated_at: string;
+
+  // Accessors del modelo — siempre presentes en la respuesta
+  estado: "Disponible" | "Crítico" | "Agotado" | null; // null si es equipo
+  label_stock: "Stock" | "Cantidad"; // "Cantidad" si es equipo
+  cantidad: number; // alias de stock_actual
+
+  // Relación eager
   category?: InventoryCategory;
 }
 
@@ -27,6 +35,26 @@ export interface Distributor {
   cellphone: string | null;
   email: string | null;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Notificaciones de stock bajo
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface StockAlertProduct {
+  id: number;
+  name: string;
+  stock_actual: number; // visible en el dropdown de alertas
+  estado: "Crítico" | "Agotado";
+}
+
+export interface StockNotificationSummary {
+  total_alertas: number;
+  productos: StockAlertProduct[];
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Compras
+// ─────────────────────────────────────────────────────────────────────────────
 
 export interface InventoryPurchase {
   id: number;
@@ -40,10 +68,22 @@ export interface InventoryPurchase {
   notes: string | null;
   created_at: string;
   updated_at: string;
+
+  // Relaciones eager (siempre presentes en listAll y register)
   product?: InventoryProduct & { category?: InventoryCategory };
   user?: { id: number; name: string };
   distributor?: Distributor | null;
 }
+
+export interface LastPurchaseInfo {
+  unit_price: number;
+  distributor_id: number | null;
+  purchase_date: string;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Consumos
+// ─────────────────────────────────────────────────────────────────────────────
 
 export interface InventoryUsage {
   id: number;
@@ -51,32 +91,43 @@ export interface InventoryUsage {
   user_id: number;
   medical_evaluation_id: number | null;
   quantity: number;
-  status: "con_paciente" | "sin_paciente" | null;
+  status: "con_paciente" | "sin_paciente";
   reason: string | null;
   usage_date: string;
-  notes: string | null;
   created_at: string;
   updated_at: string;
+
+  // Relaciones eager
   product?: InventoryProduct & { category?: InventoryCategory };
   user?: { id: number; name: string };
-  medical_evaluation?: { id: number };
+  medical_evaluation?: { id: number } | null;
 }
 
-export interface InventorySummaryData {
-  total_income: number;
-  total_expenses: number;
-  net_profit: number;
-}
+// ─────────────────────────────────────────────────────────────────────────────
+// Formularios
+// ─────────────────────────────────────────────────────────────────────────────
 
 export interface PurchaseFormValues {
+  // ── Producto ──────────────────────────────────────────────────────────────
+  // Si product_id tiene valor → producto existente, ignorar campos de nuevo producto
+  // Si product_id es null     → producto nuevo, los campos de abajo son requeridos
   product_id: number | null;
-  // Campos para nuevo producto (solo cuando product_id es null)
   name: string;
   category_id: number | "";
   type: "insumo" | "equipo" | "";
   description: string;
-  // Campos de compra
+  stock_minimo: number | ""; // requerido solo si type === "insumo" y product_id === null
+
+  // ── Distribuidor ──────────────────────────────────────────────────────────
+  // Caso 1: distributor_id !== null  → existente
+  // Caso 2: distributor_name !== ""  → nuevo (se crea en el backend)
+  // Caso 3: ambos vacíos/null        → compra sin distribuidor
   distributor_id: number | null;
+  distributor_name: string;
+  distributor_cellphone: string;
+  distributor_email: string;
+
+  // ── Compra ────────────────────────────────────────────────────────────────
   quantity: number | "";
   unit_price: number | "";
   notes: string;
@@ -94,13 +145,26 @@ export interface UsageFormValues {
   medical_evaluation_id: number | null;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Errores de API
+// ─────────────────────────────────────────────────────────────────────────────
+
 export interface UsageApiError {
   message: string;
-  error_code: "insufficient_stock" | "equipo_no_consumible";
+  error_code: "insufficient_stock";
   product_name?: string;
 }
 
-// Reports types
+// ─────────────────────────────────────────────────────────────────────────────
+// Reportes
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface InventorySummaryData {
+  total_income: number;
+  total_expenses: number;
+  net_profit: number;
+}
+
 export interface SpendByCategory {
   category_id: number;
   category_name: string;
@@ -109,7 +173,7 @@ export interface SpendByCategory {
 }
 
 export interface SpendByDistributor {
-  distributor_id: number;
+  distributor_id: number | null;
   distributor_name: string;
   amount: number;
   count: number;

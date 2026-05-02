@@ -1,4 +1,4 @@
-import ValidatedInput from "./ValidatedInput";
+import ValidatedInput from "../../../components/ValidatedInput";
 
 export type ClinicalData = {
   weightKg: string;
@@ -23,7 +23,11 @@ function getBmiStatus(bmi: number): string {
   return "Obesidad grado III (≥ 40)";
 }
 
-export default function ClinicalInfoFields({ data, onChange, onDirty }: ClinicalInfoFieldsProps) {
+export default function ClinicalInfoFields({
+  data,
+  onChange,
+  onDirty,
+}: ClinicalInfoFieldsProps) {
   const set = (field: keyof ClinicalData) => (value: string) => {
     onChange(field, value);
     onDirty();
@@ -31,7 +35,8 @@ export default function ClinicalInfoFields({ data, onChange, onDirty }: Clinical
 
   const weight = parseFloat(data.weightKg);
   const height = parseFloat(data.heightM);
-  const bmi = weight > 0 && height > 0 ? +(weight / (height * height)).toFixed(2) : null;
+  const bmi =
+    weight > 0 && height > 0 ? +(weight / (height * height)).toFixed(2) : null;
   const bmiPreview = bmi !== null ? bmi.toString() : "";
   const bmiStatusPreview = bmi !== null ? getBmiStatus(bmi) : "";
 
@@ -73,7 +78,10 @@ export default function ClinicalInfoFields({ data, onChange, onDirty }: Clinical
       {/* BMI y Estado del BMI */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
         <div>
-          <label htmlFor="bmi_preview" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="bmi_preview"
+            className="block text-sm font-medium text-gray-700"
+          >
             IMC
           </label>
           <input
@@ -96,7 +104,10 @@ export default function ClinicalInfoFields({ data, onChange, onDirty }: Clinical
 
       {/* Antecedentes médicos */}
       <div className="mt-6">
-        <label htmlFor="medical_background" className="block text-sm font-medium text-gray-700">
+        <label
+          htmlFor="medical_background"
+          className="block text-sm font-medium text-gray-700"
+        >
           Antecedentes médicos relevantes
         </label>
         <textarea
@@ -105,7 +116,10 @@ export default function ClinicalInfoFields({ data, onChange, onDirty }: Clinical
           rows={4}
           required
           value={data.medicalBackground}
-          onChange={(e) => { onChange("medicalBackground", e.target.value); onDirty(); }}
+          onChange={(e) => {
+            onChange("medicalBackground", e.target.value);
+            onDirty();
+          }}
           className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
           placeholder="Patologías previas, intervenciones quirúrgicas, alergias, medicación actual, condiciones relevantes para el procedimiento."
         />

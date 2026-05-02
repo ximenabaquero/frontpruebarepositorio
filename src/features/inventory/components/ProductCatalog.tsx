@@ -1,4 +1,4 @@
-"use client";
+/*"use client";
 
 import { useState } from "react";
 import { CubeIcon, PlusIcon } from "@heroicons/react/24/outline";
@@ -144,4 +144,4 @@ export default function ProductCatalog({ products, isAdmin, onAddProduct }: Prop
       )}
     </div>
   );
-}
+}*/

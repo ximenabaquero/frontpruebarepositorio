@@ -1,9 +1,9 @@
 "use client";
-
+/*
 import { useState } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import toast from "react-hot-toast";
-import { createProduct } from "../services/inventoryService";
+//import { createProduct } from "../services/inventoryService";
 import type { InventoryCategory } from "../types";
 
 type Props = {
@@ -32,12 +32,14 @@ export default function ProductForm({ categories, onClose, onSaved }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   function handleChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
   ) {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   }
-
+  /*
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -71,14 +73,19 @@ export default function ProductForm({ categories, onClose, onSaved }: Props) {
     } finally {
       setSaving(false);
     }
-  }
-
+  }*/
+/*
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
       <div className="w-full max-w-lg rounded-2xl bg-white shadow-xl overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h3 className="font-semibold text-gray-800">Agregar producto nuevo</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <h3 className="font-semibold text-gray-800">
+            Agregar producto nuevo
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+          >
             <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
@@ -156,8 +163,9 @@ export default function ProductForm({ categories, onClose, onSaved }: Props) {
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
             <p className="text-xs text-blue-700">
-              <strong>Nota:</strong> El producto se creará con stock inicial de 0. 
-              Después puedes registrar la primera compra desde "Registrar compra".
+              <strong>Nota:</strong> El producto se creará con stock inicial de
+              0. Después puedes registrar la primera compra desde "Registrar
+              compra".
             </p>
           </div>
 
@@ -183,4 +191,4 @@ export default function ProductForm({ categories, onClose, onSaved }: Props) {
       </div>
     </div>
   );
-}
+}*/

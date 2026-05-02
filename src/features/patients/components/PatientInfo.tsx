@@ -13,7 +13,7 @@ import {
   XMarkIcon,
   DocumentTextIcon,
 } from "@heroicons/react/24/outline";
-import PhoneInputField from "../../post-login/components/PhoneInputField";
+import PhoneInputField from "../../../components/PhoneInputField";
 
 interface Props {
   patientId: number;
@@ -68,13 +68,13 @@ function DocumentTypeBadge({ type }: { type?: string | null }) {
     "Cédula de Ciudadanía":
       "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
     "Cédula de Extranjería": "bg-blue-50 text-blue-700 ring-1 ring-blue-200",
-    "Pasaporte": "bg-violet-50 text-violet-700 ring-1 ring-violet-200",
+    Pasaporte: "bg-violet-50 text-violet-700 ring-1 ring-violet-200",
     "Tarjeta de Identidad": "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
   };
   const short: Record<string, string> = {
     "Cédula de Ciudadanía": "C.C.",
     "Cédula de Extranjería": "C.E.",
-    "Pasaporte": "PAS.",
+    Pasaporte: "PAS.",
     "Tarjeta de Identidad": "T.I.",
   };
   const label = type ?? "—";
@@ -94,7 +94,9 @@ export default function PatientInfo({ patientId }: Props) {
   const [form, setForm] = useState<Partial<Patient>>({});
 
   const { data, error, isLoading, mutate } = useSWR<any>(
-    patientId ? `${apiBaseUrl}/api/v1/patients/${patientId}/clinical-records` : null,
+    patientId
+      ? `${apiBaseUrl}/api/v1/patients/${patientId}/clinical-records`
+      : null,
     fetcher,
   );
 
@@ -163,8 +165,11 @@ export default function PatientInfo({ patientId }: Props) {
       </div>
     );
 
-  const fullName = patient.full_name || 
-    capitalize(`${patient.first_name || ''} ${patient.last_name || ''}`).trim() || 
+  const fullName =
+    patient.full_name ||
+    capitalize(
+      `${patient.first_name || ""} ${patient.last_name || ""}`,
+    ).trim() ||
     "Sin nombre";
 
   const infoItems = [

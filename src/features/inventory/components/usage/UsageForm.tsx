@@ -1,4 +1,4 @@
-"use client";
+/*"use client";
 
 import { useState, useMemo } from "react";
 import { XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
@@ -99,12 +99,12 @@ export default function UsageForm({ products, onClose, onSaved }: Props) {
       setSaving(false);
     }
   }
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh]">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
+        {/* Header */
+
+/*<div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
           <h2 className="text-base font-semibold text-gray-900">Registrar Consumo Sin Paciente</h2>
           <button
             onClick={onClose}
@@ -117,7 +117,8 @@ export default function UsageForm({ products, onClose, onSaved }: Props) {
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
           <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
 
-            {/* Info banner */}
+            {/* Info banner */
+/*
             <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
               <p className="font-medium">⚠️ Consumo sin paciente asociado</p>
               <p className="text-xs mt-1">
@@ -125,13 +126,15 @@ export default function UsageForm({ products, onClose, onSaved }: Props) {
               </p>
             </div>
 
-            {/* Lista de productos con buscador */}
+            {/* Lista de productos con buscador */
+/*
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-2">
                 Productos consumidos <span className="text-red-400">*</span>
               </label>
               
-              {/* Buscador */}
+              {/* Buscador */
+/*
               <div className="relative mb-2">
                 <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
@@ -188,8 +191,10 @@ export default function UsageForm({ products, onClose, onSaved }: Props) {
               )}
             </div>
 
-            {/* Detalles adicionales - Colapsable */}
-            {/* Motivo - OBLIGATORIO */}
+            {/* Detalles adicionales - Colapsable */
+/*
+            {/* Motivo - OBLIGATORIO */
+/*
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">
                 Motivo del consumo <span className="text-red-400">*</span>
@@ -207,7 +212,8 @@ export default function UsageForm({ products, onClose, onSaved }: Props) {
               </p>
             </div>
 
-            {/* Notas opcionales */}
+            {/* Notas opcionales */
+/*
             <details className="group">
               <summary className="cursor-pointer text-xs font-medium text-gray-500 hover:text-gray-700 flex items-center gap-1">
                 <span className="group-open:rotate-90 transition-transform">▶</span>
@@ -224,7 +230,8 @@ export default function UsageForm({ products, onClose, onSaved }: Props) {
               </div>
             </details>
 
-            {/* Error */}
+            {/* Error */
+/*
             {error && (
               <p
                 className={`text-xs rounded-lg px-3 py-2 ${
@@ -238,7 +245,8 @@ export default function UsageForm({ products, onClose, onSaved }: Props) {
             )}
           </div>
 
-          {/* Acciones */}
+          {/* Acciones */
+/*
           <div className="flex gap-2 px-6 py-4 border-t border-gray-100 flex-shrink-0">
             <button
               type="button"
@@ -259,4 +267,4 @@ export default function UsageForm({ products, onClose, onSaved }: Props) {
       </div>
     </div>
   );
-}
+}*/

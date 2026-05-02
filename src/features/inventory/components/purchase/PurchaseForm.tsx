@@ -2,13 +2,17 @@
 
 import { useState, useEffect } from "react";
 import { XMarkIcon, SparklesIcon } from "@heroicons/react/24/outline";
-import { createPurchase, getDistributors, getLastPurchase } from "../services/inventoryService";
+import {
+  createPurchase,
+  getDistributors,
+  getLastPurchase,
+} from "../../services/inventoryService";
 import type {
   InventoryCategory,
   InventoryProduct,
   Distributor,
   PurchaseFormValues,
-} from "../types";
+} from "../../types";
 
 type Props = {
   categories: InventoryCategory[];
@@ -29,7 +33,12 @@ const EMPTY: PurchaseFormValues = {
   notes: "",
 };
 
-export default function PurchaseForm({ categories, products, onClose, onSaved }: Props) {
+export default function PurchaseForm({
+  categories,
+  products,
+  onClose,
+  onSaved,
+}: Props) {
   const [form, setForm] = useState<PurchaseFormValues>(EMPTY);
   const [distributors, setDistributors] = useState<Distributor[]>([]);
   const [saving, setSaving] = useState(false);
@@ -39,16 +48,23 @@ export default function PurchaseForm({ categories, products, onClose, onSaved }:
   const [totalPrice, setTotalPrice] = useState("");
 
   useEffect(() => {
-    getDistributors().then(setDistributors).catch(() => setDistributors([]));
+    getDistributors()
+      .then(setDistributors)
+      .catch(() => setDistributors([]));
   }, []);
 
   const calculatedValue =
     priceMode === "unit"
       ? form.quantity !== "" && form.unit_price !== ""
-        ? (Number(form.quantity) * Number(form.unit_price)).toLocaleString("es-CO")
+        ? (Number(form.quantity) * Number(form.unit_price)).toLocaleString(
+            "es-CO",
+          )
         : "—"
       : totalPrice !== "" && form.quantity !== "" && Number(form.quantity) > 0
-        ? (Number(totalPrice) / Number(form.quantity)).toLocaleString("es-CO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        ? (Number(totalPrice) / Number(form.quantity)).toLocaleString("es-CO", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })
         : "—";
 
   const calculatedLabel = priceMode === "unit" ? "Total" : "Precio unitario";
@@ -56,7 +72,12 @@ export default function PurchaseForm({ categories, products, onClose, onSaved }:
   async function handleProductSelect(e: React.ChangeEvent<HTMLSelectElement>) {
     const val = e.target.value;
     if (val === "") {
-      setForm((prev) => ({ ...prev, product_id: null, unit_price: "", distributor_id: null }));
+      setForm((prev) => ({
+        ...prev,
+        product_id: null,
+        unit_price: "",
+        distributor_id: null,
+      }));
       return;
     }
 
@@ -82,7 +103,9 @@ export default function PurchaseForm({ categories, products, onClose, onSaved }:
   }
 
   function handleChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
   ) {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -90,9 +113,12 @@ export default function PurchaseForm({ categories, products, onClose, onSaved }:
 
   function handlePriceChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
-    
+
     if (priceMode === "unit") {
-      setForm((prev) => ({ ...prev, unit_price: value === "" ? "" : Number(value) }));
+      setForm((prev) => ({
+        ...prev,
+        unit_price: value === "" ? "" : Number(value),
+      }));
       // Calcular total automáticamente
       if (value && form.quantity) {
         const calculatedTotal = Number(value) * Number(form.quantity);
@@ -112,13 +138,21 @@ export default function PurchaseForm({ categories, products, onClose, onSaved }:
 
   function handleQuantityChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
-    setForm((prev) => ({ ...prev, quantity: value === "" ? "" : Number(value) }));
+    setForm((prev) => ({
+      ...prev,
+      quantity: value === "" ? "" : Number(value),
+    }));
 
     // Recalcular según el modo
     if (priceMode === "unit" && form.unit_price && value) {
       const calculatedTotal = Number(form.unit_price) * Number(value);
       setTotalPrice(calculatedTotal.toString());
-    } else if (priceMode === "total" && totalPrice && value && Number(value) > 0) {
+    } else if (
+      priceMode === "total" &&
+      totalPrice &&
+      value &&
+      Number(value) > 0
+    ) {
       const calculatedUnit = Number(totalPrice) / Number(value);
       setForm((prev) => ({ ...prev, unit_price: calculatedUnit }));
     }
@@ -127,7 +161,7 @@ export default function PurchaseForm({ categories, products, onClose, onSaved }:
   function togglePriceMode() {
     const newMode = priceMode === "unit" ? "total" : "unit";
     setPriceMode(newMode);
-    
+
     // Sincronizar valores al cambiar de modo
     if (newMode === "total" && form.quantity && form.unit_price) {
       const calculatedTotal = Number(form.quantity) * Number(form.unit_price);
@@ -169,19 +203,24 @@ export default function PurchaseForm({ categories, products, onClose, onSaved }:
       <div className="w-full max-w-lg rounded-2xl bg-white shadow-xl overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <h3 className="font-semibold text-gray-800">Registrar compra</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+          >
             <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4 max-h-[80vh] overflow-y-auto">
-
+        <form
+          onSubmit={handleSubmit}
+          className="px-6 py-5 space-y-4 max-h-[80vh] overflow-y-auto"
+        >
           {/* Selector de producto */}
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1.5">
               Producto <span className="text-rose-400">*</span>
-              <SparklesIcon 
-                className="w-3.5 h-3.5 text-indigo-500" 
+              <SparklesIcon
+                className="w-3.5 h-3.5 text-indigo-500"
                 title="Autocompletamos precio y distribuidor de tu última compra"
               />
             </label>
@@ -206,7 +245,8 @@ export default function PurchaseForm({ categories, products, onClose, onSaved }:
               </p>
             )}
             <p className="text-xs text-gray-500 mt-1">
-              ¿No encuentras el producto? Agrégalo desde la sección <span className="font-medium">Catálogo</span>
+              ¿No encuentras el producto? Agrégalo desde la sección{" "}
+              <span className="font-medium">Catálogo</span>
             </p>
           </div>
 
@@ -230,20 +270,40 @@ export default function PurchaseForm({ categories, products, onClose, onSaved }:
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="text-xs font-medium text-gray-600 flex items-center gap-1">
-                  {priceMode === "unit" ? "Precio unitario" : "Precio total"} (COP)
+                  {priceMode === "unit" ? "Precio unitario" : "Precio total"}{" "}
+                  (COP)
                   <span className="text-rose-400">*</span>
-                  {form.product_id && form.unit_price !== "" && priceMode === "unit" && (
-                    <SparklesIcon className="w-3 h-3 text-indigo-500" title="Autocompletado de última compra" />
-                  )}
+                  {form.product_id &&
+                    form.unit_price !== "" &&
+                    priceMode === "unit" && (
+                      <SparklesIcon
+                        className="w-3 h-3 text-indigo-500"
+                        title="Autocompletado de última compra"
+                      />
+                    )}
                 </label>
                 <button
                   type="button"
                   onClick={togglePriceMode}
                   className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold text-indigo-700 bg-indigo-100 hover:bg-indigo-200 transition-colors border border-indigo-300"
-                  title={priceMode === "unit" ? "Cambiar a modo precio total" : "Cambiar a modo precio unitario"}
+                  title={
+                    priceMode === "unit"
+                      ? "Cambiar a modo precio total"
+                      : "Cambiar a modo precio unitario"
+                  }
                 >
-                  <svg className="w-3 h-3" fill="none" viewBox="0 0 16 16" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h8M8 4l4 4-4 4M8 4v8" />
+                  <svg
+                    className="w-3 h-3"
+                    fill="none"
+                    viewBox="0 0 16 16"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 8h8M8 4l4 4-4 4M8 4v8"
+                    />
                   </svg>
                   {priceMode === "unit" ? "Total" : "Unitario"}
                 </button>
@@ -263,7 +323,9 @@ export default function PurchaseForm({ categories, products, onClose, onSaved }:
 
           {/* Total calculado - Más prominente */}
           <div className="rounded-lg bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200 px-4 py-3 flex justify-between items-center">
-            <span className="text-sm text-indigo-700 font-semibold">{calculatedLabel}</span>
+            <span className="text-sm text-indigo-700 font-semibold">
+              {calculatedLabel}
+            </span>
             <span className="text-xl font-extrabold text-indigo-900">
               {calculatedValue !== "—" ? `$${calculatedValue}` : "—"}
             </span>
@@ -273,7 +335,9 @@ export default function PurchaseForm({ categories, products, onClose, onSaved }:
           {distributors.length > 0 && (
             <details className="group">
               <summary className="cursor-pointer text-xs font-medium text-gray-500 hover:text-gray-700 flex items-center gap-1">
-                <span className="group-open:rotate-90 transition-transform">▶</span>
+                <span className="group-open:rotate-90 transition-transform">
+                  ▶
+                </span>
                 Detalles adicionales (opcional)
               </summary>
               <div className="mt-3 space-y-3 pl-4 border-l-2 border-gray-200">
@@ -287,14 +351,18 @@ export default function PurchaseForm({ categories, products, onClose, onSaved }:
                     onChange={(e) =>
                       setForm((prev) => ({
                         ...prev,
-                        distributor_id: e.target.value ? Number(e.target.value) : null,
+                        distributor_id: e.target.value
+                          ? Number(e.target.value)
+                          : null,
                       }))
                     }
                     className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                   >
                     <option value="">Sin distribuidor</option>
                     {distributors.map((d) => (
-                      <option key={d.id} value={d.id}>{d.name}</option>
+                      <option key={d.id} value={d.id}>
+                        {d.name}
+                      </option>
                     ))}
                   </select>
                 </div>

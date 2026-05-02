@@ -1,12 +1,15 @@
 import { useState } from "react";
-import type { PriceHistoryPoint, InventoryProduct } from "../types";
+import type { PriceHistoryPoint, InventoryProduct } from "../../types";
 
 interface PriceHistoryChartProps {
   history: PriceHistoryPoint[];
   product: InventoryProduct | null;
 }
 
-export default function PriceHistoryChart({ history, product }: PriceHistoryChartProps) {
+export default function PriceHistoryChart({
+  history,
+  product,
+}: PriceHistoryChartProps) {
   if (!product) {
     return (
       <div className="bg-white rounded-xl border border-gray-200 p-8 shadow-sm text-center text-gray-400">
@@ -24,7 +27,10 @@ export default function PriceHistoryChart({ history, product }: PriceHistoryChar
   }
 
   const fmt = (val: number) =>
-    new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" }).format(val);
+    new Intl.NumberFormat("es-CL", {
+      style: "currency",
+      currency: "CLP",
+    }).format(val);
 
   const fmtShort = (val: number) => {
     if (val >= 1000000) return `$${(val / 1000000).toFixed(1)}M`;
@@ -35,9 +41,14 @@ export default function PriceHistoryChart({ history, product }: PriceHistoryChar
   const prices = history.map((h) => h.price);
   const maxP = Math.max(...prices);
   const minP = Math.min(...prices);
-  const delta = history.length > 1
-    ? Math.round(((history[history.length - 1].price - history[0].price) / history[0].price) * 100)
-    : 0;
+  const delta =
+    history.length > 1
+      ? Math.round(
+          ((history[history.length - 1].price - history[0].price) /
+            history[0].price) *
+            100,
+        )
+      : 0;
 
   // SVG dimensions
   const W = 800;
@@ -54,7 +65,9 @@ export default function PriceHistoryChart({ history, product }: PriceHistoryChar
     return { x, y, ...h };
   });
 
-  const pathData = points.map((p, i) => (i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`)).join(" ");
+  const pathData = points
+    .map((p, i) => (i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`))
+    .join(" ");
   const areaData = `${pathData} L ${points[points.length - 1].x},${H - P} L ${P},${H - P} Z`;
 
   return (
@@ -81,8 +94,12 @@ export default function PriceHistoryChart({ history, product }: PriceHistoryChar
       </div>
 
       <div className="mb-3">
-        <div className="text-sm font-semibold text-gray-700">{product.name}</div>
-        <div className="text-xs text-gray-500">{history.length} compras registradas</div>
+        <div className="text-sm font-semibold text-gray-700">
+          {product.name}
+        </div>
+        <div className="text-xs text-gray-500">
+          {history.length} compras registradas
+        </div>
       </div>
 
       <div className="w-full overflow-x-auto">
@@ -116,7 +133,14 @@ export default function PriceHistoryChart({ history, product }: PriceHistoryChar
           {/* Points */}
           {points.map((p, i) => (
             <g key={i}>
-              <circle cx={p.x} cy={p.y} r="5" fill="white" stroke="#9333EA" strokeWidth="2" />
+              <circle
+                cx={p.x}
+                cy={p.y}
+                r="5"
+                fill="white"
+                stroke="#9333EA"
+                strokeWidth="2"
+              />
               <text
                 x={p.x}
                 y={p.y - 12}

@@ -1,18 +1,32 @@
 "use client";
 
-import { useState } from "react";
-import { PlusIcon, PencilSquareIcon, TrashIcon, PhoneIcon, EnvelopeIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import PageHeader from "./PageHeader";
-import type { Distributor } from "../types";
+import { useState, useMemo } from "react";
+import {
+  PlusIcon,
+  PencilSquareIcon,
+  PhoneIcon,
+  EnvelopeIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
+import PageHeader from "../PageHeader";
+import ValidatedInput from "@/components/ValidatedInput";
+import PhoneInputField from "@/components/PhoneInputField";
+import InventorySearchBar from "../InventorySearchBar";
+import type { Distributor } from "../../types";
 
-interface DistribuidoresTabProps {
+interface DistribuidorTabProps {
   distributors: Distributor[];
   onCreated: (d: Distributor) => void;
   onUpdated: (d: Distributor) => void;
-  onDeleted: (id: number) => void;
-  onCreate: (data: { name: string; cellphone: string | null; email: string | null }) => Promise<Distributor>;
-  onUpdate: (id: number, data: { name: string; cellphone: string | null; email: string | null }) => Promise<Distributor>;
-  onDelete: (id: number) => Promise<void>;
+  onCreate: (data: {
+    name: string;
+    cellphone: string | null;
+    email: string | null;
+  }) => Promise<Distributor>;
+  onUpdate: (
+    id: number,
+    data: { name: string; cellphone: string | null; email: string | null },
+  ) => Promise<Distributor>;
 }
 
 interface FormState {
@@ -23,21 +37,37 @@ interface FormState {
 
 const EMPTY_FORM: FormState = { name: "", cellphone: "", email: "" };
 
-export default function DistribuidoresTab({
+// Normaliza tildes para búsqueda sin acento
+const normalize = (str: string) =>
+  str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+
+export default function DistribuidorTab({
   distributors,
   onCreated,
   onUpdated,
-  onDeleted,
   onCreate,
   onUpdate,
-  onDelete,
-}: DistribuidoresTabProps) {
+}: DistribuidorTabProps) {
+  const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<Distributor | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  // Búsqueda local — no requiere llamada extra al backend
+  const filtered = useMemo(() => {
+    const q = normalize(search);
+    if (!q) return distributors;
+    return distributors.filter(
+      (d) =>
+        normalize(d.name).includes(q) ||
+        (d.cellphone && normalize(d.cellphone).includes(q)),
+    );
+  }, [distributors, search]);
 
   function openCreate() {
     setEditing(null);
@@ -65,39 +95,28 @@ export default function DistribuidoresTab({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!form.name.trim()) return setError("El nombre es obligatorio.");
+
     setSaving(true);
     setError(null);
+
     const payload = {
       name: form.name.trim(),
       cellphone: form.cellphone.trim() || null,
       email: form.email.trim() || null,
     };
+
     try {
       if (editing) {
-        const updated = await onUpdate(editing.id, payload);
-        onUpdated(updated);
+        onUpdated(await onUpdate(editing.id, payload));
       } else {
-        const created = await onCreate(payload);
-        onCreated(created);
+        onCreated(await onCreate(payload));
       }
       closeModal();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Error al guardar");
     } finally {
       setSaving(false);
-    }
-  }
-
-  async function handleDelete(dist: Distributor) {
-    if (!confirm(`¿Eliminar a "${dist.name}"? Esta acción no se puede deshacer.`)) return;
-    setDeletingId(dist.id);
-    try {
-      await onDelete(dist.id);
-      onDeleted(dist.id);
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : "No se pudo eliminar el distribuidor");
-    } finally {
-      setDeletingId(null);
     }
   }
 
@@ -119,9 +138,19 @@ export default function DistribuidoresTab({
         ]}
       />
 
-      {distributors.length > 0 ? (
+      {/* Buscador */}
+      <div className="mb-5">
+        <InventorySearchBar
+          contexto="distribuidores"
+          value={search}
+          onSearch={setSearch}
+        />
+      </div>
+
+      {/* Grilla */}
+      {filtered.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {distributors.map((dist) => (
+          {filtered.map((dist) => (
             <div
               key={dist.id}
               className="p-4 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
@@ -131,25 +160,17 @@ export default function DistribuidoresTab({
                   {dist.name[0].toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className="text-sm font-semibold text-gray-900 truncate">{dist.name}</h4>
+                  <h4 className="text-sm font-semibold text-gray-900 truncate">
+                    {dist.name}
+                  </h4>
                 </div>
-                <div className="flex gap-1 shrink-0">
-                  <button
-                    onClick={() => openEdit(dist)}
-                    className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                    title="Editar"
-                  >
-                    <PencilSquareIcon className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(dist)}
-                    disabled={deletingId === dist.id}
-                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-                    title="Eliminar"
-                  >
-                    <TrashIcon className="w-4 h-4" />
-                  </button>
-                </div>
+                <button
+                  onClick={() => openEdit(dist)}
+                  className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  title="Editar"
+                >
+                  <PencilSquareIcon className="w-4 h-4" />
+                </button>
               </div>
 
               <div className="space-y-1.5 pt-2 border-t border-gray-100">
@@ -181,20 +202,18 @@ export default function DistribuidoresTab({
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No hay distribuidores</h3>
-          <p className="text-sm text-gray-600 max-w-md mx-auto mb-6">
-            Agrega distribuidores para llevar un mejor control de tus compras y proveedores.
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            {search ? "Sin resultados" : "No hay distribuidores"}
+          </h3>
+          <p className="text-sm text-gray-600 max-w-md mx-auto">
+            {search
+              ? `No se encontró ningún distribuidor con "${search}".`
+              : "Agrega distribuidores para llevar un mejor control de tus compras."}
           </p>
-          <button
-            onClick={openCreate}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
-          >
-            <PlusIcon className="w-4 h-4" />
-            Crear primer distribuidor
-          </button>
         </div>
       )}
 
+      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md border border-gray-100">
@@ -202,55 +221,46 @@ export default function DistribuidoresTab({
               <h2 className="text-base font-semibold text-gray-900">
                 {editing ? "Editar distribuidor" : "Nuevo distribuidor"}
               </h2>
-              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 transition-colors">
+              <button
+                onClick={closeModal}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
                 <XMarkIcon className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                  Nombre <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={form.name}
-                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                  required
-                  maxLength={100}
-                  placeholder="Nombre del distribuidor"
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                  Teléfono / Celular
-                </label>
-                <input
-                  type="tel"
-                  value={form.cellphone}
-                  onChange={(e) => setForm((f) => ({ ...f, cellphone: e.target.value }))}
-                  maxLength={25}
-                  placeholder="Ej: 3001234567"
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                  Correo electrónico
-                </label>
-                <input
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                  maxLength={100}
-                  placeholder="correo@ejemplo.com"
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent"
-                />
-              </div>
+              <ValidatedInput
+                id="distributor-name"
+                label="Nombre"
+                placeholder="Nombre del distribuidor"
+                maxLength={100}
+                required
+                value={form.name}
+                onChange={(val) => setForm((f) => ({ ...f, name: val }))}
+              />
+
+              <PhoneInputField
+                label="Celular"
+                variant="modal"
+                value={form.cellphone}
+                onChange={(val) => setForm((f) => ({ ...f, cellphone: val }))}
+              />
+
+              <ValidatedInput
+                id="distributor-email"
+                label="Correo electrónico"
+                placeholder="correo@ejemplo.com"
+                type="email"
+                maxLength={100}
+                value={form.email}
+                onChange={(val) => setForm((f) => ({ ...f, email: val }))}
+              />
 
               {error && (
-                <p className="text-xs text-red-600 font-medium">{error}</p>
+                <p className="text-[10px] uppercase font-semibold tracking-wider text-red-500">
+                  {error}
+                </p>
               )}
 
               <div className="flex gap-3 pt-2">
@@ -266,7 +276,11 @@ export default function DistribuidoresTab({
                   disabled={saving || !form.name.trim()}
                   className="flex-1 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  {saving ? "Guardando..." : editing ? "Guardar cambios" : "Crear distribuidor"}
+                  {saving
+                    ? "Guardando..."
+                    : editing
+                      ? "Guardar cambios"
+                      : "Crear distribuidor"}
                 </button>
               </div>
             </form>
