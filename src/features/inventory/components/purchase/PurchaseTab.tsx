@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { ShoppingCartIcon } from "@heroicons/react/24/outline";
 import CategorySelector from "../CategorySelector";
 import CategoryManager from "../CategoryManager";
@@ -17,6 +17,8 @@ interface PurchaseTabProps {
   onRefreshCategories: () => void;
   onRefreshProducts: () => void;
 }
+
+const ITEMS_PER_PAGE = 10;
 
 const normalize = (str: string) =>
   str
@@ -35,6 +37,7 @@ export default function PurchaseTab({
 }: PurchaseTabProps) {
   const [search, setSearch] = useState("");
   const [activeCategoryId, setActiveCategoryId] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const filtered = useMemo(() => {
     const q = normalize(search);
@@ -53,6 +56,22 @@ export default function PurchaseTab({
     });
   }, [purchases, search, activeCategoryId]);
 
+  // Vuelve a página 1 cada vez que cambia el filtro
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, activeCategoryId]);
+
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+
+  const paginatedPurchases = useMemo(
+    () =>
+      filtered.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE,
+      ),
+    [filtered, currentPage],
+  );
+
   return (
     <div className="flex flex-col gap-5">
       {/* Fila 1: Categorías + botón */}
@@ -64,7 +83,6 @@ export default function PurchaseTab({
             onSelect={setActiveCategoryId}
           />
         </div>
-        {/* Gestionar categorías — solo admin */}
         {isAdmin && (
           <CategoryManager
             categories={categories}
@@ -72,7 +90,6 @@ export default function PurchaseTab({
             onRefreshProducts={onRefreshProducts}
           />
         )}
-
         <button
           onClick={onOpenPurchase}
           className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors shrink-0"
@@ -89,8 +106,18 @@ export default function PurchaseTab({
         onSearch={setSearch}
       />
 
-      {/* Fila 3: Tabla */}
-      <PurchaseTable purchases={filtered} isAdmin={isAdmin} loading={loading} />
+      {/* Fila 3: Tabla + paginación */}
+      <PurchaseTable
+        purchases={paginatedPurchases}
+        isAdmin={isAdmin}
+        loading={loading}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={filtered.length}
+        itemsPerPage={ITEMS_PER_PAGE}
+        onNext={() => setCurrentPage((p) => p + 1)}
+        onPrev={() => setCurrentPage((p) => p - 1)}
+      />
     </div>
   );
 }

@@ -53,6 +53,14 @@ export default function UsageTab({
     });
   }, [usages, search, activeCategoryId]);
 
+  const handleSearch = (q: string) => {
+    setSearch(q);
+  };
+
+  const handleCategory = (id: number | null) => {
+    setActiveCategoryId(id);
+  };
+
   return (
     <div className="flex flex-col gap-5">
       {/* Fila 1: Categorías + Gestionar + Registrar */}
@@ -61,7 +69,7 @@ export default function UsageTab({
           <CategorySelector
             categories={categories}
             activeCategoryId={activeCategoryId}
-            onSelect={setActiveCategoryId}
+            onSelect={handleCategory}
           />
         </div>
 
@@ -86,10 +94,10 @@ export default function UsageTab({
       <InventorySearchBar
         contexto="consumos"
         value={search}
-        onSearch={setSearch}
+        onSearch={handleSearch}
       />
 
-      {/* Fila 3: Tabla */}
+      {/* Fila 3: Tabla con scroll por sección */}
       <UsageTable usages={filtered} loading={loading} />
     </div>
   );

@@ -11,6 +11,9 @@ type ValidatedInputProps = {
   required?: boolean;
   value: string | number;
   onChange: (val: string) => void;
+  // ── Props nuevas, opcionales — no rompen ningún uso existente ──
+  maxErrorMessage?: string; // mensaje custom cuando se supera el max
+  clampToMin?: boolean; // fuerza el valor a min en vez de mostrar error
 };
 
 export default function ValidatedInput({
@@ -24,6 +27,8 @@ export default function ValidatedInput({
   required = false,
   value,
   onChange,
+  maxErrorMessage,
+  clampToMin = false,
 }: ValidatedInputProps) {
   const [error, setError] = useState("");
 
@@ -32,36 +37,47 @@ export default function ValidatedInput({
 
     if (maxLength && val.length > maxLength) {
       setError(`Máximo ${maxLength} caracteres.`);
-    }
-
-    // Validación numérica (Edad, Peso, Estatura)
-    else if (type === "number" && val !== "") {
-      // Reemplazamos coma por punto por si el usuario escribe en formato latino
+    } else if (type === "number" && val !== "") {
       const normalizedVal = val.replace(",", ".");
       const num = Number(normalizedVal);
 
-      // Verificamos si es un número válido y si está fuera de rango
       const isBelowMin = min !== undefined && num < min;
       const isAboveMax = max !== undefined && num > max;
 
-      if (isBelowMin || isAboveMax) {
-        // Mapeo de unidades según el ID
+      if (isBelowMin) {
+        if (clampToMin && min !== undefined) {
+          // Bloquea silenciosamente: fuerza el valor al mínimo
+          setError("");
+          onChange(String(min));
+          return;
+        }
+        // Comportamiento original: muestra el rango (edad, peso, altura)
         const unidades: Record<string, string> = {
           age: "años",
           weight: "kg",
           height: "m",
         };
-
         const unidad = unidades[id] || "";
         setError(`Rango permitido: ${min} a ${max} ${unidad}`.trim() + ".");
+      } else if (isAboveMax) {
+        // Usa mensaje custom si se provee, si no el mensaje original
+        const unidades: Record<string, string> = {
+          age: "años",
+          weight: "kg",
+          height: "m",
+        };
+        const unidad = unidades[id] || "";
+        setError(
+          maxErrorMessage ??
+            `Rango permitido: ${min} a ${max} ${unidad}`.trim() + ".",
+        );
       } else {
         setError("");
       }
-    }
-    // 3. Limpiar error si el campo está vacío o es válido
-    else {
+    } else {
       setError("");
     }
+
     onChange(val);
   };
 

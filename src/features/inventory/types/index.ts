@@ -140,7 +140,7 @@ export type UsageItem = {
 
 export interface UsageFormValues {
   items: UsageItem[];
-  status: "con_paciente" | "sin_paciente" | "";
+  status: "con_paciente" | "sin_paciente";
   reason: string;
   medical_evaluation_id: number | null;
 }

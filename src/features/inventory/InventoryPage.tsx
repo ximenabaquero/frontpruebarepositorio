@@ -14,9 +14,9 @@ import ProductTab from "./components/dashboard/ProductTab";
 import UsageTab from "./components/usage/UsageTab";
 import PurchaseTab from "./components/purchase/PurchaseTab";
 import ReportesTab from "./components/reports/ReportesTab";
-import CatalogoTab from "./components/CatalogoTab";
 import DistribuidorTab from "./components/distribuidor/DistribuidorTab";
 import PurchaseForm from "./components/purchase/PurchaseForm";
+import UsageForm from "./components/usage/UsageForm";
 
 import {
   getCategories,
@@ -62,6 +62,12 @@ export default function InventoryPage() {
   const [selectedProduct, setSelectedProduct] = useState<
     InventoryProduct | undefined
   >();
+
+  // Estado adicional para el ID de evaluación
+  const [usageEvaluationId, setUsageEvaluationId] = useState<
+    number | undefined
+  >();
+  const [showUsageForm, setShowUsageForm] = useState(false);
 
   // Callbacks de carga de datos
   const loadCategories = useCallback(async () => {
@@ -129,10 +135,13 @@ export default function InventoryPage() {
     setShowPurchaseForm(true);
   };
 
-  const handleOpenConsume = (product?: InventoryProduct) => {
+  const handleOpenConsume = (
+    product?: InventoryProduct,
+    evaluationId?: number,
+  ) => {
     setSelectedProduct(product);
-    // Aquí abrirías tu formulario de consumo cuando lo habilites
-    console.log("Abrir consumo para:", product?.name);
+    setUsageEvaluationId(evaluationId);
+    setShowUsageForm(true);
   };
 
   return (
@@ -240,9 +249,26 @@ export default function InventoryPage() {
           <PurchaseForm
             categories={categories}
             products={products}
+            distributors={distributors}
             onClose={() => setShowPurchaseForm(false)}
             onSaved={() => {
               loadPurchases();
+              loadProducts();
+            }}
+          />
+        )}
+
+        {showUsageForm && (
+          <UsageForm
+            products={products}
+            mode={usageEvaluationId ? "con_paciente" : "sin_paciente"}
+            medicalEvaluationId={usageEvaluationId}
+            onClose={() => {
+              setShowUsageForm(false);
+              setUsageEvaluationId(undefined);
+            }}
+            onSaved={() => {
+              loadUsages();
               loadProducts();
             }}
           />

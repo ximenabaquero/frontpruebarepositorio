@@ -4,8 +4,6 @@ import { useState, useMemo } from "react";
 import {
   ArrowDownTrayIcon,
   ChevronDownIcon,
-  ShoppingCartIcon,
-  PlusIcon,
 } from "@heroicons/react/24/outline";
 import { toast } from "react-hot-toast";
 import CategorySelector from "../CategorySelector";
@@ -15,10 +13,9 @@ import ProductTable from "./ProductTable";
 import type { InventoryProduct, InventoryCategory } from "../../types";
 import { exportToCSV, exportToExcel } from "../../utils/exportUtils";
 
-// ── Iconos inline para las tablas ────────────────────────────────────────────
 const InsumoIcon = (
   <svg
-    className="w-5 h-5"
+    className="w-4 h-4"
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"
@@ -34,7 +31,7 @@ const InsumoIcon = (
 
 const EquipoIcon = (
   <svg
-    className="w-5 h-5"
+    className="w-4 h-4"
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"
@@ -48,8 +45,6 @@ const EquipoIcon = (
   </svg>
 );
 
-// ─────────────────────────────────────────────────────────────────────────────
-
 interface ProductTabProps {
   products: InventoryProduct[];
   categories: InventoryCategory[];
@@ -57,6 +52,12 @@ interface ProductTabProps {
   onRefreshProducts?: () => void;
   isAdmin: boolean;
 }
+
+const normalize = (str: string) =>
+  str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
 
 export default function ProductTab({
   products,
@@ -69,16 +70,8 @@ export default function ProductTab({
   const [activeCategoryId, setActiveCategoryId] = useState<number | null>(null);
   const [showExportMenu, setShowExportMenu] = useState(false);
 
-  // ── Filtrado ──────────────────────────────────────────────────────────────
   const filtered = useMemo(() => {
-    const normalize = (str: string) =>
-      str
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase();
-
     const q = normalize(search);
-
     return products.filter((p) => {
       const matchSearch = !q || normalize(p.name).includes(q);
       const matchCategory =
@@ -96,7 +89,6 @@ export default function ProductTab({
     [filtered],
   );
 
-  // ── Export ────────────────────────────────────────────────────────────────
   const handleExportCSV = () => {
     setShowExportMenu(false);
     const ok = exportToCSV(filtered, categories, "inventario_productos");
@@ -119,12 +111,10 @@ export default function ProductTab({
     );
   };
 
-  // ─────────────────────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col gap-5">
-      {/* ── Fila 1: Categorías + Gestionar + Export + Acciones ─────────────── */}
+      {/* Fila 1: Categorías + Gestionar + Export */}
       <div className="flex flex-wrap items-center gap-3">
-        {/* Categorías pill */}
         <div className="flex-1 min-w-0">
           <CategorySelector
             categories={categories}
@@ -133,7 +123,6 @@ export default function ProductTab({
           />
         </div>
 
-        {/* Gestionar categorías — solo admin */}
         {isAdmin && (
           <CategoryManager
             categories={categories}
@@ -142,7 +131,6 @@ export default function ProductTab({
           />
         )}
 
-        {/* Export dropdown */}
         <div className="relative">
           <button
             onClick={() => setShowExportMenu((v) => !v)}
@@ -180,21 +168,20 @@ export default function ProductTab({
         </div>
       </div>
 
-      {/* ── Fila 2: Buscador ───────────────────────────────────────────────── */}
+      {/* Fila 2: Buscador */}
       <InventorySearchBar
         contexto="dashboard"
         value={search}
         onSearch={setSearch}
       />
 
-      {/* ── Fila 3: Tablas ─────────────────────────────────────────────────── */}
+      {/* Fila 3: Tablas */}
       <ProductTable
         products={insumos}
         title="Insumos"
         icon={InsumoIcon}
         type="insumo"
       />
-
       <ProductTable
         products={equipos}
         title="Equipos"
