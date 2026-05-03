@@ -101,11 +101,10 @@ export default function UsageForm({
     }
 
     // ── Payload ───────────────────────────────────────────────────────────
-    // En handleSubmit, reemplaza el bloque del payload por esto:
     const payload: UsageFormValues = {
-      status: mode, // UsageMode ⊂ UsageFormValues["status"], necesita cast
+      status: mode,
       items: filledItems as Array<{ product_id: number; quantity: number }>,
-      reason: mode === "sin_paciente" ? reason.trim() : "",
+      reason: reason.trim(),
       medical_evaluation_id:
         mode === "con_paciente" ? (medicalEvaluationId ?? null) : null,
     };
@@ -285,7 +284,7 @@ export default function UsageForm({
                             value={qty}
                             placeholder="0"
                             onChange={(val) => updateQuantity(product.id, val)}
-                            maxErrorMessage="Stock insuficiente." // ← custom para este contexto
+                            maxErrorMessage="Stock insuficiente."
                             clampToMin // ← bloquea negativos silenciosamente
                           />
                         </div>
@@ -315,24 +314,31 @@ export default function UsageForm({
               </div>
             )}
 
-            {/* Motivo — solo sin_paciente */}
-            {mode === "sin_paciente" && (
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Motivo del consumo <span className="text-red-400">*</span>
-                </label>
-                <textarea
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                  placeholder="Ej: Limpieza de equipos, prueba de producto, daño/vencimiento..."
-                  rows={2}
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
-                />
-                <p className="text-xs text-gray-400 mt-1">
-                  Máx. 300 caracteres · {reason.length}/300
-                </p>
-              </div>
-            )}
+            {/* Motivo — obligatorio en sin_paciente, opcional en con_paciente */}
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                Motivo del consumo{" "}
+                {mode === "sin_paciente" ? (
+                  <span className="text-red-400">*</span>
+                ) : (
+                  <span className="text-gray-400 font-normal">(opcional)</span>
+                )}
+              </label>
+              <textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder={
+                  mode === "sin_paciente"
+                    ? "Ej: Limpieza de equipos, prueba de producto, daño/vencimiento..."
+                    : "Ej: Procedimiento de relleno facial, zona tratada, observaciones..."
+                }
+                rows={2}
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
+              />
+              <p className="text-xs text-gray-400 mt-1">
+                Máx. 300 caracteres · {reason.length}/300
+              </p>
+            </div>
 
             {/* Error de submit */}
             {submitError && (
