@@ -89,7 +89,7 @@ export default function Header() {
             {/* Divider */}
             <div className="hidden sm:block w-px h-5 bg-gray-200 mx-1" />
 
-            {/* Auth */}
+           { /* Auth 
             {user ? (
               <button
                 type="button"
@@ -111,7 +111,7 @@ export default function Header() {
                 </svg>
                 <span className="hidden sm:inline">Iniciar sesión</span>
               </Link>
-            )}
+            )}*/ }
 
             {/* Mobile menu button */}
             <button
