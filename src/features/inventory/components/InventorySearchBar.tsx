@@ -26,19 +26,19 @@ export default function InventorySearchBar({
    */
   const config = {
     dashboard: {
-      placeholder: "Buscar por nombre de producto",
+      placeholder: "Buscar por nombre de producto...",
       label: "Inventario General",
     },
     compras: {
-      placeholder: "Buscar por producto, distribuidor o regsitrado por...",
+      placeholder: "Bucar por producto, proveedor o responsable...",
       label: "Historial de Compras",
     },
     distribuidores: {
-      placeholder: "Buscar por nombre o celular",
+      placeholder: "Buscar por nombre, empresa o teléfono...",
       label: "Directorio de Proveedores",
     },
     consumos: {
-      placeholder: "Buscar por cliente o número de pedido...",
+      placeholder: "Buscar por producto o responsable...",
       label: "Historial de Consumos",
     },
   };

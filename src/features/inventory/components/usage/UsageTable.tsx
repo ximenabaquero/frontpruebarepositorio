@@ -44,7 +44,7 @@ function UsageSection({
       <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
         <span
           className={`inline-block w-2 h-2 rounded-full ${
-            title.includes("Insumo") ? "bg-indigo-400" : "bg-amber-400"
+            title.includes("Insumo") ? "bg-indigo-400" : "bg-purple-400"
           }`}
         />
         {title}

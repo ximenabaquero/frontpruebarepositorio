@@ -1,10 +1,12 @@
 "use client";
 
+import StockNotificationBell from "./StockNotificationBell";
+
 type TabType =
   | "dashboard"
-  | "distribuidores"
   | "compras"
   | "consumos"
+  | "distribuidores"
   | "reportes";
 
 interface InventoryNavProps {
@@ -14,38 +16,45 @@ interface InventoryNavProps {
 
 const TABS: { key: TabType; label: string }[] = [
   { key: "dashboard", label: "Dashboard" },
-  { key: "distribuidores", label: "Distribuidores" },
   { key: "compras", label: "Compras" },
   { key: "consumos", label: "Consumos" },
+  { key: "distribuidores", label: "Distribuidores" },
   { key: "reportes", label: "Reportes" },
 ];
+
+const activeBtn =
+  "rounded-xl px-4 py-2 sm:px-5 sm:py-2 text-xs sm:text-sm font-semibold shrink-0 transition-all duration-200 bg-gradient-to-r from-emerald-600 to-teal-500 text-white shadow-md shadow-emerald-200";
+
+const inactiveBtn =
+  "rounded-xl px-4 py-2 sm:px-5 sm:py-2 text-xs sm:text-sm font-semibold shrink-0 transition-all duration-200 border border-transparent bg-white text-gray-500 hover:border-emerald-200 hover:text-emerald-700 hover:shadow-md hover:shadow-emerald-100";
 
 export default function InventoryNav({
   activeTab,
   onTabChange,
 }: InventoryNavProps) {
   return (
-    <nav className="w-full border-b border-gray-200 bg-white px-6">
-      <div className="flex items-center gap-1 h-12">
-        {TABS.map(({ key, label }) => {
-          const isActive = activeTab === key;
-          return (
+    <nav className="w-full bg-white border border-gray-200 rounded-2xl px-4 py-2.5">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center">
+        {/* Columna Izquierda (Espaciador) */}
+        <div />
+
+        {/* Columna Central: Tabs centrados */}
+        <div className="flex items-center gap-2 sm:gap-5 flex-wrap justify-center">
+          {TABS.map(({ key, label }) => (
             <button
               key={key}
               onClick={() => onTabChange(key)}
-              className={`
-                relative px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-150 border
-                ${
-                  isActive
-                    ? "bg-white text-indigo-700 border-indigo-200 shadow-sm"
-                    : "bg-transparent text-gray-500 border-transparent hover:text-gray-800 hover:bg-gray-50"
-                }
-              `}
+              className={activeTab === key ? activeBtn : inactiveBtn}
             >
               {label}
             </button>
-          );
-        })}
+          ))}
+        </div>
+
+        {/* Columna Derecha: Campana alineada al final */}
+        <div className="flex justify-end">
+          <StockNotificationBell />
+        </div>
       </div>
     </nav>
   );

@@ -53,14 +53,28 @@ export default function UsageForm({
 
   // ── Filtrado ─────────────────────────────────────────────────────────────
 
+  // ── Filtrado con soporte para tildes ──────────────────────────────────────
+
   const filteredProducts = useMemo(() => {
+    // Función de normalización interna
+    const normalize = (text: string) =>
+      text
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+
     if (!searchTerm.trim()) return activeProducts;
-    const term = searchTerm.toLowerCase();
-    return activeProducts.filter(
-      (p) =>
-        p.name.toLowerCase().includes(term) ||
-        p.category?.name.toLowerCase().includes(term),
-    );
+
+    const term = normalize(searchTerm);
+
+    return activeProducts.filter((p) => {
+      const nameMatch = normalize(p.name).includes(term);
+      const categoryMatch = p.category?.name
+        ? normalize(p.category.name).includes(term)
+        : false;
+
+      return nameMatch || categoryMatch;
+    });
   }, [activeProducts, searchTerm]);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
@@ -220,7 +234,7 @@ export default function UsageForm({
                 </p>
               ) : filteredProducts.length === 0 ? (
                 <p className="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
-                  No se encontraron productos con "{searchTerm}".
+                  No se encontraron productos con “{searchTerm}”.
                 </p>
               ) : (
                 <div className="max-h-[240px] overflow-y-auto rounded-xl border border-gray-200 divide-y divide-gray-100">

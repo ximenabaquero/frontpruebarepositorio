@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { PlusIcon, PencilIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  PencilIcon,
+  XMarkIcon,
+  SquaresPlusIcon,
+} from "@heroicons/react/24/outline";
 import { createCategory, updateCategory } from "../services/inventoryService";
 import ValidatedInput from "@/components/ValidatedInput";
 import type { InventoryCategory } from "../types";
@@ -38,20 +42,16 @@ export default function CategoryManager({
   async function handleSave() {
     if (!name.trim()) return setError("El nombre es requerido.");
     if (name.trim().length > 50) return setError("Máximo 50 caracteres.");
-
     setSaving(true);
     setError(null);
-
     try {
       editing
         ? await updateCategory(editing.id, { name: name.trim() })
         : await createCategory({ name: name.trim() });
-
       handleClose();
       onRefresh();
       onRefreshProducts?.();
     } catch (e: unknown) {
-      // e.message ya trae el error del backend procesado en el service
       setError(
         e instanceof Error ? e.message : "Error al procesar la solicitud",
       );
@@ -62,81 +62,120 @@ export default function CategoryManager({
 
   return (
     <>
-      <button
-        onClick={() => openForm()}
-        className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors"
-      >
-        <PlusIcon className="w-4 h-4" />
-        Gestionar Categorías
-      </button>
+      {/* Botón trigger */}
+      <div className="relative group">
+        <button
+          onClick={() => openForm()}
+          className="p-2 rounded-xl border border-gray-200 bg-white text-gray-500 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-all duration-200"
+          aria-label="Gestionar categorías"
+        >
+          <SquaresPlusIcon className="w-5 h-5" />
+        </button>
+        <div className="absolute right-full top-1/2 -translate-y-1/2 mr-2 px-2.5 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-[9999]">
+          Gestionar categorías
+          <div className="absolute left-full top-1/2 -translate-y-1/2 border-4 border-transparent border-l-gray-900" />
+        </div>
+      </div>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
-            <div className="p-6">
-              {/* Header */}
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-bold text-gray-800">
-                  {editing ? "Editar Categoría" : "Nueva Categoría"}
-                </h3>
+            {/* ── Header con gradiente ── */}
+            <div className="bg-gradient-to-r from-emerald-600 to-teal-500 px-6 pt-5 pb-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-semibold text-white/70 uppercase tracking-widest mb-1">
+                    Gestión de inventario
+                  </p>
+                  <h3 className="text-lg font-bold text-white">
+                    {editing ? "Editar categoría" : "Nueva categoría"}
+                  </h3>
+                </div>
                 <button
                   onClick={handleClose}
-                  className="p-1 hover:bg-gray-100 rounded-full"
+                  className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition-colors"
                 >
-                  <XMarkIcon className="w-6 h-6 text-gray-400" />
+                  <XMarkIcon className="w-5 h-5 text-white" />
                 </button>
               </div>
+            </div>
 
-              {/* Listado para editar existentes — solo en modo creación */}
+            <div className="px-6 py-5 space-y-5">
+              {/* ── Categorías existentes (solo en modo creación) ── */}
               {!editing && categories.length > 0 && (
-                <div className="mb-6 max-h-40 overflow-y-auto border-b pb-4">
-                  <p className="text-xs font-bold text-gray-400 uppercase mb-2">
-                    Existentes
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {categories.map((c) => (
-                      <button
-                        key={c.id}
-                        onClick={() => openForm(c)}
-                        className="flex items-center gap-1 text-xs bg-gray-100 px-2 py-1 rounded hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                      >
-                        {c.name} <PencilIcon className="w-3 h-3" />
-                      </button>
-                    ))}
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="w-0.5 h-4 bg-gradient-to-b from-emerald-500 to-teal-400 rounded-full" />
+                    <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">
+                      Categorías existentes
+                    </p>
                   </div>
+
+                  <div className="bg-gray-50 rounded-xl p-3 max-h-32 overflow-y-auto">
+                    <div className="flex flex-wrap gap-2">
+                      {categories.map((c) => (
+                        <button
+                          key={c.id}
+                          onClick={() => openForm(c)}
+                          className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border border-gray-200 bg-white text-gray-600 font-medium hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 transition-all duration-150"
+                        >
+                          {c.name}
+                          <PencilIcon className="w-3 h-3 shrink-0" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-gray-400 mt-2 pl-0.5">
+                    Haz clic en una categoría para editarla.
+                  </p>
                 </div>
               )}
 
-              {/* Input validado — max 50 */}
-              <ValidatedInput
-                id="category-name"
-                label="Nombre de la categoría"
-                placeholder="Ej: Insumos médicos"
-                maxLength={50}
-                required
-                value={name}
-                onChange={setName}
-              />
+              {/* ── Divider solo en modo creación con categorías ── */}
+              {!editing && categories.length > 0 && (
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-px bg-gray-100" />
+                  <span className="text-[11px] text-gray-400 font-medium">
+                    o crea una nueva
+                  </span>
+                  <div className="flex-1 h-px bg-gray-100" />
+                </div>
+              )}
 
-              {/* Error del backend (validación server-side o error genérico) */}
+              {/* ── Input nombre ── */}
+              <div>
+                <ValidatedInput
+                  id="category-name"
+                  label="Nombre de la categoría"
+                  placeholder="Ej: Insumos médicos"
+                  maxLength={50}
+                  required
+                  value={name}
+                  onChange={setName}
+                />
+                <p className="text-[11px] text-gray-400 mt-1.5 pl-0.5">
+                  Máximo 50 caracteres · {name.length}/50
+                </p>
+              </div>
+
               {error && (
-                <p className="text-[10px] uppercase font-semibold tracking-wider text-red-500 mt-2">
+                <p className="text-[10px] uppercase font-semibold tracking-wider text-red-500">
                   {error}
                 </p>
               )}
 
-              {/* Acciones */}
-              <div className="flex gap-3 mt-5">
+              {/* ── Acciones ── */}
+              <div className="flex gap-3 pt-1">
                 <button
                   onClick={handleClose}
-                  className="flex-1 py-3 text-gray-500 font-medium hover:bg-gray-50 rounded-xl transition-colors"
+                  className="flex-1 py-2.5 text-sm font-medium text-gray-500 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                  className="flex-1 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-500 rounded-xl shadow-md shadow-emerald-200 hover:from-emerald-700 hover:to-teal-600 disabled:opacity-50 transition-all duration-200"
                 >
                   {saving ? "Guardando..." : "Confirmar"}
                 </button>

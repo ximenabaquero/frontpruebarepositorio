@@ -16,6 +16,12 @@ interface Props {
   categories: InventoryCategory[];
 }
 
+const normalize = (text: string) =>
+  text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
 export default function Step1Product({
   form,
   onChange,
@@ -26,13 +32,11 @@ export default function Step1Product({
     form.product_id ? "existing" : "new",
   );
 
-  // Restaurar el nombre del producto seleccionado al volver al paso
   const selectedProduct = products.find((p) => p.id === form.product_id);
   const [productSearch, setProductSearch] = useState(
     selectedProduct?.name ?? "",
   );
 
-  // Sincronizar si cambia form.product_id desde afuera
   useEffect(() => {
     if (form.product_id) {
       const p = products.find((p) => p.id === form.product_id);
@@ -40,9 +44,12 @@ export default function Step1Product({
     }
   }, [form.product_id, products]);
 
-  const filteredProducts = products.filter((p) =>
-    p.name.toLowerCase().includes(productSearch.toLowerCase()),
-  );
+  // Muestra todos si no hay búsqueda, filtra si hay texto
+  const filteredProducts = productSearch.trim()
+    ? products.filter((p) =>
+        normalize(p.name).includes(normalize(productSearch)),
+      )
+    : products;
 
   const handleModeChange = (m: "new" | "existing") => {
     setMode(m);
@@ -66,10 +73,11 @@ export default function Step1Product({
   };
 
   const isNewInsumo = mode === "new" && form.type === "insumo";
-  const showDropdown = productSearch.length > 0 && !form.product_id;
+  const showDropdown = !form.product_id; // siempre visible mientras no haya selección
 
   return (
     <div className="space-y-5">
+      {/* Toggle */}
       <div className="flex gap-2 p-1 bg-gray-100 rounded-xl">
         {(["new", "existing"] as const).map((m) => (
           <button
@@ -89,7 +97,7 @@ export default function Step1Product({
 
       {mode === "existing" ? (
         <div className="space-y-3">
-          {/* Producto ya seleccionado — siempre visible al volver */}
+          {/* Producto seleccionado */}
           {form.product_id ? (
             <div className="flex items-center justify-between p-3 bg-indigo-50 border border-indigo-100 rounded-xl">
               <div>
@@ -113,6 +121,7 @@ export default function Step1Product({
             </div>
           ) : (
             <>
+              {/* Buscador */}
               <div className="relative">
                 <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
@@ -127,11 +136,12 @@ export default function Step1Product({
                 />
               </div>
 
+              {/* Lista — siempre visible mientras no haya selección */}
               {showDropdown && (
-                <div className="border border-gray-100 rounded-xl shadow-sm overflow-hidden max-h-44 overflow-y-auto">
+                <div className="border border-gray-100 rounded-xl shadow-sm overflow-hidden max-h-52 overflow-y-auto">
                   {filteredProducts.length === 0 ? (
                     <p className="px-4 py-3 text-sm text-gray-400 italic">
-                      Sin resultados.
+                      Sin resultados para “{productSearch}”.
                     </p>
                   ) : (
                     filteredProducts.map((p) => (
@@ -139,23 +149,31 @@ export default function Step1Product({
                         key={p.id}
                         type="button"
                         onClick={() => handleSelectProduct(p)}
-                        className="w-full px-4 py-3 text-left text-sm hover:bg-indigo-50 flex items-center justify-between border-b border-gray-50 last:border-0"
+                        className="w-full px-4 py-3 text-left text-sm hover:bg-indigo-50 flex items-center justify-between border-b border-gray-50 last:border-0 transition-colors"
                       >
-                        <div>
-                          <p className="font-medium text-gray-900">{p.name}</p>
+                        <div className="min-w-0">
+                          <p className="font-medium text-gray-900 truncate">
+                            {p.name}
+                          </p>
                           <p className="text-xs text-gray-400">
                             {p.category?.name}
                           </p>
                         </div>
-                        <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                            p.type === "insumo"
-                              ? "bg-cyan-50 text-cyan-700"
-                              : "bg-purple-50 text-purple-700"
-                          }`}
-                        >
-                          {p.type}
-                        </span>
+                        <div className="flex items-center gap-2 ml-3 shrink-0">
+                          <span className="text-xs text-gray-500">
+                            {p.label_stock}:{" "}
+                            <span className="font-semibold">{p.cantidad}</span>
+                          </span>
+                          <span
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                              p.type === "insumo"
+                                ? "bg-cyan-50 text-cyan-700"
+                                : "bg-purple-50 text-purple-700"
+                            }`}
+                          >
+                            {p.type}
+                          </span>
+                        </div>
                       </button>
                     ))
                   )}
@@ -175,6 +193,7 @@ export default function Step1Product({
             value={form.name}
             onChange={(v) => onChange({ name: v })}
           />
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Categoría <span className="text-red-500">*</span>
@@ -196,6 +215,7 @@ export default function Step1Product({
               ))}
             </select>
           </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Tipo <span className="text-red-500">*</span>
@@ -224,6 +244,7 @@ export default function Step1Product({
               ))}
             </div>
           </div>
+
           {isNewInsumo && (
             <ValidatedInput
               id="p-stock-minimo"
@@ -236,8 +257,10 @@ export default function Step1Product({
               onChange={(v) =>
                 onChange({ stock_minimo: v === "" ? "" : Number(v) })
               }
+              clampToMin
             />
           )}
+
           <ValidatedInput
             id="p-description"
             label="Descripción"

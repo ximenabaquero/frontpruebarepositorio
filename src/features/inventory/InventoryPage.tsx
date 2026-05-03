@@ -147,7 +147,7 @@ export default function InventoryPage() {
   return (
     <AuthGuard>
       <MainLayout>
-        <div className="bg-gradient-to-b from-indigo-50 via-white to-white min-h-screen pb-10">
+        <div className="bg-gradient-to-b from-emerald-50 via-white to-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
             <RegisterHeaderBar
               onBackToRegisterClick={() => router.push("/register-patient")}
@@ -162,10 +162,12 @@ export default function InventoryPage() {
             {/* Título de Sección */}
             <div className="mt-8 mb-6">
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                Gestión de Inventario
+                Gestión de Inventario y Consumos
               </h1>
               <p className="mt-1 text-sm text-gray-500">
-                Control completo de stock, compras y consumos.
+                Control integral del catálogo de productos, flujo de consumos y
+                ciclo de compras con módulo especializado para la gestión de
+                relaciones con distribuidores.
               </p>
             </div>
 

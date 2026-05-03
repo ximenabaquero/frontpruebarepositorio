@@ -33,6 +33,7 @@ export default function Step3Purchase({ form, onChange }: Props) {
           required
           value={form.quantity}
           onChange={(v) => onChange({ quantity: v === "" ? "" : Number(v) })}
+          clampToMin
         />
         <ValidatedInput
           id="price"
@@ -43,6 +44,7 @@ export default function Step3Purchase({ form, onChange }: Props) {
           required
           value={form.unit_price}
           onChange={(v) => onChange({ unit_price: v === "" ? "" : Number(v) })}
+          clampToMin
         />
       </div>
 

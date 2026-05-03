@@ -113,7 +113,7 @@ export default function ProductTab({
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Fila 1: Categorías + Gestionar + Export */}
+      {/* Fila 1: Categorías + ícono gestionar */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex-1 min-w-0">
           <CategorySelector
@@ -130,15 +130,34 @@ export default function ProductTab({
             onRefreshProducts={onRefreshProducts}
           />
         )}
+      </div>
 
-        <div className="relative">
+      {/* Fila 2: Buscador + Export */}
+      <div className="flex items-end gap-3">
+        <div className="flex-1">
+          <InventorySearchBar
+            contexto="dashboard"
+            value={search}
+            onSearch={setSearch}
+          />
+        </div>
+        {/* Export */}
+        <div className="relative shrink-0">
           <button
             onClick={() => setShowExportMenu((v) => !v)}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-teal-700 bg-teal-50 border-2 border-teal-200 rounded-lg hover:bg-teal-100 hover:border-teal-300 transition-all shadow-sm"
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold
+        text-white
+        bg-gradient-to-r from-emerald-600 to-teal-500
+        rounded-xl
+        shadow-md shadow-emerald-200
+        hover:from-emerald-700 hover:to-teal-600
+        hover:shadow-lg hover:shadow-emerald-200
+        active:translate-y-[1px]
+        transition-all duration-200"
           >
-            <ArrowDownTrayIcon className="w-4 h-4" />
+            <ArrowDownTrayIcon className="w-4 h-4 text-white/80" />
             Exportar
-            <ChevronDownIcon className="w-3 h-3" />
+            <ChevronDownIcon className="w-3 h-3 text-white/70" />
           </button>
 
           {showExportMenu && (
@@ -147,7 +166,7 @@ export default function ProductTab({
                 className="fixed inset-0 z-10"
                 onClick={() => setShowExportMenu(false)}
               />
-              <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-20 overflow-hidden">
+              <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-xl shadow-lg z-20 overflow-hidden">
                 <button
                   onClick={handleExportCSV}
                   className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
@@ -168,23 +187,16 @@ export default function ProductTab({
         </div>
       </div>
 
-      {/* Fila 2: Buscador */}
-      <InventorySearchBar
-        contexto="dashboard"
-        value={search}
-        onSearch={setSearch}
-      />
-
       {/* Fila 3: Tablas */}
       <ProductTable
         products={insumos}
-        title="Insumos"
+        title="Insumos Médicos"
         icon={InsumoIcon}
         type="insumo"
       />
       <ProductTable
         products={equipos}
-        title="Equipos"
+        title="Equipos & Mobiliario"
         icon={EquipoIcon}
         type="equipo"
       />

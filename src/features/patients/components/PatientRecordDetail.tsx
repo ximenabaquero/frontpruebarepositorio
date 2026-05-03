@@ -21,7 +21,6 @@ import ClinicalRecordView from "./ClinicalRecordView";
 import ConfirmacionModal from "./ConfirmacionModal";
 import EditarEvaluacionModal from "./EditarEvaluacionModal";
 import EditarProcedimientoModal from "./EditarProcedimientoModal";
-import SuppliesRegistrationModal from "./SuppliesRegistrationModal";
 import UsageForm from "@/features/inventory/components/usage/UsageForm";
 import InvoicePdf from "./InvoicePdf";
 import HistoriaClinicaPdf from "./HistoriaClinicaPdf";
@@ -65,7 +64,6 @@ export default function PatientRecordDetail({
   const [editingProc, setEditingProc] = useState<Procedure | null>(null);
   const [isChangingStatus, setIsChangingStatus] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
-  const [showSuppliesModal, setShowSuppliesModal] = useState(false);
   const [showUsageForm, setShowUsageForm] = useState(false);
 
   // ── Data fetching ──────────────────────────────────────────────────────────
@@ -82,7 +80,7 @@ export default function PatientRecordDetail({
     fetcher,
   );
 
-  // Variable tipada para usar en UsageForm y SuppliesRegistrationModal
+  // Variable tipada para usar en UsageForm
   const products: InventoryProduct[] = productsData?.data ?? [];
 
   // ── Handlers ───────────────────────────────────────────────────────────────
@@ -363,18 +361,6 @@ export default function PatientRecordDetail({
             }}
             onClose={() => setEditingProc(null)}
             onSaved={() => mutate()}
-          />
-        )}
-
-        {showSuppliesModal && (
-          <SuppliesRegistrationModal
-            evaluationId={evaluationId}
-            products={products}
-            onClose={() => setShowSuppliesModal(false)}
-            onSaved={() => {
-              mutate();
-              setShowSuppliesModal(false);
-            }}
           />
         )}
 

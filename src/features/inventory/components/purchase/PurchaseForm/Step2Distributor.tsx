@@ -14,6 +14,12 @@ interface Props {
 
 type DistMode = "none" | "existing" | "new";
 
+const normalize = (text: string) =>
+  text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
 export default function Step2Distributor({
   form,
   onChange,
@@ -38,6 +44,10 @@ export default function Step2Distributor({
     }
   }, [form.distributor_id, distributors]);
 
+  const filteredDistributors = search.trim()
+    ? distributors.filter((p) => normalize(p.name).includes(normalize(search)))
+    : distributors;
+
   const handleMode = (m: DistMode) => {
     setMode(m);
     onChange({
@@ -54,11 +64,7 @@ export default function Step2Distributor({
     setSearch(d.name);
   };
 
-  const filtered = distributors.filter((d) =>
-    d.name.toLowerCase().includes(search.toLowerCase()),
-  );
-
-  const showDropdown = search.length > 0 && !form.distributor_id;
+  const showDropdown = !form.distributor_id;
 
   return (
     <div className="space-y-5">
@@ -142,12 +148,12 @@ export default function Step2Distributor({
 
               {showDropdown && (
                 <div className="border border-gray-100 rounded-xl shadow-sm overflow-hidden max-h-44 overflow-y-auto">
-                  {filtered.length === 0 ? (
+                  {filteredDistributors.length === 0 ? (
                     <p className="px-4 py-3 text-sm text-gray-400 italic">
-                      Sin resultados.
+                      Sin resultados para “{search}”.
                     </p>
                   ) : (
-                    filtered.map((d) => (
+                    filteredDistributors.map((d) => (
                       <button
                         key={d.id}
                         type="button"

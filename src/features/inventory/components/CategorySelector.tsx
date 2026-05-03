@@ -14,33 +14,39 @@ export default function CategorySelector({
   onSelect,
 }: Props) {
   return (
-    <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
-      {/* Botón para "Todas" */}
-      <button
-        onClick={() => onSelect(null)}
-        className={`whitespace-nowrap px-6 py-2.5 rounded-full text-sm font-medium transition-all shadow-sm ${
-          activeCategoryId === null
-            ? "bg-white text-indigo-600 ring-2 ring-indigo-100"
-            : "bg-gray-50 text-gray-500 hover:bg-gray-100"
-        }`}
-      >
-        Todas
-      </button>
-
-      {/* Mapeo de categorías */}
-      {categories.map((cat) => (
+    <div className="flex flex-col gap-3">
+      {" "}
+      {/* Contenedor vertical para separar el título de los botones */}
+      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
+        Categorias
+      </span>
+      <div className="flex flex-wrap items-center gap-2">
+        {" "}
+        {/* Contenedor horizontal para los botones */}
         <button
-          key={cat.id}
-          onClick={() => onSelect(cat.id)}
-          className={`whitespace-nowrap px-6 py-2.5 rounded-full text-sm font-medium transition-all shadow-sm ${
-            activeCategoryId === cat.id
-              ? "bg-white text-indigo-600 ring-2 ring-indigo-100"
-              : "bg-gray-50 text-gray-500 hover:bg-gray-100"
+          onClick={() => onSelect(null)}
+          className={`px-4 py-1.5 rounded-full text-sm transition-all duration-200 border ${
+            activeCategoryId === null
+              ? "bg-white text-blue-600 border-blue-200 shadow-sm font-bold"
+              : "bg-white text-gray-500 border-gray-200 font-medium hover:border-gray-300 hover:text-gray-700"
           }`}
         >
-          {cat.name}
+          Todas
         </button>
-      ))}
+        {categories.map((cat) => (
+          <button
+            key={cat.id}
+            onClick={() => onSelect(cat.id)}
+            className={`px-4 py-1.5 rounded-full text-sm transition-all duration-200 border ${
+              activeCategoryId === cat.id
+                ? "bg-white text-blue-600 border-blue-200 shadow-sm font-bold"
+                : "bg-white text-gray-500 border-gray-200 font-medium hover:border-gray-300 hover:text-gray-700"
+            }`}
+          >
+            {cat.name}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
