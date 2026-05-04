@@ -80,22 +80,27 @@ export default function UsageTab({
             onRefreshProducts={onRefreshProducts}
           />
         )}
-
-        <button
-          onClick={onOpenConsume}
-          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shrink-0"
-        >
-          <PlusIcon className="w-4 h-4" />
-          Registrar consumo
-        </button>
       </div>
 
-      {/* Fila 2: Buscador */}
-      <InventorySearchBar
-        contexto="consumos"
-        value={search}
-        onSearch={handleSearch}
-      />
+      {/* Fila 2: Buscador + Registrar consumo */}
+      <div className="flex items-end gap-3">
+        <div className="flex-1">
+          <InventorySearchBar
+            contexto="consumos"
+            value={search}
+            onSearch={handleSearch}
+          />
+        </div>
+        <div className="relative shrink-0">
+          <button
+            onClick={onOpenConsume}
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shrink-0"
+          >
+            <PlusIcon className="w-4 h-4" />
+            Registrar consumo
+          </button>
+        </div>
+      </div>
 
       {/* Fila 3: Tabla con scroll por sección */}
       <UsageTable usages={filtered} loading={loading} />

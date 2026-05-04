@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useRef, useCallback } from "react";
+import ReactDOM from "react-dom";
 import type { InventoryUsage } from "../../types";
 
 function formatDate(dateStr: string): string {
@@ -10,6 +12,71 @@ function formatDate(dateStr: string): string {
   });
 }
 
+// ─── Tooltip universal con portal (sin scroll horizontal) ─────────────────────
+function TooltipPortal({
+  text,
+  side = "right",
+}: {
+  text: string;
+  side?: "left" | "right";
+}) {
+  const [pos, setPos] = useState<{ top: number; x: number } | null>(null);
+  const ref = useRef<HTMLDivElement>(null);
+
+  const show = useCallback(() => {
+    if (!ref.current) return;
+    const r = ref.current.getBoundingClientRect();
+    setPos({
+      top: r.top + r.height / 2,
+      x: side === "right" ? r.right + 8 : r.left - 8,
+    });
+  }, [side]);
+
+  const hide = useCallback(() => setPos(null), []);
+
+  return (
+    <div
+      ref={ref}
+      onMouseEnter={show}
+      onMouseLeave={hide}
+      className="block w-full overflow-hidden"
+    >
+      <p className="text-xs text-gray-400 truncate cursor-default leading-tight">
+        {text}
+      </p>
+
+      {pos &&
+        ReactDOM.createPortal(
+          <div
+            style={{
+              position: "fixed",
+              top: pos.top,
+              transform: "translateY(-50%)",
+              zIndex: 9999,
+              // Para "left" anclamos desde la derecha de la ventana para no
+              // depender de left y evitar cualquier desborde horizontal
+              ...(side === "right"
+                ? { left: pos.x }
+                : { right: `calc(100vw - ${pos.x}px)` }),
+            }}
+            className="w-56 px-3 py-2 bg-gray-900 text-white text-xs font-medium rounded-lg pointer-events-none whitespace-normal break-all leading-relaxed"
+          >
+            {text}
+            <div
+              className={`absolute top-1/2 -translate-y-1/2 border-4 border-transparent ${
+                side === "right"
+                  ? "right-full border-r-gray-900"
+                  : "left-full border-l-gray-900"
+              }`}
+            />
+          </div>,
+          document.body,
+        )}
+    </div>
+  );
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 type Props = {
   usages: InventoryUsage[];
   loading: boolean;
@@ -18,17 +85,26 @@ type Props = {
 function StatusBadge({ status }: { status: InventoryUsage["status"] }) {
   if (status === "con_paciente") {
     return (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
         Con paciente
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
       Sin paciente
     </span>
   );
 }
+
+const HEADERS = [
+  "Producto",
+  "Registrado por",
+  "Estado",
+  "Cantidad",
+  "Fecha",
+  "Motivo",
+];
 
 function UsageSection({
   title,
@@ -37,8 +113,6 @@ function UsageSection({
   title: string;
   usages: InventoryUsage[];
 }) {
-  // ← quitar el return null
-
   return (
     <div className="mb-6">
       <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
@@ -54,77 +128,102 @@ function UsageSection({
       </h3>
 
       <div className="rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <div className="overflow-y-auto" style={{ maxHeight: "300px" }}>
-            <table className="min-w-full divide-y divide-gray-100 text-sm">
-              <thead className="bg-gray-50 sticky top-0 z-10">
+        <div className="overflow-y-auto" style={{ maxHeight: "300px" }}>
+          <table className="w-full text-sm table-fixed">
+            <colgroup>
+              <col style={{ width: "26%" }} />
+              <col style={{ width: "16%" }} />
+              <col style={{ width: "15%" }} />
+              <col style={{ width: "10%" }} />
+              <col style={{ width: "14%" }} />
+              <col style={{ width: "19%" }} />
+            </colgroup>
+
+            <thead className="bg-gray-50 sticky top-0 z-10">
+              <tr className="h-[44px]">
+                {HEADERS.map((h) => (
+                  <th
+                    key={h}
+                    className="px-4 py-3 text-left text-[10px] font-semibold text-gray-400 uppercase tracking-wider"
+                  >
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+
+            <tbody className="bg-white divide-y divide-gray-50 [&_tr]:h-[56px] [&_td]:align-middle">
+              {usages.length === 0 ? (
                 <tr>
-                  {[
-                    "Producto",
-                    "Registrado por",
-                    "Estado",
-                    "Cantidad",
-                    "Fecha",
-                    "Motivo",
-                  ].map((h) => (
-                    <th
-                      key={h}
-                      className="px-4 py-3 text-left text-[10px] font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap"
-                    >
-                      {h}
-                    </th>
-                  ))}
+                  <td
+                    colSpan={6}
+                    className="px-4 py-8 text-center text-sm text-gray-400 italic !h-auto"
+                  >
+                    No hay datos para mostrar.
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-50">
-                {usages.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="px-4 py-8 text-center text-sm text-gray-400 italic"
-                    >
-                      No hay datos para mostrar.
-                    </td>
-                  </tr>
-                ) : (
-                  usages.map((u) => (
-                    <tr
-                      key={u.id}
-                      className="hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="px-4 py-3 max-w-[200px]">
-                        <p className="font-medium text-gray-900 truncate">
-                          {u.product?.name ?? "—"}
-                        </p>
-                        {u.product?.description && (
-                          <p className="text-xs text-gray-400 truncate mt-0.5">
+              ) : (
+                usages.map((u) => (
+                  <tr key={u.id} className="hover:bg-gray-50 transition-colors">
+                    {/* Producto + descripción */}
+                    <td className="px-4 py-0 overflow-visible max-w-0">
+                      <p className="font-semibold text-gray-900 truncate text-sm leading-tight">
+                        {u.product?.name ?? "—"}
+                      </p>
+                      {u.product?.description &&
+                        (u.product.description.length > 45 ? (
+                          <TooltipPortal
+                            text={u.product.description}
+                            side="right"
+                          />
+                        ) : (
+                          <p className="text-xs text-gray-400 truncate leading-tight mt-0.5">
                             {u.product.description}
                           </p>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-gray-700 font-medium tabular-nums whitespace-nowrap">
+                        ))}
+                    </td>
+
+                    {/* Registrado por */}
+                    <td className="px-4 py-0 overflow-hidden max-w-0">
+                      <p className="text-xs text-gray-500 truncate">
                         {u.user?.name ?? "—"}
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <StatusBadge status={u.status} />
-                      </td>
-                      <td className="px-4 py-3 text-gray-700 font-medium tabular-nums whitespace-nowrap">
-                        {u.quantity} und.
-                      </td>
-                      <td className="px-4 py-3 text-gray-500 whitespace-nowrap text-xs">
+                      </p>
+                    </td>
+
+                    {/* Estado */}
+                    <td className="px-4 py-0">
+                      <StatusBadge status={u.status} />
+                    </td>
+
+                    {/* Cantidad */}
+                    <td className="px-4 py-0 font-bold text-gray-800 tabular-nums">
+                      {u.quantity} und.
+                    </td>
+
+                    {/* Fecha */}
+                    <td className="px-4 py-0">
+                      <p className="text-xs text-gray-500 whitespace-nowrap">
                         {formatDate(u.usage_date)}
-                      </td>
-                      <td className="px-4 py-3 text-gray-500 max-w-[180px] truncate text-xs">
-                        {u.reason ?? (
-                          <span className="italic text-gray-300">—</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                      </p>
+                    </td>
+
+                    {/* Motivo */}
+                    <td className="px-4 py-0 overflow-visible max-w-0">
+                      {u.reason && u.reason.length > 30 ? (
+                        <TooltipPortal text={u.reason} side="left" />
+                      ) : u.reason ? (
+                        <p className="text-xs text-gray-400 truncate">
+                          {u.reason}
+                        </p>
+                      ) : (
+                        <span className="italic text-gray-300 text-xs">—</span>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

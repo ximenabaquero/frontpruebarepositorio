@@ -331,7 +331,7 @@ export default function UsageForm({
             {/* Motivo — obligatorio en sin_paciente, opcional en con_paciente */}
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">
-                Motivo del consumo{" "}
+                Motivo del consumo
                 {mode === "sin_paciente" ? (
                   <span className="text-red-400">*</span>
                 ) : (
@@ -350,7 +350,7 @@ export default function UsageForm({
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
               />
               <p className="text-xs text-gray-400 mt-1">
-                Máx. 300 caracteres · {reason.length}/300
+                Máx. 200 caracteres · {reason.length}/200
               </p>
             </div>
 

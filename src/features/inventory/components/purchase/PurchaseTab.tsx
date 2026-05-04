@@ -90,21 +90,27 @@ export default function PurchaseTab({
             onRefreshProducts={onRefreshProducts}
           />
         )}
-        <button
-          onClick={onOpenPurchase}
-          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors shrink-0"
-        >
-          <ShoppingCartIcon className="w-4 h-4" />
-          Registrar compra
-        </button>
       </div>
 
-      {/* Fila 2: Buscador */}
-      <InventorySearchBar
-        contexto="compras"
-        value={search}
-        onSearch={setSearch}
-      />
+      {/* Fila 2: Buscador + Registrar compra */}
+      <div className="flex items-end gap-3">
+        <div className="flex-1">
+          <InventorySearchBar
+            contexto="compras"
+            value={search}
+            onSearch={setSearch}
+          />
+        </div>
+        <div className="relative shrink-0">
+          <button
+            onClick={onOpenPurchase}
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors shrink-0"
+          >
+            <ShoppingCartIcon className="w-4 h-4" />
+            Registrar compra
+          </button>
+        </div>
+      </div>
 
       {/* Fila 3: Tabla + paginación */}
       <PurchaseTable
