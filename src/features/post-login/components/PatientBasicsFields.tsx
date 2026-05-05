@@ -1,5 +1,5 @@
-import ValidatedInput from "./ValidatedInput";
-import PhoneInputField from "./PhoneInputField";
+import ValidatedInput from "../../../components/ValidatedInput";
+import PhoneInputField from "../../../components/PhoneInputField";
 import SelectField from "./SelectField";
 import DateOfBirthPicker from "./DateOfBirthPicker";
 import "react-phone-input-2/lib/style.css";
@@ -88,7 +88,9 @@ export default function PatientBasicsFields({
         >
           <option value="">Seleccione un tipo</option>
           {DOCUMENT_TYPES.map((type) => (
-            <option key={type} value={type}>{type}</option>
+            <option key={type} value={type}>
+              {type}
+            </option>
           ))}
         </SelectField>
 

@@ -124,7 +124,7 @@ export default function Benefits() {
               style={{ transitionDelay: `${index * 100}ms` }}>
 
                 {/* Icon */}
-                <div className="relative mb-5">
+                <div className="relative mb-5 flex justify-center">
                   <div className="absolute inset-0 bg-gradient-to-br from-teal-100 to-cyan-100 rounded-xl md:rounded-2xl blur-xl opacity-50"></div>
                   <div className={`relative w-14 h-14 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br ${benefit.gradient} flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-500`}>
                     <div className="text-white">{benefit.lucideIcon}</div>

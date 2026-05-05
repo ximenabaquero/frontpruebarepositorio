@@ -40,17 +40,15 @@ export default function Header() {
           {/* Logo + usuario */}
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="relative h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-400 to-blue-500 p-[2px] shadow-md group-hover:shadow-emerald-200 transition-shadow duration-300">
-                <div className="h-full w-full rounded-[10px] bg-white flex items-center justify-center overflow-hidden">
-                  <Image
-                    src="/coldestheticlogo.png"
-                    alt="Coldesthetic"
-                    width={32}
-                    height={32}
-                    className="h-full w-full object-contain"
-                    priority
-                  />
-                </div>
+              <div className="relative h-9 w-9">
+                <Image
+                  src="/coldestheticlogo.png"
+                  alt="Coldesthetic"
+                  width={32}
+                  height={32}
+                  className="h-full w-full object-contain"
+                  priority
+                />
               </div>
               <span className="text-lg font-bold bg-gradient-to-r from-emerald-500 to-blue-500 bg-clip-text text-transparent tracking-tight">
                 Coldesthetic

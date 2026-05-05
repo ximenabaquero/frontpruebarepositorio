@@ -13,8 +13,9 @@ export const metadata: Metadata = {
   description:
     "Lipólisis láser asistida. Procedimiento mínimamente invasivo para reducción de grasa localizada con tecnología médica certificada",
   icons: {
-    icon: "/coldestheticlogo.png",
+    icon: { url: "/coldestheticlogo.png", type: "image/png" },
     apple: "/coldestheticlogo.png",
+    shortcut: "/coldestheticlogo.png",
   },
 };
 

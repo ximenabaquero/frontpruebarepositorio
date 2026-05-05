@@ -27,9 +27,54 @@ function formatCOP(value: number) {
   }).format(value);
 }
 
-type Props = {
-  isAdmin: boolean;
-};
+// ── StatCard ───────────────────────────────────────────────────────────────
+
+function StatCard({
+  label,
+  tooltip,
+  value,
+  icon: Icon,
+  iconColor,
+}: {
+  label: string;
+  tooltip: string;
+  value: string;
+  icon: React.ElementType;
+  iconColor: string;
+}) {
+  return (
+    <div className="group relative">
+      {/* Glow hover */}
+      <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-400 to-green-500 rounded-2xl md:rounded-3xl blur opacity-0 group-hover:opacity-30 transition duration-500" />
+
+      <div className="relative flex flex-col justify-between bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-100 p-5 shadow-lg hover:shadow-xl transition-all duration-500 h-full min-h-[110px]">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-[10px] uppercase tracking-wider text-gray-400 mb-2 flex items-center gap-1">
+              {label}
+              <InfoTooltip text={tooltip} position="bottom" />
+            </h3>
+            <p className="text-2xl font-bold text-gray-900 break-words leading-tight tracking-tight w-full overflow-hidden text-ellipsis">
+              {value}
+            </p>
+          </div>
+
+          {/* Ícono */}
+          <div className="shrink-0 rounded-xl p-2.5 bg-white shadow-sm border border-gray-100">
+            <Icon className={`w-5 h-5 ${iconColor}`} />
+          </div>
+        </div>
+
+        {/* Underline animado */}
+        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-emerald-500 to-blue-600 group-hover:w-2/3 transition-all duration-500 rounded-full" />
+      </div>
+    </div>
+  );
+}
+
+// ── Componente principal ───────────────────────────────────────────────────
+
+type Props = { isAdmin: boolean };
 
 export default function InventorySummaryCards({ isAdmin }: Props) {
   const [data, setData] = useState<InventorySummaryData | null>(null);
@@ -43,11 +88,8 @@ export default function InventorySummaryCards({ isAdmin }: Props) {
   const [verifying, setVerifying] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
-  // Restaurar estado de sesión
   useEffect(() => {
-    if (sessionStorage.getItem(SESSION_KEY) === "1") {
-      setUnlocked(true);
-    }
+    if (sessionStorage.getItem(SESSION_KEY) === "1") setUnlocked(true);
   }, []);
 
   useEffect(() => {
@@ -95,47 +137,53 @@ export default function InventorySummaryCards({ isAdmin }: Props) {
     setUnlocked(false);
   }
 
-  if (!isAdmin) return null;
+  function closeModal() {
+    setShowModal(false);
+    setPassword("");
+    setPasswordError(null);
+  }
 
+  if (!isAdmin) return null;
   if (loading)
     return <p className="text-gray-500 italic text-sm">Cargando resumen...</p>;
   if (error || !data)
-    return <p className="text-red-500 text-sm">{error || "Error al cargar resumen."}</p>;
+    return (
+      <p className="text-red-500 text-sm">
+        {error || "Error al cargar resumen."}
+      </p>
+    );
+
+  const masked = "$ ••••••••";
 
   const cards = [
     {
       label: "Ingreso Total",
-      tooltip: "suma de todos los ingresos confirmados registrados en la clínica.",
-      value: formatCOP(data.total_income),
+      tooltip:
+        "Suma de todos los ingresos confirmados registrados en la clínica.",
+      value: unlocked ? formatCOP(data.total_income) : masked,
       icon: BanknotesIcon,
-      bg: "bg-emerald-50",
       iconColor: "text-emerald-600",
-      border: "border-emerald-200",
     },
     {
       label: "Gastos Totales",
-      tooltip: "total gastado en compras de insumos y materiales.",
-      value: formatCOP(data.total_expenses),
+      tooltip: "Total gastado en compras de insumos y equipos médicos.",
+      value: unlocked ? formatCOP(data.total_expenses) : masked,
       icon: ShoppingCartIcon,
-      bg: "bg-rose-50",
       iconColor: "text-rose-500",
-      border: "border-rose-200",
     },
     {
       label: "Utilidad Neta",
-      tooltip: "resultado global: ingresos menos gastos totales.",
-      value: formatCOP(data.net_profit),
+      tooltip: "Resultado global: ingresos menos gastos totales.",
+      value: unlocked ? formatCOP(data.net_profit) : masked,
       icon: ArrowTrendingUpIcon,
-      bg: data.net_profit >= 0 ? "bg-blue-50" : "bg-orange-50",
       iconColor: data.net_profit >= 0 ? "text-blue-600" : "text-orange-500",
-      border: data.net_profit >= 0 ? "border-blue-200" : "border-orange-200",
     },
   ];
 
   return (
     <>
       <div className="relative mb-6">
-        {/* Candado para re-bloquear (visible solo cuando está desbloqueado) */}
+        {/* Botón re-bloquear */}
         {unlocked && (
           <button
             onClick={handleLock}
@@ -148,23 +196,7 @@ export default function InventorySummaryCards({ isAdmin }: Props) {
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {cards.map((card) => (
-            <div
-              key={card.label}
-              className={`flex items-center gap-4 rounded-2xl border ${card.border} ${card.bg} px-5 py-4 shadow-sm`}
-            >
-              <div className="rounded-xl p-2.5 bg-white shadow-sm">
-                <card.icon className={`w-5 h-5 ${card.iconColor}`} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-gray-500 font-medium flex items-center gap-1">
-                  {card.label}
-                  <InfoTooltip text={card.tooltip} />
-                </p>
-                <p className="text-lg font-bold text-gray-800">
-                  {unlocked ? card.value : "$ ••••••••"}
-                </p>
-              </div>
-            </div>
+            <StatCard key={card.label} {...card} />
           ))}
         </div>
 
@@ -193,10 +225,12 @@ export default function InventorySummaryCards({ isAdmin }: Props) {
                 <div className="rounded-lg bg-indigo-100 p-1.5">
                   <LockClosedIcon className="w-4 h-4 text-indigo-600" />
                 </div>
-                <h3 className="font-semibold text-gray-800">Confirmar identidad</h3>
+                <h3 className="font-semibold text-gray-800">
+                  Confirmar identidad
+                </h3>
               </div>
               <button
-                onClick={() => { setShowModal(false); setPassword(""); setPasswordError(null); }}
+                onClick={closeModal}
                 className="text-gray-400 hover:text-gray-600"
               >
                 <XMarkIcon className="w-5 h-5" />
@@ -204,7 +238,8 @@ export default function InventorySummaryCards({ isAdmin }: Props) {
             </div>
 
             <p className="text-sm text-gray-500 mb-4">
-              Ingresa tu contraseña de administrador para ver el resumen financiero.
+              Ingresa tu contraseña de administrador para ver el resumen
+              financiero.
             </p>
 
             <form onSubmit={handleConfirm} className="space-y-4">
@@ -223,9 +258,11 @@ export default function InventorySummaryCards({ isAdmin }: Props) {
                   onClick={() => setShowPassword((v) => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showPassword
-                    ? <EyeSlashIcon className="w-4 h-4" />
-                    : <EyeIcon className="w-4 h-4" />}
+                  {showPassword ? (
+                    <EyeSlashIcon className="w-4 h-4" />
+                  ) : (
+                    <EyeIcon className="w-4 h-4" />
+                  )}
                 </button>
               </div>
 
@@ -236,7 +273,7 @@ export default function InventorySummaryCards({ isAdmin }: Props) {
               <div className="flex gap-2 pt-1">
                 <button
                   type="button"
-                  onClick={() => { setShowModal(false); setPassword(""); setPasswordError(null); }}
+                  onClick={closeModal}
                   className="flex-1 rounded-xl border border-gray-200 py-2.5 text-sm text-gray-600 hover:bg-gray-50"
                 >
                   Cancelar

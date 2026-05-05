@@ -109,8 +109,8 @@ export default function Services() {
                     : 'bg-white/80 border border-gray-100 group-hover:border-teal-100'
                 }`}>
                   {/* Icon */}
-                  <div className={`mb-6 inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br ${service.gradient} shadow-lg group-hover:scale-110 transition-transform duration-500`}>
-                    <div className="text-white">
+                  <div className={`mb-6 flex justify-center w-16 h-16 rounded-2xl bg-gradient-to-br ${service.gradient} shadow-lg group-hover:scale-110 transition-transform duration-500 mx-auto`}>
+                    <div className="text-white flex items-center justify-center">
                       {service.icon}
                     </div>
                   </div>

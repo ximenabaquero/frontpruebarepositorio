@@ -1,10 +1,12 @@
-import type { SpendByCategory } from "../types";
+import type { SpendByCategory } from "../../types";
 
 interface SpendByCategoryChartProps {
   data: SpendByCategory[];
 }
 
-export default function SpendByCategoryChart({ data }: SpendByCategoryChartProps) {
+export default function SpendByCategoryChart({
+  data,
+}: SpendByCategoryChartProps) {
   if (data.length === 0) {
     return (
       <div className="p-8 text-center text-gray-400">
@@ -16,7 +18,10 @@ export default function SpendByCategoryChart({ data }: SpendByCategoryChartProps
   const maxAmount = Math.max(...data.map((d) => d.amount));
 
   const fmt = (val: number) =>
-    new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" }).format(val);
+    new Intl.NumberFormat("es-CL", {
+      style: "currency",
+      currency: "CLP",
+    }).format(val);
 
   const fmtShort = (val: number) => {
     if (val >= 1000000) return `$${(val / 1000000).toFixed(1)}M`;

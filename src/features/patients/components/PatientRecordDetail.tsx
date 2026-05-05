@@ -6,7 +6,12 @@ import { useRouter } from "next/navigation";
 import MainLayout from "@/layouts/MainLayout";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
-import { CheckCircleIcon, XCircleIcon, ArrowDownTrayIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import {
+  CheckCircleIcon,
+  XCircleIcon,
+  ArrowDownTrayIcon,
+  ChevronDownIcon,
+} from "@heroicons/react/24/outline";
 
 import RegisterHeaderBar from "../../post-login/components/RegisterHeaderBar";
 import ExportButton from "../../../components/ExportButton";
@@ -16,7 +21,7 @@ import ClinicalRecordView from "./ClinicalRecordView";
 import ConfirmacionModal from "./ConfirmacionModal";
 import EditarEvaluacionModal from "./EditarEvaluacionModal";
 import EditarProcedimientoModal from "./EditarProcedimientoModal";
-import SuppliesRegistrationModal from "./SuppliesRegistrationModal";
+import UsageForm from "@/features/inventory/components/usage/UsageForm";
 import InvoicePdf from "./InvoicePdf";
 import HistoriaClinicaPdf from "./HistoriaClinicaPdf";
 import type { Procedure } from "../types";
@@ -37,11 +42,17 @@ interface Props {
 
 const STATUS_CONFIG = {
   EN_ESPERA: { label: "En espera", classes: "bg-yellow-100 text-yellow-700" },
-  CONFIRMADO: { label: "Confirmado", classes: "bg-emerald-100 text-emerald-700" },
+  CONFIRMADO: {
+    label: "Confirmado",
+    classes: "bg-emerald-100 text-emerald-700",
+  },
   CANCELADO: { label: "Cancelado", classes: "bg-red-100 text-red-600" },
 } as const;
 
-export default function PatientRecordDetail({ patientId, evaluationId }: Props) {
+export default function PatientRecordDetail({
+  patientId,
+  evaluationId,
+}: Props) {
   const [currentYear] = useState(new Date().getFullYear());
   const historiaRef = useRef<HTMLDivElement>(null);
   const invoiceRef = useRef<HTMLDivElement>(null);
@@ -53,7 +64,9 @@ export default function PatientRecordDetail({ patientId, evaluationId }: Props) 
   const [editingProc, setEditingProc] = useState<Procedure | null>(null);
   const [isChangingStatus, setIsChangingStatus] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
-  const [showSuppliesModal, setShowSuppliesModal] = useState(false);
+  const [showUsageForm, setShowUsageForm] = useState(false);
+
+  // ── Data fetching ──────────────────────────────────────────────────────────
 
   const { data, error, isLoading, mutate } = useSWR(
     evaluationId
@@ -62,11 +75,15 @@ export default function PatientRecordDetail({ patientId, evaluationId }: Props) 
     fetcher,
   );
 
-  // Fetch de productos de inventario
   const { data: productsData } = useSWR<{ data: InventoryProduct[] }>(
     `${apiBaseUrl}/api/v1/inventory/products`,
-    fetcher
+    fetcher,
   );
+
+  // Variable tipada para usar en UsageForm
+  const products: InventoryProduct[] = productsData?.data ?? [];
+
+  // ── Handlers ───────────────────────────────────────────────────────────────
 
   const handleStatusChange = async (action: "confirmar" | "cancelar") => {
     setIsChangingStatus(true);
@@ -82,9 +99,15 @@ export default function PatientRecordDetail({ patientId, evaluationId }: Props) 
       );
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error((err as { message?: string }).message ?? "Error al cambiar estado");
+        throw new Error(
+          (err as { message?: string }).message ?? "Error al cambiar estado",
+        );
       }
-      toast.success(action === "confirmar" ? "Valoracion confirmada" : "Valoracion cancelada");
+      toast.success(
+        action === "confirmar"
+          ? "Valoracion confirmada"
+          : "Valoracion cancelada",
+      );
       mutate();
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "Error inesperado");
@@ -92,6 +115,8 @@ export default function PatientRecordDetail({ patientId, evaluationId }: Props) 
       setIsChangingStatus(false);
     }
   };
+
+  // ── Estados de carga ───────────────────────────────────────────────────────
 
   if (isLoading) {
     return (
@@ -113,7 +138,6 @@ export default function PatientRecordDetail({ patientId, evaluationId }: Props) 
 
   const evaluation = data.data;
   const status: keyof typeof STATUS_CONFIG = evaluation.status ?? "EN_ESPERA";
-  const statusCfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.EN_ESPERA;
   const isConfirmed = status === "CONFIRMADO";
   const isCanceled = status === "CANCELADO";
 
@@ -137,7 +161,8 @@ export default function PatientRecordDetail({ patientId, evaluationId }: Props) 
                 Registro clínico del paciente
               </h1>
               <p className="mt-2 text-sm text-gray-600">
-                Historial médico con procedimientos, notas clínicas y costos asociados.
+                Historial médico con procedimientos, notas clínicas y costos
+                asociados.
               </p>
 
               <div className="mt-4 flex flex-wrap items-center justify-between gap-3 mb-6">
@@ -145,19 +170,19 @@ export default function PatientRecordDetail({ patientId, evaluationId }: Props) 
                 <div className="flex flex-wrap items-center gap-2">
                   {/* Segmented status control */}
                   <div className="flex items-center rounded-xl border border-gray-200 bg-white shadow-sm p-1 gap-1">
-                    {/* En espera */}
-                    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                      status === "EN_ESPERA"
-                        ? "bg-yellow-100 text-yellow-700"
-                        : "text-gray-400 opacity-50"
-                    }`}>
+                    <div
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                        status === "EN_ESPERA"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "text-gray-400 opacity-50"
+                      }`}
+                    >
                       <span className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
                       En espera
                     </div>
 
                     <div className="w-px h-4 bg-gray-200" />
 
-                    {/* Confirmar */}
                     <button
                       onClick={() => !isConfirmed && setShowConfirmModal(true)}
                       disabled={isChangingStatus || isConfirmed}
@@ -173,7 +198,6 @@ export default function PatientRecordDetail({ patientId, evaluationId }: Props) 
 
                     <div className="w-px h-4 bg-gray-200" />
 
-                    {/* Cancelar */}
                     <button
                       onClick={() => !isCanceled && setShowCancelModal(true)}
                       disabled={isChangingStatus || isCanceled}
@@ -188,6 +212,7 @@ export default function PatientRecordDetail({ patientId, evaluationId }: Props) 
                     </button>
                   </div>
 
+                  {/* Exportar */}
                   <div className="relative">
                     <button
                       onClick={() => setShowExportMenu(!showExportMenu)}
@@ -225,6 +250,7 @@ export default function PatientRecordDetail({ patientId, evaluationId }: Props) 
                 </div>
               </div>
 
+              {/* Vista principal del registro */}
               <ClinicalRecordView
                 evaluation={evaluation}
                 currentYear={currentYear}
@@ -232,115 +258,125 @@ export default function PatientRecordDetail({ patientId, evaluationId }: Props) 
                 status={status}
                 onEditEval={() => setShowEditEval(true)}
                 onEditProc={(proc) => setEditingProc(proc)}
-                onRegisterSupplies={() => setShowSuppliesModal(true)}
+                onRegisterUsage={() => setShowUsageForm(true)}
               />
             </div>
           </div>
         </div>
-      </MainLayout>
 
-      {showCancelModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-          onClick={(e) => e.target === e.currentTarget && setShowCancelModal(false)}
-        >
-          <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-              <h2 className="text-lg font-bold text-gray-900">Cancelar registro</h2>
-              <button
-                onClick={() => setShowCancelModal(false)}
-                className="rounded-full p-1.5 hover:bg-gray-100 transition"
-              >
-                <XCircleIcon className="h-5 w-5 text-gray-500" />
-              </button>
-            </div>
-            <div className="px-6 py-5">
-              <p className="text-sm text-gray-600">
-                ¿Está seguro que desea cancelar este registro clínico? Esta acción no se puede deshacer.
-              </p>
-            </div>
-            <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
-              <button
-                onClick={() => setShowCancelModal(false)}
-                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition"
-              >
-                Volver
-              </button>
-              <button
-                onClick={() => { setShowCancelModal(false); handleStatusChange("cancelar"); }}
-                disabled={isChangingStatus}
-                className="flex items-center gap-2 px-5 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium disabled:opacity-50"
-              >
-                <XCircleIcon className="h-4 w-4" />
-                {isChangingStatus ? "Cancelando..." : "Sí, cancelar"}
-              </button>
+        {/* ── Modales globales ─────────────────────────────────────────────── */}
+
+        {/* Consumo con paciente */}
+        {showUsageForm && (
+          <UsageForm
+            products={products}
+            mode="con_paciente"
+            medicalEvaluationId={evaluation.id}
+            onClose={() => setShowUsageForm(false)}
+            onSaved={() => mutate()} // ← refresca el registro al guardar
+          />
+        )}
+
+        {showCancelModal && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={(e) =>
+              e.target === e.currentTarget && setShowCancelModal(false)
+            }
+          >
+            <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl overflow-hidden">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                <h2 className="text-lg font-bold text-gray-900">
+                  Cancelar registro
+                </h2>
+                <button
+                  onClick={() => setShowCancelModal(false)}
+                  className="rounded-full p-1.5 hover:bg-gray-100 transition"
+                >
+                  <XCircleIcon className="h-5 w-5 text-gray-500" />
+                </button>
+              </div>
+              <div className="px-6 py-5">
+                <p className="text-sm text-gray-600">
+                  ¿Está seguro que desea cancelar este registro clínico? Esta
+                  acción no se puede deshacer.
+                </p>
+              </div>
+              <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
+                <button
+                  onClick={() => setShowCancelModal(false)}
+                  className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition"
+                >
+                  Volver
+                </button>
+                <button
+                  onClick={() => {
+                    setShowCancelModal(false);
+                    handleStatusChange("cancelar");
+                  }}
+                  disabled={isChangingStatus}
+                  className="flex items-center gap-2 px-5 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium disabled:opacity-50"
+                >
+                  <XCircleIcon className="h-4 w-4" />
+                  {isChangingStatus ? "Cancelando..." : "Sí, cancelar"}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {showConfirmModal && (
-        <ConfirmacionModal
+        {showConfirmModal && (
+          <ConfirmacionModal
+            evaluationId={evaluationId}
+            onClose={() => setShowConfirmModal(false)}
+            onConfirmed={() => mutate()}
+          />
+        )}
+
+        {showEditEval && (
+          <EditarEvaluacionModal
+            evaluationId={evaluationId}
+            initialData={{
+              weight: String(evaluation.weight ?? ""),
+              height: String(evaluation.height ?? ""),
+              medical_background: evaluation.medical_background ?? "",
+            }}
+            onClose={() => setShowEditEval(false)}
+            onSaved={() => mutate()}
+          />
+        )}
+
+        {editingProc !== null && (
+          <EditarProcedimientoModal
+            procedureId={editingProc.id}
+            initialData={{
+              notes: editingProc.notes ?? "",
+              items: editingProc.items.map((i) => ({
+                id: i.id,
+                item_name: i.item_name,
+                price: Math.round(parseFloat(String(i.price))).toLocaleString(
+                  "es-CO",
+                ),
+              })),
+            }}
+            onClose={() => setEditingProc(null)}
+            onSaved={() => mutate()}
+          />
+        )}
+
+        <InvoicePdf
+          ref={invoiceRef}
+          evaluation={evaluation}
           evaluationId={evaluationId}
-          onClose={() => setShowConfirmModal(false)}
-          onConfirmed={() => mutate()}
+          currentYear={currentYear}
         />
-      )}
-
-      {showEditEval && (
-        <EditarEvaluacionModal
+        <HistoriaClinicaPdf
+          ref={historiaRef}
+          evaluation={evaluation}
           evaluationId={evaluationId}
-          initialData={{
-            weight: String(evaluation.weight ?? ""),
-            height: String(evaluation.height ?? ""),
-            medical_background: evaluation.medical_background ?? "",
-          }}
-          onClose={() => setShowEditEval(false)}
-          onSaved={() => mutate()}
+          currentYear={currentYear}
         />
-      )}
-
-      {editingProc !== null && (
-        <EditarProcedimientoModal
-          procedureId={editingProc.id}
-          initialData={{
-            procedure_date: editingProc.procedure_date?.slice(0, 10) ?? "",
-            notes: editingProc.notes ?? "",
-            items: editingProc.items.map((i) => ({
-              id: i.id,
-              item_name: i.item_name,
-              price: String(i.price),
-            })),
-          }}
-          onClose={() => setEditingProc(null)}
-          onSaved={() => mutate()}
-        />
-      )}
-
-      {showSuppliesModal && productsData?.data && (
-        <SuppliesRegistrationModal
-          evaluationId={evaluationId}
-          products={productsData.data}
-          onClose={() => setShowSuppliesModal(false)}
-          onSaved={() => {
-            mutate();
-            setShowSuppliesModal(false);
-          }}
-        />
-      )}
-
-      <InvoicePdf
-        ref={invoiceRef}
-        evaluation={evaluation}
-        evaluationId={evaluationId}
-        currentYear={currentYear}
-      />
-      <HistoriaClinicaPdf
-        ref={historiaRef}
-        evaluation={evaluation}
-        evaluationId={evaluationId}
-        currentYear={currentYear}
-      />
+      </MainLayout>
     </AuthGuard>
   );
 }

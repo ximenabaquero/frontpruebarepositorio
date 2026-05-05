@@ -6,8 +6,12 @@ import Cookies from "js-cookie";
 import MainLayout from "@/layouts/MainLayout";
 import RegisterCard from "./components/RegisterCard";
 import RegisterHeaderBar from "./components/RegisterHeaderBar";
-import PatientBasicsFields, { type PatientBasicData } from "./components/PatientBasicsFields";
-import ClinicalInfoFields, { type ClinicalData } from "./components/ClinicalInfoFields";
+import PatientBasicsFields, {
+  type PatientBasicData,
+} from "./components/PatientBasicsFields";
+import ClinicalInfoFields, {
+  type ClinicalData,
+} from "./components/ClinicalInfoFields";
 import ProceduresSelector from "./components/ProceduresSelector";
 import NotesField from "./components/NotesField";
 import StickySubmitBar from "./components/StickySubmitBar";
@@ -26,19 +30,28 @@ type ProcedureItem = {
 };
 
 const INITIAL_PATIENT: PatientBasicData = {
-  firstName: "", lastName: "", dateOfBirth: "",
-  documentType: "", cedula: "", cellphone: "", biologicalSex: "",
+  firstName: "",
+  lastName: "",
+  dateOfBirth: "",
+  documentType: "",
+  cedula: "",
+  cellphone: "",
+  biologicalSex: "",
 };
 
 const INITIAL_CLINICAL: ClinicalData = {
-  weightKg: "", heightM: "", medicalBackground: "",
+  weightKg: "",
+  heightM: "",
+  medicalBackground: "",
 };
 
 export default function RegisterPatientPage() {
   const router = useRouter();
 
   const [currentStep, setCurrentStep] = useState(0);
-  const [stepCompleted, setStepCompleted] = useState<[boolean, boolean, boolean]>([false, false, false]);
+  const [stepCompleted, setStepCompleted] = useState<
+    [boolean, boolean, boolean]
+  >([false, false, false]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -46,8 +59,10 @@ export default function RegisterPatientPage() {
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
   const [hasTriedSubmit, setHasTriedSubmit] = useState(false);
 
-  const [patientData, setPatientData] = useState<PatientBasicData>(INITIAL_PATIENT);
-  const [clinicalData, setClinicalData] = useState<ClinicalData>(INITIAL_CLINICAL);
+  const [patientData, setPatientData] =
+    useState<PatientBasicData>(INITIAL_PATIENT);
+  const [clinicalData, setClinicalData] =
+    useState<ClinicalData>(INITIAL_CLINICAL);
   const [procedureItems, setProcedureItems] = useState<ProcedureItem[]>([]);
   const [procedureNotes, setProcedureNotes] = useState("");
 
@@ -68,9 +83,12 @@ export default function RegisterPatientPage() {
 
   useEffect(() => {
     if (currentStep === 2) {
-      const valid = procedureItems.length > 0 && procedureNotes.trim().length > 0;
+      const valid =
+        procedureItems.length > 0 && procedureNotes.trim().length > 0;
       setValidationError(
-        valid ? null : "⚠️​ Complete todos los pasos antes de guardar el registro.",
+        valid
+          ? null
+          : "⚠️​ Complete todos los pasos antes de guardar el registro.",
       );
     } else {
       setValidationError(null);
@@ -83,7 +101,9 @@ export default function RegisterPatientPage() {
     setHasTriedSubmit(true);
     const valid = procedureItems.length > 0 && procedureNotes.trim().length > 0;
     if (!valid) {
-      setValidationError("⚠️​ Complete todos los pasos antes de guardar el registro.");
+      setValidationError(
+        "⚠️​ Complete todos los pasos antes de guardar el registro.",
+      );
       return;
     }
     setShowConfirmModal(true);
@@ -136,13 +156,16 @@ export default function RegisterPatientPage() {
         const errBody = await res.json();
         if (errBody.error === "PATIENT_EXISTS" && errBody.data?.patient) {
           const existingPatient = errBody.data.patient;
-          toast.error(`El paciente ${existingPatient.full_name} ya existe. Redirigiendo...`);
+          toast.error(
+            `El paciente ${existingPatient.full_name} ya existe. Redirigiendo...`,
+          );
           router.push(`/patients/${existingPatient.id}/records`);
           return;
         }
       }
 
-      if (res.status === 401) throw new Error("Sesión expirada. Inicia sesión nuevamente.");
+      if (res.status === 401)
+        throw new Error("Sesión expirada. Inicia sesión nuevamente.");
       if (res.status === 403) {
         const errJson = await res.json();
         throw new Error(errJson.message || "Cuenta no activa.");
@@ -154,7 +177,9 @@ export default function RegisterPatientPage() {
         const detail =
           errBody?.message ||
           (errBody?.errors
-            ? Object.values(errBody.errors as Record<string, string[]>).flat().join(" ")
+            ? Object.values(errBody.errors as Record<string, string[]>)
+                .flat()
+                .join(" ")
             : null) ||
           errBody?.error ||
           "Error al crear registro clínico";
@@ -179,10 +204,14 @@ export default function RegisterPatientPage() {
 
   const selectedCount = procedureItems.length;
   const stickyTotalCop = procedureItems
-    .reduce((total, item) => total + (Number(item.price?.replace(/\D/g, "")) || 0), 0)
+    .reduce(
+      (total, item) => total + (Number(item.price?.replace(/\D/g, "")) || 0),
+      0,
+    )
     .toLocaleString("es-CO");
 
-  const allStepsCompleted = stepCompleted[0] && stepCompleted[1] && stepCompleted[2];
+  const allStepsCompleted =
+    stepCompleted[0] && stepCompleted[1] && stepCompleted[2];
 
   return (
     <AuthGuard>
@@ -194,9 +223,15 @@ export default function RegisterPatientPage() {
               <aside className="col-span-12 lg:col-span-4">
                 <SidebarSteps
                   steps={[
-                    { label: "Datos del paciente",  completed: stepCompleted[0] },
-                    { label: "Evaluación clínica",  completed: stepCompleted[1] },
-                    { label: "Procedimientos",       completed: stepCompleted[2] },
+                    {
+                      label: "Datos del paciente",
+                      completed: stepCompleted[0],
+                    },
+                    {
+                      label: "Evaluación clínica",
+                      completed: stepCompleted[1],
+                    },
+                    { label: "Procedimientos", completed: stepCompleted[2] },
                   ]}
                   currentStep={currentStep}
                   onStepClick={setCurrentStep}
@@ -209,7 +244,9 @@ export default function RegisterPatientPage() {
                     onStatsClick={() => router.push("/stats")}
                     onImagesClick={() => router.push("/control-images")}
                     onPatientsClick={() => router.push("/patients")}
-                    onBackToRegisterClick={() => router.push("/register-patient")}
+                    onBackToRegisterClick={() =>
+                      router.push("/register-patient")
+                    }
                     onRemitentesClick={() => router.push("/admin/remitentes")}
                     onInventoryClick={() => router.push("/inventory")}
                     active="register"
@@ -223,10 +260,19 @@ export default function RegisterPatientPage() {
                     índice de masa corporal (IMC) se registrará automáticamente.
                   </p>
 
-                  <form className="space-y-5 mt-6" onSubmit={(e) => e.preventDefault()}>
-                    {validationError && <FormAlert variant="warning" message={validationError} />}
-                    {submitError    && <FormAlert variant="error"   message={submitError} />}
-                    {submitSuccess  && <FormAlert variant="success" message={submitSuccess} />}
+                  <form
+                    className="space-y-5 mt-6"
+                    onSubmit={(e) => e.preventDefault()}
+                  >
+                    {validationError && (
+                      <FormAlert variant="warning" message={validationError} />
+                    )}
+                    {submitError && (
+                      <FormAlert variant="error" message={submitError} />
+                    )}
+                    {submitSuccess && (
+                      <FormAlert variant="success" message={submitSuccess} />
+                    )}
 
                     {currentStep === 0 && (
                       <RegisterCard
@@ -285,7 +331,9 @@ export default function RegisterPatientPage() {
                     <div className="flex items-center justify-between pt-2">
                       <button
                         type="button"
-                        onClick={() => setCurrentStep((s) => Math.max(0, s - 1))}
+                        onClick={() =>
+                          setCurrentStep((s) => Math.max(0, s - 1))
+                        }
                         className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-60"
                         disabled={currentStep === 0 || isSubmitting}
                       >
@@ -295,7 +343,9 @@ export default function RegisterPatientPage() {
                       {currentStep < 2 ? (
                         <button
                           type="button"
-                          onClick={() => setCurrentStep((s) => Math.min(2, s + 1))}
+                          onClick={() =>
+                            setCurrentStep((s) => Math.min(2, s + 1))
+                          }
                           className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 disabled:opacity-60"
                           disabled={isSubmitting}
                         >
@@ -307,9 +357,10 @@ export default function RegisterPatientPage() {
                           disabled={isSubmitting || !allStepsCompleted}
                           onClick={handleSaveClick}
                           className={`rounded-xl px-4 py-2 text-sm font-semibold text-white transition-all duration-200
-                            ${allStepsCompleted
-                              ? "bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-700 hover:to-teal-600 shadow-sm cursor-pointer"
-                              : "bg-emerald-200 cursor-not-allowed"
+                            ${
+                              allStepsCompleted
+                                ? "bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-700 hover:to-teal-600 shadow-sm cursor-pointer"
+                                : "bg-emerald-200 cursor-not-allowed"
                             }`}
                         >
                           {isSubmitting ? "Guardando..." : "Guardar registro"}

@@ -1,6 +1,11 @@
 import { forwardRef } from "react";
 import Image from "next/image";
-import { CheckBadgeIcon, CheckCircleIcon, ClockIcon, XCircleIcon } from "@heroicons/react/24/solid";
+import {
+  CheckBadgeIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  XCircleIcon,
+} from "@heroicons/react/24/solid";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import type { Procedure, EvaluationData } from "../types";
 
@@ -11,20 +16,38 @@ type Props = {
   status?: "EN_ESPERA" | "CONFIRMADO" | "CANCELADO";
   onEditEval: () => void;
   onEditProc: (proc: Procedure) => void;
-  onRegisterSupplies?: () => void;
+  onRegisterUsage?: () => void;
 };
 
 const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
-  ({ evaluation, currentYear, isConfirmed, status = "EN_ESPERA", onEditEval, onEditProc, onRegisterSupplies }, ref) => {
+  (
+    {
+      evaluation,
+      currentYear,
+      isConfirmed,
+      status = "EN_ESPERA",
+      onEditEval,
+      onEditProc,
+      onRegisterUsage,
+    },
+    ref,
+  ) => {
     const { patient, procedures } = evaluation;
 
-    const procedureDate = procedures?.[0]?.procedure_date ?? evaluation.created_at;
+    const procedureDate =
+      procedures?.[0]?.procedure_date ?? evaluation.created_at;
     const formattedDate = procedureDate
       ? (() => {
-          const f = new Date(procedureDate).toLocaleString("es-ES", {
-            dateStyle: "medium",
-            timeStyle: "short",
-          });
+          const isDateOnly = /^\d{4}-\d{2}-\d{2}$/.test(procedureDate);
+          const d = new Date(
+            isDateOnly ? `${procedureDate}T00:00:00` : procedureDate,
+          );
+          const f = isDateOnly
+            ? d.toLocaleDateString("es-ES", { dateStyle: "medium" })
+            : d.toLocaleString("es-ES", {
+                dateStyle: "medium",
+                timeStyle: "short",
+              });
           return f.charAt(0).toUpperCase() + f.slice(1);
         })()
       : "";
@@ -39,7 +62,7 @@ const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
           borderColor: "border-yellow-200",
           textColor: "text-yellow-700",
           iconColor: "text-yellow-500",
-          description: "Este registro está pendiente de confirmación"
+          description: "Este registro está pendiente de confirmación",
         },
         CONFIRMADO: {
           label: "Confirmado",
@@ -48,7 +71,7 @@ const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
           borderColor: "border-emerald-200",
           textColor: "text-emerald-700",
           iconColor: "text-emerald-500",
-          description: "Este registro ha sido confirmado y aprobado"
+          description: "Este registro ha sido confirmado y aprobado",
         },
         CANCELADO: {
           label: "Cancelado",
@@ -57,10 +80,12 @@ const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
           borderColor: "border-red-200",
           textColor: "text-red-700",
           iconColor: "text-red-500",
-          description: "Este registro ha sido cancelado"
-        }
+          description: "Este registro ha sido cancelado",
+        },
       };
-      return configs[currentStatus as keyof typeof configs] || configs.EN_ESPERA;
+      return (
+        configs[currentStatus as keyof typeof configs] || configs.EN_ESPERA
+      );
     };
 
     const currentStatus = getStatusConfig(status);
@@ -97,7 +122,9 @@ const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
           </div>
           <div className="mt-2 flex flex-wrap items-center justify-end gap-6 text-[13px] text-gray-700">
             <div className="flex flex-col items-start">
-              <p className="text-[10px] uppercase tracking-wider text-gray-400 mb-1">Remitente</p>
+              <p className="text-[10px] uppercase tracking-wider text-gray-400 mb-1">
+                Remitente
+              </p>
               <div className="flex items-center gap-1">
                 <CheckBadgeIcon className="w-4 h-4 text-emerald-500" />
                 <span className="font-medium">{evaluation.referrer_name}</span>
@@ -105,59 +132,80 @@ const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
             </div>
             <span className="text-gray-300">|</span>
             <div className="flex flex-col items-start">
-              <p className="text-[10px] uppercase tracking-wider text-gray-400 mb-1">Fecha</p>
+              <p className="text-[10px] uppercase tracking-wider text-gray-400 mb-1">
+                Fecha
+              </p>
               <p className="font-medium">{formattedDate}</p>
             </div>
           </div>
         </div>
         {/* Barra de estado + acción */}
         <div className="flex items-center justify-between px-4 sm:px-8 py-3 border-t border-gray-100">
-          <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm font-medium ${currentStatus.bgColor} ${currentStatus.borderColor} ${currentStatus.textColor}`}>
+          <div
+            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm font-medium ${currentStatus.bgColor} ${currentStatus.borderColor} ${currentStatus.textColor}`}
+          >
             <StatusIcon className={`w-4 h-4 ${currentStatus.iconColor}`} />
             {currentStatus.label}
           </div>
-          {onRegisterSupplies && status === "CONFIRMADO" && (
+          {onRegisterUsage && status === "CONFIRMADO" && (
             <button
-              onClick={onRegisterSupplies}
-              className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition print:hidden"
+              onClick={onRegisterUsage}
+              className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition print:hidden"
             >
               <span className="text-base">💉</span>
-              Registrar insumos
+              Registrar consumo
             </button>
           )}
         </div>
 
         <div className="px-4 sm:px-8 py-6 space-y-10">
-
-          {/* Datos personales */
-          <section>
-            <div className="flex items-center gap-2 mb-4">
-              <span className="h-5 w-1 bg-emerald-500 rounded-full" />
-              <h3 className="text-lg font-semibold text-gray-800 tracking-tight">Datos personales</h3>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 rounded-xl border border-gray-200 bg-white p-4 text-sm">
-              {[
-                { label: "Nombre completo", value: `${patient.first_name} ${patient.last_name}` },
-                { label: "Cedula", value: patient.cedula },
-                { label: "Fecha de nacimiento", value: new Date(patient.date_of_birth).toLocaleDateString("es-ES") },
-                { label: "Edad", value: `${evaluation.patient_age_at_evaluation} años` },
-                { label: "Sexo biológico", value: patient.biological_sex },
-                { label: "Celular", value: patient.cellphone },
-              ].map(({ label, value }) => (
-                <div key={label}>
-                  <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wide mb-1">{label}</p>
-                  <p className="font-medium text-gray-800">{value}</p>
-                </div>
-              ))}
-            </div>
-          </section>
+          {
+            /* Datos personales */
+            <section>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="h-5 w-1 bg-emerald-500 rounded-full" />
+                <h3 className="text-lg font-semibold text-gray-800 tracking-tight">
+                  Datos personales
+                </h3>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-6 rounded-xl border border-gray-200 bg-white p-4 text-sm">
+                {[
+                  {
+                    label: "Nombre completo",
+                    value: `${patient.first_name} ${patient.last_name}`,
+                  },
+                  { label: "Cedula", value: patient.cedula },
+                  {
+                    label: "Fecha de nacimiento",
+                    value: new Date(patient.date_of_birth).toLocaleDateString(
+                      "es-ES",
+                    ),
+                  },
+                  {
+                    label: "Edad",
+                    value: `${evaluation.patient_age_at_evaluation} años`,
+                  },
+                  { label: "Sexo biológico", value: patient.biological_sex },
+                  { label: "Celular", value: patient.cellphone },
+                ].map(({ label, value }) => (
+                  <div key={label}>
+                    <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wide mb-1">
+                      {label}
+                    </p>
+                    <p className="font-medium text-gray-800">{value}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
           }
           {/* Evaluación clínica */}
           <section>
             <div className="flex items-center justify-between gap-2 mb-4">
               <div className="flex items-center gap-2">
                 <span className="h-5 w-1 bg-blue-500 rounded-full" />
-                <h3 className="text-lg font-semibold text-gray-800 tracking-tight">Evaluación clínica</h3>
+                <h3 className="text-lg font-semibold text-gray-800 tracking-tight">
+                  Evaluación clínica
+                </h3>
               </div>
               {!isConfirmed && (
                 <button
@@ -171,29 +219,39 @@ const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm mb-4">
               <div>
-                <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wide mb-1">Peso</p>
+                <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wide mb-1">
+                  Peso
+                </p>
                 <p className="font-medium">{evaluation.weight} kg</p>
                 <div className="border-t border-gray-100 mt-2" />
               </div>
               <div>
-                <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wide mb-1">Estatura</p>
+                <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wide mb-1">
+                  Estatura
+                </p>
                 <p className="font-medium">{evaluation.height} m</p>
                 <div className="border-t border-gray-100 mt-2" />
               </div>
               <div>
-                <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wide mb-1">IMC</p>
+                <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wide mb-1">
+                  IMC
+                </p>
                 <p className="font-semibold text-blue-600">{evaluation.bmi}</p>
                 <div className="border-t border-gray-100 mt-2" />
               </div>
               <div>
-                <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wide mb-0.5">Estado IMC</p>
+                <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wide mb-0.5">
+                  Estado IMC
+                </p>
                 <span className="inline-block mt-1 rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-bold text-blue-600">
                   {evaluation.bmi_status}
                 </span>
                 <div className="border-t border-gray-100 mt-2" />
               </div>
             </div>
-            <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wide mb-1">Antecedentes médicos</p>
+            <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wide mb-1">
+              Antecedentes médicos
+            </p>
             <div className="bg-gray-50 rounded-xl p-4 text-sm">
               <p className="text-gray-700">{evaluation.medical_background}</p>
             </div>
@@ -203,7 +261,9 @@ const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
           <section>
             <div className="flex items-center gap-2 mb-4">
               <span className="h-5 w-1 bg-emerald-500 rounded-full" />
-              <h3 className="text-lg font-semibold text-gray-800 tracking-tight">Procedimientos y precios</h3>
+              <h3 className="text-lg font-semibold text-gray-800 tracking-tight">
+                Procedimientos y precios
+              </h3>
             </div>
             {procedures.map((proc) => (
               <div key={proc.id} className="space-y-4 mb-8">
@@ -219,14 +279,20 @@ const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
                 <table className="w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
                   <thead className="bg-gray-50 text-xs uppercase text-gray-500">
                     <tr>
-                      <th className="text-[10px] uppercase font-bold text-gray-500 tracking-wide text-left py-3 px-3">Procedimiento</th>
-                      <th className="text-[10px] uppercase font-bold text-gray-500 tracking-wide text-right py-3 px-3">Precio unitario</th>
+                      <th className="text-[10px] uppercase font-bold text-gray-500 tracking-wide text-left py-3 px-3">
+                        Procedimiento
+                      </th>
+                      <th className="text-[10px] uppercase font-bold text-gray-500 tracking-wide text-right py-3 px-3">
+                        Precio unitario
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {proc.items.map((item) => (
                       <tr key={item.id} className="border-t border-gray-100">
-                        <td className="py-2 px-3 text-gray-700">{item.item_name}</td>
+                        <td className="py-2 px-3 text-gray-700">
+                          {item.item_name}
+                        </td>
                         <td className="py-2 px-3 text-right font-medium text-gray-800">
                           ${Number(item.price).toLocaleString("es-CO")}
                         </td>
@@ -234,13 +300,17 @@ const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
                     ))}
                   </tbody>
                 </table>
-                <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wide mb-1">Notas clínicas</p>
+                <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wide mb-1">
+                  Notas clínicas
+                </p>
                 <div className="bg-white border border-gray-200 rounded-xl p-4 text-sm italic text-gray-600">
                   {proc.notes}
                 </div>
                 <div className="text-right">
                   <div className="border-t border-gray-100 mt-1 mb-4" />
-                  <p className="text-[10px] uppercase font-bold text-gray-400 tracking-widest mb-1">Valor clínico total</p>
+                  <p className="text-[10px] uppercase font-bold text-gray-400 tracking-widest mb-1">
+                    Valor clínico total
+                  </p>
                   <p className="text-4xl font-extrabold text-green-500">
                     ${Number(proc.total_amount).toLocaleString("es-CO")}
                   </p>
@@ -254,24 +324,34 @@ const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
         {evaluation.patient_signature && (
           <div className="px-4 sm:px-8 pb-6">
             <div className="border-t border-gray-100 mb-6" />
-            <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wide mb-3">Firma de la paciente</p>
+            <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wide mb-3">
+              Firma de la paciente
+            </p>
             <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4">
               <div className="border border-gray-200 rounded-xl overflow-hidden bg-gray-50 p-2 inline-block">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={evaluation.patient_signature} alt="Firma de la paciente" className="h-24 object-contain" />
+                <img
+                  src={evaluation.patient_signature}
+                  alt="Firma de la paciente"
+                  className="h-24 object-contain"
+                />
               </div>
               <div className="text-xs text-gray-500 space-y-0.5">
                 {evaluation.confirmed_at && (
                   <p>
                     Firmado el{" "}
                     {new Date(evaluation.confirmed_at).toLocaleString("es-CO", {
-                      day: "2-digit", month: "long", year: "numeric",
-                      hour: "2-digit", minute: "2-digit",
+                      day: "2-digit",
+                      month: "long",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
                     })}
                   </p>
                 )}
                 <p className="text-gray-400 italic">
-                  La paciente confirma haber leído y aceptado el registro clínico.
+                  La paciente confirma haber leído y aceptado el registro
+                  clínico.
                 </p>
               </div>
             </div>
@@ -279,7 +359,8 @@ const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
         )}
 
         <div className="border-t border-gray-200 text-center text-[10px] text-gray-400 py-4">
-          Coldesthetic - Historia Clinica (c) {currentYear} | Documento confidencial
+          Coldesthetic - Historia Clinica (c) {currentYear} | Documento
+          confidencial
         </div>
       </div>
     );

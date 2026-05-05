@@ -1,149 +1,189 @@
 "use client";
 
 import { useState } from "react";
-import { PlusIcon, PencilIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import {
-  createCategory,
-  updateCategory,
-} from "../services/inventoryService";
+  PencilIcon,
+  XMarkIcon,
+  SquaresPlusIcon,
+} from "@heroicons/react/24/outline";
+import { createCategory, updateCategory } from "../services/inventoryService";
+import ValidatedInput from "@/components/ValidatedInput";
 import type { InventoryCategory } from "../types";
 
 type Props = {
   categories: InventoryCategory[];
   onRefresh: () => void;
-  /** Modo compacto: solo muestra el botón de crear + modal (sin lista ni título) */
-  compact?: boolean;
+  onRefreshProducts?: () => void;
 };
 
-export default function CategoryManager({ categories, onRefresh, compact = false }: Props) {
+export default function CategoryManager({
+  categories,
+  onRefresh,
+  onRefreshProducts,
+}: Props) {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<InventoryCategory | null>(null);
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  function openNew() {
-    setEditing(null);
-    setName("");
+  const openForm = (cat?: InventoryCategory) => {
+    setEditing(cat ?? null);
+    setName(cat?.name ?? "");
     setError(null);
     setOpen(true);
-  }
+  };
 
-  function openEdit(cat: InventoryCategory) {
-    setEditing(cat);
-    setName(cat.name);
+  const handleClose = () => {
+    setOpen(false);
     setError(null);
-    setOpen(true);
-  }
+  };
 
   async function handleSave() {
-    if (!name.trim()) { setError("El nombre es requerido."); return; }
+    if (!name.trim()) return setError("El nombre es requerido.");
+    if (name.trim().length > 50) return setError("Máximo 50 caracteres.");
     setSaving(true);
     setError(null);
     try {
-      if (editing) {
-        await updateCategory(editing.id, { name: name.trim() });
-      } else {
-        await createCategory({ name: name.trim() });
-      }
-      setOpen(false);
+      editing
+        ? await updateCategory(editing.id, { name: name.trim() })
+        : await createCategory({ name: name.trim() });
+      handleClose();
       onRefresh();
+      onRefreshProducts?.();
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Error al guardar");
+      setError(
+        e instanceof Error ? e.message : "Error al procesar la solicitud",
+      );
     } finally {
       setSaving(false);
     }
   }
 
-  const modal = open && (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-gray-800">
-            {editing ? "Editar categoría" : "Nueva categoría"}
-          </h3>
-          <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-gray-600">
-            <XMarkIcon className="w-5 h-5" />
-          </button>
-        </div>
-        <div className="mb-5">
-          <label className="block text-xs font-medium text-gray-600 mb-1">Nombre</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            placeholder="Ej: Fajas, Anestesias, Consumibles..."
-          />
-        </div>
-        {error && <p className="text-xs text-rose-500 mb-3">{error}</p>}
-        <div className="flex justify-end gap-2">
-          <button
-            onClick={() => setOpen(false)}
-            className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
-          >
-            {saving ? "Guardando..." : "Guardar"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
-  if (compact) {
-    return (
-      <>
-        <button
-          onClick={openNew}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition-colors"
-        >
-          <PlusIcon className="w-3.5 h-3.5" />
-          Crear Categoría
-        </button>
-        {modal}
-      </>
-    );
-  }
-
   return (
-    <div className="mb-6">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
-          Categorías
-        </h2>
+    <>
+      {/* Botón trigger */}
+      <div className="relative group">
         <button
-          onClick={openNew}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700 transition-colors"
+          onClick={() => openForm()}
+          className="p-2 rounded-xl border border-gray-200 bg-white text-gray-500 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-all duration-200"
+          aria-label="Gestionar categorías"
         >
-          <PlusIcon className="w-3.5 h-3.5" />
-          Nueva categoría
+          <SquaresPlusIcon className="w-5 h-5" />
         </button>
+        <div className="absolute right-full top-1/2 -translate-y-1/2 mr-2 px-2.5 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-[9999]">
+          Gestionar categorías
+          <div className="absolute left-full top-1/2 -translate-y-1/2 border-4 border-transparent border-l-gray-900" />
+        </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {categories.map((cat) => (
-          <div
-            key={cat.id}
-            className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm shadow-sm"
-          >
-            <span className="text-gray-700 font-medium">{cat.name}</span>
-            <button onClick={() => openEdit(cat)} className="text-gray-400 hover:text-indigo-600 transition-colors">
-              <PencilIcon className="w-3.5 h-3.5" />
-            </button>
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
+            {/* ── Header con gradiente ── */}
+            <div className="bg-gradient-to-r from-emerald-600 to-teal-500 px-6 pt-5 pb-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-semibold text-white/70 uppercase tracking-widest mb-1">
+                    Gestión de inventario
+                  </p>
+                  <h3 className="text-lg font-bold text-white">
+                    {editing ? "Editar categoría" : "Nueva categoría"}
+                  </h3>
+                </div>
+                <button
+                  onClick={handleClose}
+                  className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition-colors"
+                >
+                  <XMarkIcon className="w-5 h-5 text-white" />
+                </button>
+              </div>
+            </div>
+
+            <div className="px-6 py-5 space-y-5">
+              {/* ── Categorías existentes (solo en modo creación) ── */}
+              {!editing && categories.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="w-0.5 h-4 bg-gradient-to-b from-emerald-500 to-teal-400 rounded-full" />
+                    <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">
+                      Categorías existentes
+                    </p>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-xl p-3 max-h-32 overflow-y-auto">
+                    <div className="flex flex-wrap gap-2">
+                      {categories.map((c) => (
+                        <button
+                          key={c.id}
+                          onClick={() => openForm(c)}
+                          className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border border-gray-200 bg-white text-gray-600 font-medium hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 transition-all duration-150"
+                        >
+                          {c.name}
+                          <PencilIcon className="w-3 h-3 shrink-0" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-gray-400 mt-2 pl-0.5">
+                    Haz clic en una categoría para editarla.
+                  </p>
+                </div>
+              )}
+
+              {/* ── Divider solo en modo creación con categorías ── */}
+              {!editing && categories.length > 0 && (
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-px bg-gray-100" />
+                  <span className="text-[11px] text-gray-400 font-medium">
+                    o crea una nueva
+                  </span>
+                  <div className="flex-1 h-px bg-gray-100" />
+                </div>
+              )}
+
+              {/* ── Input nombre ── */}
+              <div>
+                <ValidatedInput
+                  id="category-name"
+                  label="Nombre de la categoría"
+                  placeholder="Ej: Insumos médicos"
+                  maxLength={50}
+                  required
+                  value={name}
+                  onChange={setName}
+                />
+                <p className="text-[11px] text-gray-400 mt-1.5 pl-0.5">
+                  Máximo 50 caracteres · {name.length}/50
+                </p>
+              </div>
+
+              {error && (
+                <p className="text-[10px] uppercase font-semibold tracking-wider text-red-500">
+                  {error}
+                </p>
+              )}
+
+              {/* ── Acciones ── */}
+              <div className="flex gap-3 pt-1">
+                <button
+                  onClick={handleClose}
+                  className="flex-1 py-2.5 text-sm font-medium text-gray-500 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="flex-1 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-500 rounded-xl shadow-md shadow-emerald-200 hover:from-emerald-700 hover:to-teal-600 disabled:opacity-50 transition-all duration-200"
+                >
+                  {saving ? "Guardando..." : "Confirmar"}
+                </button>
+              </div>
+            </div>
           </div>
-        ))}
-        {categories.length === 0 && (
-          <p className="text-sm text-gray-400 italic">Sin categorías aún. Crea una para continuar.</p>
-        )}
-      </div>
-
-      {modal}
-    </div>
+        </div>
+      )}
+    </>
   );
 }

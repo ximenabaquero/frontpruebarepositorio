@@ -7,7 +7,7 @@ import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 import MainLayout from "@/layouts/MainLayout";
 import RegisterHeaderBar from "../post-login/components/RegisterHeaderBar";
-import AuthGuard from "@/components/AuthGuard";
+import RoleGuard from "@/components/RoleGuard";
 import ConfirmModal from "@/components/ConfirmModal";
 import { useAuth } from "@/features/auth/AuthContext";
 import { endpoints } from "./services/ClinicalImagesService";
@@ -36,7 +36,7 @@ export default function ControlImagesPage() {
 
   const handleDelete = (id: number) => {
     setConfirmModal({
-      message: "Esta acción eliminará la imagen permanentemente.",
+      message: "Esta accion eliminara la imagen permanentemente.",
       onConfirm: async () => {
         setConfirmModal(null);
         const token = Cookies.get("XSRF-TOKEN") ?? "";
@@ -61,7 +61,7 @@ export default function ControlImagesPage() {
   const atLimit = list.length >= 10;
 
   return (
-    <AuthGuard>
+    <RoleGuard allow={["ADMIN"]}>
       <MainLayout>
         <div className="bg-gradient-to-b from-emerald-50 via-white to-white min-h-screen">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -75,29 +75,25 @@ export default function ControlImagesPage() {
                 onInventoryClick={() => router.push("/inventory")}
                 active="images"
               />
-
               <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                   <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                    {isAdmin ? "Gestión de imágenes clínicas" : "Imágenes clínicas"}
+                    Gestión de imágenes clínicas
                   </h1>
                   <p className="mt-1 text-sm text-gray-500">
                     Imágenes comparativas antes / después de los tratamientos.
                   </p>
                 </div>
-                {isAdmin && (
-                  <button
-                    onClick={openCreate}
-                    disabled={atLimit}
-                    title={atLimit ? "Límite de 10 imágenes alcanzado" : undefined}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition shadow-sm shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <PlusIcon className="h-4 w-4" />
-                    Nueva imagen
-                  </button>
-                )}
+                <button
+                  onClick={openCreate}
+                  disabled={atLimit}
+                  title={atLimit ? "Límite de 10 imágenes alcanzado" : undefined}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition shadow-sm shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  Nueva imagen
+                </button>
               </div>
-
               <div className="mt-4 flex items-center justify-between">
                 {list.length > 0 && (
                   <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -105,13 +101,12 @@ export default function ControlImagesPage() {
                     <span>{list.length} imagen{list.length !== 1 ? "es" : ""} publicada{list.length !== 1 ? "s" : ""}</span>
                   </div>
                 )}
-                {isAdmin && atLimit && (
+                {atLimit && (
                   <p className="text-xs text-amber-600 font-medium bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5">
                     Límite máximo alcanzado (10/10). Elimina una imagen para agregar otra.
                   </p>
                 )}
               </div>
-
               <div className="mt-8">
                 {isLoading && (
                   <div className="text-center py-16">
@@ -136,25 +131,30 @@ export default function ControlImagesPage() {
             </div>
           </div>
         </div>
+
+        {showModal && (
+          <ClinicalImageFormModal
+            image={editingImage}
+            onClose={() => setShowModal(false)}
+            onSaved={() => {
+              setShowModal(false);
+              mutate();
+            }}
+          />
+        )}
+
+        {confirmModal && (
+          <ConfirmModal
+            isOpen={true}
+            title="Eliminar imagen"
+            message={confirmModal.message}
+            confirmLabel="Eliminar"
+            variant="danger"
+            onConfirm={confirmModal.onConfirm}
+            onCancel={() => setConfirmModal(null)}
+          />
+        )}
       </MainLayout>
-
-      {showModal && (
-        <ClinicalImageFormModal
-          image={editingImage}
-          onClose={() => setShowModal(false)}
-          onSaved={() => mutate()}
-        />
-      )}
-
-      <ConfirmModal
-        isOpen={!!confirmModal}
-        title="¿Seguro que deseas eliminar esta imagen?"
-        message={confirmModal?.message ?? ""}
-        confirmLabel="Eliminar"
-        variant="danger"
-        onConfirm={() => confirmModal?.onConfirm()}
-        onCancel={() => setConfirmModal(null)}
-      />
-    </AuthGuard>
+    </RoleGuard>
   );
 }
