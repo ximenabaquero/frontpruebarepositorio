@@ -9,34 +9,34 @@ import type { StockNotificationSummary } from "../types";
 const POLL_INTERVAL_MS = 60_000;
 const STORAGE_KEY = "stock_bell_last_seen_count";
 
+// ── localStorage (persiste entre sesiones) ───────────────────────────────────
+// seguro porque solo guardamos un integer — sin datos sensibles
 function getStoredLastCount(): number {
   if (typeof window === "undefined") return 0;
-  return Number(sessionStorage.getItem(STORAGE_KEY) ?? 0);
+  return Number(localStorage.getItem(STORAGE_KEY) ?? 0);
 }
 
 function storeLastCount(count: number) {
-  sessionStorage.setItem(STORAGE_KEY, String(count));
+  localStorage.setItem(STORAGE_KEY, String(count));
 }
 
 export default function StockNotificationBell() {
   const [open, setOpen] = useState(false);
   const [data, setData] = useState<StockNotificationSummary | null>(null);
   const [loading, setLoading] = useState(true);
-
-  // Inicializar desde sessionStorage para sobrevivir navegación
   const [lastCount, setLastCount] = useState<number>(getStoredLastCount);
-  const [seen, setSeen] = useState<boolean>(() => {
-    // Si no hay nada guardado aún → tratar como no visto
-    return typeof window !== "undefined"
-      ? sessionStorage.getItem(STORAGE_KEY) !== null
-      : false;
-  });
+  const [seen, setSeen] = useState<boolean>(() =>
+    typeof window !== "undefined"
+      ? localStorage.getItem(STORAGE_KEY) !== null
+      : false,
+  );
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // ── Polling ──────────────────────────────────────────────────────────────
+  // ── Polling con pausa cuando la pestaña está en segundo plano ────────────
   useEffect(() => {
     let mounted = true;
+    let interval: ReturnType<typeof setInterval> | null = null;
 
     const load = async () => {
       try {
@@ -45,23 +45,38 @@ export default function StockNotificationBell() {
 
         setData(result);
 
-        // Solo mostrar badge si hay MÁS alertas que la última vez que el usuario vio
         const stored = getStoredLastCount();
         if (result.total_alertas > stored) {
           setSeen(false);
         }
       } catch {
-        // silenciar — no crítico
+        // no crítico — próximo poll reintentará
       } finally {
         if (mounted) setLoading(false);
       }
     };
 
-    load();
-    const interval = setInterval(load, POLL_INTERVAL_MS);
+    const startPolling = () => {
+      load();
+      interval = setInterval(load, POLL_INTERVAL_MS);
+    };
+
+    const stopPolling = () => {
+      if (interval) clearInterval(interval);
+    };
+
+    const handleVisibility = () => {
+      // pausar si el usuario tiene otra pestaña activa
+      document.hidden ? stopPolling() : startPolling();
+    };
+
+    startPolling();
+    document.addEventListener("visibilitychange", handleVisibility);
+
     return () => {
       mounted = false;
-      clearInterval(interval);
+      stopPolling();
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, []);
 
@@ -86,13 +101,15 @@ export default function StockNotificationBell() {
         const count = data?.total_alertas ?? 0;
         setSeen(true);
         setLastCount(count);
-        storeLastCount(count); // persistir para sobrevivir navegación
+        storeLastCount(count); // persiste en localStorage
       }
       return opening;
     });
   };
 
-  const hasAlerts = (data?.total_alertas ?? 0) > 0;
+  const totalAlertas = data?.total_alertas ?? 0;
+  const hasAlerts = totalAlertas > 0;
+  const newAlerts = Math.max(0, totalAlertas - lastCount);
   const showBadge = hasAlerts && !seen;
 
   return (
@@ -113,7 +130,8 @@ export default function StockNotificationBell() {
 
         {showBadge && (
           <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center border-2 border-white tabular-nums">
-            1
+            {/* fix: mostrar alertas reales, no "1" hardcodeado */}
+            {newAlerts > 9 ? "9+" : newAlerts || totalAlertas}
           </span>
         )}
       </button>
@@ -121,7 +139,6 @@ export default function StockNotificationBell() {
       {/* ── Dropdown ── */}
       {open && (
         <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-xl border border-gray-200 z-50 overflow-hidden">
-          {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-emerald-600 to-teal-500">
             <div className="flex items-center gap-2">
               <ExclamationTriangleIcon className="w-4 h-4 text-white/80" />
@@ -131,13 +148,11 @@ export default function StockNotificationBell() {
             </div>
             {hasAlerts && (
               <span className="text-xs font-bold text-white bg-white/20 border border-white/30 px-2 py-0.5 rounded-full">
-                {data?.total_alertas}{" "}
-                {data?.total_alertas === 1 ? "producto" : "productos"}
+                {totalAlertas} {totalAlertas === 1 ? "producto" : "productos"}
               </span>
             )}
           </div>
 
-          {/* Contenido */}
           <div className="max-h-64 overflow-y-auto">
             {loading ? (
               <p className="px-4 py-6 text-center text-sm text-gray-400 italic">
@@ -186,8 +201,8 @@ export default function StockNotificationBell() {
                     <span
                       className={`ml-3 shrink-0 text-[10px] font-semibold px-2.5 py-1 rounded-full ${
                         p.estado === "Agotado"
-                          ? "bg-gray-100 text-gray-600"
-                          : "bg-orange-50 text-orange-600 border border-orange-200"
+                          ? "bg-red-50 text-red-600 border border-red-200"
+                          : "bg-amber-50 text-amber-700 border border-amber-200"
                       }`}
                     >
                       {p.estado}
@@ -198,7 +213,6 @@ export default function StockNotificationBell() {
             )}
           </div>
 
-          {/* Footer */}
           {hasAlerts && (
             <div className="px-4 py-2.5 border-t border-gray-100 bg-gray-50">
               <p className="text-[10px] text-gray-400 text-center">

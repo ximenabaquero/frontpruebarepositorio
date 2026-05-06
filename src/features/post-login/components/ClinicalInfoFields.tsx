@@ -60,6 +60,7 @@ export default function ClinicalInfoFields({
           required
           min={2}
           max={400}
+          clampToMin
         />
 
         <ValidatedInput
@@ -72,6 +73,7 @@ export default function ClinicalInfoFields({
           required
           min={1.2}
           max={2.5}
+          clampToMin
         />
       </div>
 

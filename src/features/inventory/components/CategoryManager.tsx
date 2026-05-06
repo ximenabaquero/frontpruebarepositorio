@@ -80,22 +80,22 @@ export default function CategoryManager({
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
-            {/* ── Header con gradiente ── */}
-            <div className="bg-gradient-to-r from-emerald-600 to-teal-500 px-6 pt-5 pb-4">
+            {/* ── Header ── */}
+            <div className="px-6 pt-5 pb-4 border-b border-gray-100">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[10px] font-semibold text-white/70 uppercase tracking-widest mb-1">
+                  <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-1">
                     Gestión de inventario
                   </p>
-                  <h3 className="text-lg font-bold text-white">
+                  <h3 className="text-lg font-bold text-gray-900">
                     {editing ? "Editar categoría" : "Nueva categoría"}
                   </h3>
                 </div>
                 <button
                   onClick={handleClose}
-                  className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition-colors"
+                  className="w-8 h-8 text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  <XMarkIcon className="w-5 h-5 text-white" />
+                  <XMarkIcon className="w-5 h-5" />
                 </button>
               </div>
             </div>
@@ -105,7 +105,8 @@ export default function CategoryManager({
               {!editing && categories.length > 0 && (
                 <div>
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="w-0.5 h-4 bg-gradient-to-b from-emerald-500 to-teal-400 rounded-full" />
+                    <span className="w-0.5 h-4 bg-gradient-to-b from-blue-500 to-cyan-400 rounded-full" />
+
                     <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">
                       Categorías existentes
                     </p>
@@ -117,7 +118,7 @@ export default function CategoryManager({
                         <button
                           key={c.id}
                           onClick={() => openForm(c)}
-                          className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border border-gray-200 bg-white text-gray-600 font-medium hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 transition-all duration-150"
+                          className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border border-gray-200 bg-white text-gray-600 font-medium hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 transition-all duration-150"
                         >
                           {c.name}
                           <PencilIcon className="w-3 h-3 shrink-0" />
@@ -147,7 +148,7 @@ export default function CategoryManager({
                 <ValidatedInput
                   id="category-name"
                   label="Nombre de la categoría"
-                  placeholder="Ej: Insumos médicos"
+                  placeholder="Nombre de la categoría"
                   maxLength={50}
                   required
                   value={name}
@@ -175,7 +176,7 @@ export default function CategoryManager({
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="flex-1 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-500 rounded-xl shadow-md shadow-emerald-200 hover:from-emerald-700 hover:to-teal-600 disabled:opacity-50 transition-all duration-200"
+                  className="flex-1 py-2.5 text-sm font-semibold text-white rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 shadow-blue-200 hover:from-blue-700 hover:to-cyan-600 disabled:opacity-50 transition-all duration-200"
                 >
                   {saving ? "Guardando..." : "Confirmar"}
                 </button>

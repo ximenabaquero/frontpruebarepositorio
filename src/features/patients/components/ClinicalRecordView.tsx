@@ -8,6 +8,7 @@ import {
 } from "@heroicons/react/24/solid";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import type { Procedure, EvaluationData } from "../types";
+import { PlusIcon } from "@heroicons/react/24/outline";
 
 type Props = {
   evaluation: EvaluationData;
@@ -150,9 +151,17 @@ const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
           {onRegisterUsage && status === "CONFIRMADO" && (
             <button
               onClick={onRegisterUsage}
-              className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition print:hidden"
+              className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold
+        text-white
+        bg-gradient-to-r from-indigo-600 to-teal-500
+        rounded-xl
+        shadow-md shadow-indigo-200
+        hover:from-indigo-700 hover:to-teal-600
+        hover:shadow-lg hover:shadow-indigo-200
+        active:translate-y-[1px]
+        transition-all duration-200"
             >
-              <span className="text-base">💉</span>
+              <PlusIcon className="w-4 h-4" />
               Registrar consumo
             </button>
           )}
