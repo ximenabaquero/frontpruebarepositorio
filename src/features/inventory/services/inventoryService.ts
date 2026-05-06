@@ -14,6 +14,7 @@ import type {
   SpendByCategory,
   SpendByDistributor,
   PriceHistoryPoint,
+  SpendReport,
 } from "../types";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
@@ -322,11 +323,10 @@ export async function getInventorySummary(): Promise<InventorySummaryData> {
 }
 
 // ── Reportes ──────────────────────────────────────────────────────────────────
-
 export async function getSpendByCategory(params?: {
   month?: number;
   year?: number;
-}): Promise<SpendByCategory[]> {
+}): Promise<SpendReport<SpendByCategory>> {
   const qs = new URLSearchParams();
   if (params?.month) qs.set("month", String(params.month));
   if (params?.year) qs.set("year", String(params.year));
@@ -337,13 +337,13 @@ export async function getSpendByCategory(params?: {
   });
   if (!res.ok) throw new Error("Error al cargar reporte por categoría");
   const json = await res.json();
-  return json.data ?? [];
+  return json.data;
 }
 
 export async function getSpendByDistributor(params?: {
   month?: number;
   year?: number;
-}): Promise<SpendByDistributor[]> {
+}): Promise<SpendReport<SpendByDistributor>> {
   const qs = new URLSearchParams();
   if (params?.month) qs.set("month", String(params.month));
   if (params?.year) qs.set("year", String(params.year));
@@ -354,7 +354,7 @@ export async function getSpendByDistributor(params?: {
   });
   if (!res.ok) throw new Error("Error al cargar reporte por distribuidor");
   const json = await res.json();
-  return json.data ?? [];
+  return json.data;
 }
 
 export async function getPriceHistory(

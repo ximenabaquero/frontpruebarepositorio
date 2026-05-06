@@ -6,15 +6,9 @@ import { useRouter } from "next/navigation";
 import MainLayout from "@/layouts/MainLayout";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
-import {
-  CheckCircleIcon,
-  XCircleIcon,
-  ArrowDownTrayIcon,
-  ChevronDownIcon,
-} from "@heroicons/react/24/outline";
+import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/outline";
 
 import RegisterHeaderBar from "../../post-login/components/RegisterHeaderBar";
-import ExportButton from "../../../components/ExportButton";
 import BackButton from "../../../components/BackButton";
 import AuthGuard from "@/components/AuthGuard";
 import ClinicalRecordView from "./ClinicalRecordView";
@@ -26,6 +20,8 @@ import InvoicePdf from "./InvoicePdf";
 import HistoriaClinicaPdf from "./HistoriaClinicaPdf";
 import type { Procedure } from "../types";
 import type { InventoryProduct } from "@/features/inventory/types";
+import ExportDropdown from "@/components/ExportDropdown";
+import { exportElementToPDF } from "@/utils/exportPDF";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
 
@@ -213,40 +209,30 @@ export default function PatientRecordDetail({
                   </div>
 
                   {/* Exportar */}
-                  <div className="relative">
-                    <button
-                      onClick={() => setShowExportMenu(!showExportMenu)}
-                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      <ArrowDownTrayIcon className="w-4 h-4" />
-                      Exportar
-                      <ChevronDownIcon className="w-3 h-3" />
-                    </button>
-                    {showExportMenu && (
-                      <>
-                        <div
-                          className="fixed inset-0 z-10"
-                          onClick={() => setShowExportMenu(false)}
-                        />
-                        <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-20 overflow-hidden">
-                          <ExportButton
-                            targetRef={invoiceRef}
-                            filename={`factura-paciente-${patientId}.pdf`}
-                            label="Imprimir factura"
-                            className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2 border-b border-gray-100"
-                            onExportStart={() => setShowExportMenu(false)}
-                          />
-                          <ExportButton
-                            targetRef={historiaRef}
-                            filename={`historia-clinica-paciente-${patientId}.pdf`}
-                            label="Exportar historia clínica"
-                            className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2"
-                            onExportStart={() => setShowExportMenu(false)}
-                          />
-                        </div>
-                      </>
-                    )}
-                  </div>
+                  <ExportDropdown
+                    items={[
+                      {
+                        label: "Imprimir factura",
+                        onClick: () => {
+                          if (invoiceRef.current)
+                            exportElementToPDF(
+                              invoiceRef.current,
+                              `factura-paciente-${patientId}.pdf`,
+                            );
+                        },
+                      },
+                      {
+                        label: "Exportar historia clínica",
+                        onClick: () => {
+                          if (historiaRef.current)
+                            exportElementToPDF(
+                              historiaRef.current,
+                              `historia-clinica-paciente-${patientId}.pdf`,
+                            );
+                        },
+                      },
+                    ]}
+                  />
                 </div>
               </div>
 

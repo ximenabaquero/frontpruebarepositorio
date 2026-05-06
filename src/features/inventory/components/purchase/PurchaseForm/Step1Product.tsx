@@ -171,7 +171,7 @@ export default function Step1Product({
                                 : "bg-purple-50 text-purple-700"
                             }`}
                           >
-                            {p.type}
+                            {p.type === "equipo" ? "Equipo" : "Insumo"}
                           </span>
                         </div>
                       </button>
@@ -187,7 +187,7 @@ export default function Step1Product({
           <ValidatedInput
             id="p-name"
             label="Nombre del producto"
-            placeholder="Ej: Guantes de nitrilo"
+            placeholder="Nombre del producto"
             maxLength={100}
             required
             value={form.name}
@@ -196,7 +196,7 @@ export default function Step1Product({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Categoría <span className="text-red-500">*</span>
+              Categoría
             </label>
             <select
               value={form.category_id}
@@ -218,7 +218,7 @@ export default function Step1Product({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Tipo <span className="text-red-500">*</span>
+              Tipo
             </label>
             <div className="flex gap-2">
               {(["insumo", "equipo"] as const).map((t) => (
@@ -261,14 +261,27 @@ export default function Step1Product({
             />
           )}
 
-          <ValidatedInput
-            id="p-description"
-            label="Descripción"
-            placeholder="Opcional..."
-            maxLength={255}
-            value={form.description}
-            onChange={(v) => onChange({ description: v })}
-          />
+          <div className="space-y-1">
+            <label
+              htmlFor="p-description"
+              className="flex items-center gap-1.5 text-sm font-medium text-gray-700"
+            >
+              Descripción
+              <span className="text-gray-400 font-normal">(opcional)</span>
+            </label>
+
+            <ValidatedInput
+              id="p-description"
+              label=""
+              placeholder="Escribe la descripción del producto..."
+              maxLength={255}
+              value={form.description}
+              onChange={(v) => onChange({ description: v })}
+            />
+            <p className="text-[11px] text-gray-400 mt-1.5 pl-0.5">
+              Máximo 255 caracteres · {form.description.length}/255
+            </p>
+          </div>
         </div>
       )}
     </div>

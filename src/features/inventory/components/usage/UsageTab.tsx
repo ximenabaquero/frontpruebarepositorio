@@ -94,7 +94,15 @@ export default function UsageTab({
         <div className="relative shrink-0">
           <button
             onClick={onOpenConsume}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shrink-0"
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold
+        text-white
+        bg-gradient-to-r from-indigo-600 to-teal-500
+        rounded-xl
+        shadow-md shadow-indigo-200
+        hover:from-indigo-700 hover:to-teal-600
+        hover:shadow-lg hover:shadow-indigo-200
+        active:translate-y-[1px]
+        transition-all duration-200"
           >
             <PlusIcon className="w-4 h-4" />
             Registrar consumo

@@ -22,7 +22,7 @@ function buildEmptyItems(products: InventoryProduct[]): UsageItem[] {
 
 const TITLES: Record<string, string> = {
   con_paciente: "Registrar Consumo — Con Paciente",
-  sin_paciente: "Registrar Consumo Sin Paciente",
+  sin_paciente: "Registrar Consumo — Sin Paciente",
 };
 
 // ── Componente ────────────────────────────────────────────────────────────
@@ -201,7 +201,7 @@ export default function UsageForm({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 transition-colors"
+            className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors"
           >
             <XMarkIcon className="w-5 h-5" />
           </button>
@@ -215,9 +215,9 @@ export default function UsageForm({
             {/* Banner: solo para sin_paciente */}
             {mode === "sin_paciente" && (
               <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
-                <p className="font-medium">⚠️ Consumo sin paciente asociado</p>
+                <p className="font-medium">Consumo sin paciente asociado</p>
                 <p className="text-xs mt-1">
-                  Para consumos no relacionados con un procedimiento clínico
+                  Para consumos no relacionados con un registro clínico
                 </p>
               </div>
             )}
@@ -225,7 +225,7 @@ export default function UsageForm({
             {/* Banner: para con_paciente */}
             {mode === "con_paciente" && (
               <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
-                <p className="font-medium">🩺 Consumo clínico</p>
+                <p className="font-medium">Consumo clínico</p>
                 <p className="text-xs mt-1">
                   Los productos seleccionados se descontarán del stock y
                   quedarán asociados al registro confirmado.
@@ -235,8 +235,8 @@ export default function UsageForm({
 
             {/* Lista de productos */}
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-2">
-                Productos consumidos <span className="text-red-400">*</span>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Productos consumidos
               </label>
 
               {/* Buscador */}
@@ -277,10 +277,10 @@ export default function UsageForm({
                               {product.name}
                             </p>
                             <span
-                              className={`shrink-0 inline-block rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                              className={`shrink-0 inline-block text-[10px] font-bold px-2 py-0.5 rounded-full ${
                                 product.type === "equipo"
-                                  ? "bg-purple-100 text-purple-700 border border-purple-200"
-                                  : "bg-blue-100 text-blue-700 border border-blue-200"
+                                  ? "bg-purple-50 text-purple-700"
+                                  : "bg-cyan-50 text-cyan-700"
                               }`}
                             >
                               {product.type === "equipo" ? "Equipo" : "Insumo"}
@@ -353,27 +353,23 @@ export default function UsageForm({
 
             {/* Motivo — obligatorio en sin_paciente, opcional en con_paciente */}
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Motivo del consumo
-                {mode === "sin_paciente" ? (
-                  <span className="text-red-400">*</span>
-                ) : (
-                  <span className="text-gray-400 font-normal">(opcional)</span>
+                {mode === "con_paciente" && (
+                  <span className="ml-1 text-gray-400 font-normal">
+                    (opcional)
+                  </span>
                 )}
               </label>
               <textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder={
-                  mode === "sin_paciente"
-                    ? "Ej: Limpieza de equipos, prueba de producto, daño/vencimiento..."
-                    : "Ej: Procedimiento de relleno facial, zona tratada, observaciones..."
-                }
+                placeholder="Describe el motivo del consumo..."
                 rows={2}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
               />
-              <p className="text-xs text-gray-400 mt-1">
-                Máx. 200 caracteres · {reason.length}/200
+              <p className="text-[11px] text-gray-400">
+                Máximo 200 caracteres · {reason.length}/200
               </p>
             </div>
 

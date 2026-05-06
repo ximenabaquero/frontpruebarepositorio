@@ -179,7 +179,7 @@ export default function Step2Distributor({
           <ValidatedInput
             id="dist-name"
             label="Nombre del distribuidor"
-            placeholder="Ej: MediSupply SA"
+            placeholder="Nombre del distribuidor"
             maxLength={100}
             required
             value={form.distributor_name}
@@ -191,15 +191,25 @@ export default function Step2Distributor({
             value={form.distributor_cellphone}
             onChange={(v) => onChange({ distributor_cellphone: v })}
           />
-          <ValidatedInput
-            id="dist-email"
-            label="Correo electrónico"
-            placeholder="correo@ejemplo.com"
-            type="email"
-            maxLength={100}
-            value={form.distributor_email}
-            onChange={(v) => onChange({ distributor_email: v })}
-          />
+          <div className="space-y-1">
+            <label
+              htmlFor="p-description"
+              className="flex items-center gap-1.5 text-sm font-medium text-gray-700"
+            >
+              Correo electrónico
+              <span className="text-gray-400 font-normal">(opcional)</span>
+            </label>
+
+            <ValidatedInput
+              id="dist-email"
+              label=""
+              placeholder="correo@ejemplo.com"
+              type="email"
+              maxLength={100}
+              value={form.distributor_email}
+              onChange={(v) => onChange({ distributor_email: v })}
+            />
+          </div>
         </div>
       )}
     </div>

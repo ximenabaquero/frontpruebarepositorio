@@ -60,7 +60,7 @@ export default function PhoneInputField({
   return (
     <div style={{ position: "relative", zIndex: 99999 }}>
       {isModal ? (
-        <label className="block text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-wider">
+        <label className="block text-sm font-medium text-gray-700 mb-1">
           {label}
         </label>
       ) : (
