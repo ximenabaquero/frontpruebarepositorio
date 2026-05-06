@@ -179,8 +179,17 @@ export interface SpendByDistributor {
   count: number;
 }
 
+// Wrapper común para ambos reportes
+export interface SpendReport<T> {
+  period: string; // "2026" o "April 2026"
+  total: number;
+  items: T[];
+}
+
 export interface PriceHistoryPoint {
-  date: string;
-  price: number;
-  purchase_id: number;
+  month: string; // "2026-01"
+  avg_price: number;
+  min_price: number;
+  max_price: number;
+  purchase_count: number;
 }
