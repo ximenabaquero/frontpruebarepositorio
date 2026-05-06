@@ -104,7 +104,15 @@ export default function PurchaseTab({
         <div className="relative shrink-0">
           <button
             onClick={onOpenPurchase}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors shrink-0"
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold
+        text-white
+        bg-gradient-to-r from-purple-600 to-fuchsia-500
+        rounded-xl
+        shadow-md shadow-purple-200
+        hover:from-purple-700 hover:to-fuchsia-600
+        hover:shadow-lg hover:shadow-purple-200
+        active:translate-y-[1px]
+        transition-all duration-200"
           >
             <ShoppingCartIcon className="w-4 h-4" />
             Registrar compra

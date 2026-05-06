@@ -12,6 +12,7 @@ import InventorySearchBar from "../InventorySearchBar";
 import ProductTable from "./ProductTable";
 import type { InventoryProduct, InventoryCategory } from "../../types";
 import { exportToCSV, exportToExcel } from "../../utils/exportUtils";
+import ExportDropdown from "@/components/ExportDropdown";
 
 const InsumoIcon = (
   <svg
@@ -142,49 +143,12 @@ export default function ProductTab({
           />
         </div>
         {/* Export */}
-        <div className="relative shrink-0">
-          <button
-            onClick={() => setShowExportMenu((v) => !v)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold
-        text-white
-        bg-gradient-to-r from-emerald-600 to-teal-500
-        rounded-xl
-        shadow-md shadow-emerald-200
-        hover:from-emerald-700 hover:to-teal-600
-        hover:shadow-lg hover:shadow-emerald-200
-        active:translate-y-[1px]
-        transition-all duration-200"
-          >
-            <ArrowDownTrayIcon className="w-4 h-4 text-white/80" />
-            Exportar
-            <ChevronDownIcon className="w-3 h-3 text-white/70" />
-          </button>
-
-          {showExportMenu && (
-            <>
-              <div
-                className="fixed inset-0 z-10"
-                onClick={() => setShowExportMenu(false)}
-              />
-              <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-xl shadow-lg z-20 overflow-hidden">
-                <button
-                  onClick={handleExportCSV}
-                  className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                >
-                  <ArrowDownTrayIcon className="w-4 h-4 text-gray-400" />
-                  Exportar como CSV
-                </button>
-                <button
-                  onClick={handleExportExcel}
-                  className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 border-t border-gray-100"
-                >
-                  <ArrowDownTrayIcon className="w-4 h-4 text-gray-400" />
-                  Exportar como Excel
-                </button>
-              </div>
-            </>
-          )}
-        </div>
+        <ExportDropdown
+          items={[
+            { label: "Exportar como CSV", onClick: handleExportCSV },
+            { label: "Exportar como Excel", onClick: handleExportExcel },
+          ]}
+        />
       </div>
 
       {/* Fila 3: Tablas */}

@@ -13,6 +13,9 @@ import ValidatedInput from "@/components/ValidatedInput";
 import PhoneInputField from "@/components/PhoneInputField";
 import InventorySearchBar from "../InventorySearchBar";
 import type { Distributor } from "../../types";
+import PaginationBar from "@/components/PaginationBar";
+
+const ITEMS_PER_PAGE = 12;
 
 interface DistribuidorTabProps {
   distributors: Distributor[];
@@ -57,6 +60,7 @@ export default function DistribuidorTab({
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Búsqueda local — no requiere llamada extra al backend
   const filtered = useMemo(() => {
@@ -68,6 +72,17 @@ export default function DistribuidorTab({
         (d.cellphone && normalize(d.cellphone).includes(q)),
     );
   }, [distributors, search]);
+
+  const handleSearch = (val: string) => {
+    setSearch(val);
+    setCurrentPage(1);
+  };
+
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const paginated = filtered.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  );
 
   function openCreate() {
     setEditing(null);
@@ -123,82 +138,104 @@ export default function DistribuidorTab({
   return (
     <>
       <PageHeader
-        eyebrow="Configuración"
+        eyebrow="Gestión de distribuidores"
         title="Distribuidores"
-        subtitle="Proveedores con los que trabajas."
-        actions={[
+        subtitle="Directorio detallado de distribuidores y aliados comerciales. Mantén toda la información de contacto organizada y accesible para optimizar tus compras y relaciones comerciales."
+      />
+
+      {/* Buscador + boton nuevo distribuidor*/}
+      <div className="flex items-end gap-3 mb-5">
+        <div className="flex-1">
+          <InventorySearchBar
+            contexto="distribuidores"
+            value={search}
+            onSearch={handleSearch}
+          />
+        </div>
+        <div className="relative shrink-0">
           <button
             key="new"
             onClick={openCreate}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold
+        text-white
+        bg-gradient-to-r from-indigo-600 to-cyan-500
+        rounded-xl
+        shadow-md shadow-indigo-200
+        hover:from-indigo-700 hover:to-cyan-600
+        hover:shadow-lg hover:shadow-indigo-200
+        active:translate-y-[1px]
+        transition-all duration-200"
           >
             <PlusIcon className="w-4 h-4" />
             Nuevo distribuidor
-          </button>,
-        ]}
-      />
-
-      {/* Buscador */}
-      <div className="mb-5">
-        <InventorySearchBar
-          contexto="distribuidores"
-          value={search}
-          onSearch={setSearch}
-        />
+          </button>
+        </div>
       </div>
 
       {/* Grilla */}
       {filtered.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((dist) => (
-            <div
-              key={dist.id}
-              className="p-4 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-lg shrink-0">
-                  {dist.name[0].toUpperCase()}
+        <div className="border border-gray-200 rounded-xl overflow-hidden">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 bg-white">
+            {paginated.map((dist) => (
+              <div
+                key={dist.id}
+                className="p-4 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-lg shrink-0">
+                    {dist.name[0].toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-sm font-semibold text-gray-900 truncate">
+                      {dist.name}
+                    </h4>
+                  </div>
+                  <button
+                    onClick={() => openEdit(dist)}
+                    className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    title="Editar"
+                  >
+                    <PencilSquareIcon className="w-4 h-4" />
+                  </button>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h4 className="text-sm font-semibold text-gray-900 truncate">
-                    {dist.name}
-                  </h4>
-                </div>
-                <button
-                  onClick={() => openEdit(dist)}
-                  className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                  title="Editar"
-                >
-                  <PencilSquareIcon className="w-4 h-4" />
-                </button>
-              </div>
 
-              <div className="space-y-1.5 pt-2 border-t border-gray-100">
-                {dist.cellphone ? (
-                  <div className="flex items-center gap-2 text-xs text-gray-600">
-                    <PhoneIcon className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                    <span>{dist.cellphone}</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 text-xs text-gray-400 italic">
-                    <PhoneIcon className="w-3.5 h-3.5 shrink-0" />
-                    <span>Sin teléfono</span>
-                  </div>
-                )}
-                {dist.email ? (
-                  <div className="flex items-center gap-2 text-xs text-gray-600">
-                    <EnvelopeIcon className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                    <span className="truncate">{dist.email}</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 text-xs text-gray-400 italic">
-                    <EnvelopeIcon className="w-3.5 h-3.5 shrink-0" />
-                    <span>Sin correo</span>
-                  </div>
-                )}
+                <div className="space-y-1.5 pt-2 border-t border-gray-100">
+                  {dist.cellphone ? (
+                    <div className="flex items-center gap-2 text-xs text-gray-600">
+                      <PhoneIcon className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                      <span>{dist.cellphone}</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-xs text-gray-400 italic">
+                      <PhoneIcon className="w-3.5 h-3.5 shrink-0" />
+                      <span>Sin teléfono</span>
+                    </div>
+                  )}
+                  {dist.email ? (
+                    <div className="flex items-center gap-2 text-xs text-gray-600">
+                      <EnvelopeIcon className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                      <span className="truncate">{dist.email}</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-xs text-gray-400 italic">
+                      <EnvelopeIcon className="w-3.5 h-3.5 shrink-0" />
+                      <span>Sin correo</span>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+          <PaginationBar
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filtered.length}
+            itemsPerPage={ITEMS_PER_PAGE}
+            onNext={() => setCurrentPage((p) => p + 1)}
+            onPrev={() => setCurrentPage((p) => p - 1)}
+            isFirstPage={currentPage === 1}
+            isLastPage={currentPage === totalPages}
+          />
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
@@ -232,7 +269,7 @@ export default function DistribuidorTab({
             <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
               <ValidatedInput
                 id="distributor-name"
-                label="Nombre"
+                label="Nombre del distribuidor"
                 placeholder="Nombre del distribuidor"
                 maxLength={100}
                 required
@@ -247,15 +284,25 @@ export default function DistribuidorTab({
                 onChange={(val) => setForm((f) => ({ ...f, cellphone: val }))}
               />
 
-              <ValidatedInput
-                id="distributor-email"
-                label="Correo electrónico"
-                placeholder="correo@ejemplo.com"
-                type="email"
-                maxLength={100}
-                value={form.email}
-                onChange={(val) => setForm((f) => ({ ...f, email: val }))}
-              />
+              <div className="space-y-1">
+                <label
+                  htmlFor="p-description"
+                  className="flex items-center gap-1.5 text-sm font-medium text-gray-700"
+                >
+                  Correo electrónico
+                  <span className="text-gray-400 font-normal">(opcional)</span>
+                </label>
+
+                <ValidatedInput
+                  id="distributor-email"
+                  label=""
+                  placeholder="correo@ejemplo.com"
+                  type="email"
+                  maxLength={100}
+                  value={form.email}
+                  onChange={(val) => setForm((f) => ({ ...f, email: val }))}
+                />
+              </div>
 
               {error && (
                 <p className="text-[10px] uppercase font-semibold tracking-wider text-red-500">
