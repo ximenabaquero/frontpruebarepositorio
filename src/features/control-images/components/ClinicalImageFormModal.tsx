@@ -6,6 +6,7 @@ import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 import { endpoints, getImageUrl } from "../services/ClinicalImagesService";
 import type { ClinicalImage } from "../types/ClinicalImage";
+import ValidatedInput from "@/components/ValidatedInput";
 
 type Props = {
   image: ClinicalImage | null; // null = creating
@@ -142,53 +143,33 @@ export default function ClinicalImageFormModal({ image, onClose, onSaved }: Prop
 
         <div className="overflow-y-auto flex-1 px-6 py-5">
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide">
-                  Título *
-                </label>
-                <span className={`text-xs ${title.length >= 100 ? "text-red-500 font-semibold" : "text-gray-400"}`}>
-                  {title.length}/100
-                </span>
-              </div>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => {
-                  setTitle(e.target.value);
-                  if (errors.title) setErrors({ ...errors, title: "" });
-                }}
-                className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:outline-none ${
-                  errors.title
-                    ? "border-red-300 focus:ring-red-400"
-                    : "border-gray-200 focus:ring-emerald-400"
-                }`}
-                maxLength={100}
-                placeholder="Ej. Liposucción abdominal"
-              />
-              {errors.title && (
-                <p className="text-xs text-red-600 mt-1 font-medium">{errors.title}</p>
-              )}
-            </div>
+            <ValidatedInput
+              id="title"
+              label="Título *"
+              type="text"
+              value={title}
+              onChange={(val) => {
+                setTitle(val);
+                if (errors.title) setErrors({ ...errors, title: "" });
+              }}
+              maxLength={100}
+              required
+              placeholder="Ej. Liposucción abdominal"
+            />
+            {errors.title && (
+              <p className="text-xs text-red-600 mt-1 font-medium">{errors.title}</p>
+            )}
 
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide">
-                  Descripción <span className="normal-case font-normal text-gray-400">(opcional)</span>
-                </label>
-                <span className={`text-xs ${description.length >= 300 ? "text-red-500 font-semibold" : "text-gray-400"}`}>
-                  {description.length}/300
-                </span>
-              </div>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none resize-none"
-                rows={2}
-                maxLength={300}
-                placeholder="Breve descripción del tratamiento..."
-              />
-            </div>
+            <ValidatedInput
+              id="description"
+              label="Descripción (opcional)"
+              as="textarea"
+              rows={2}
+              value={description}
+              onChange={setDescription}
+              maxLength={300}
+              placeholder="Breve descripción del tratamiento..."
+            />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Antes */}

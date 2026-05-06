@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 
 type ValidatedInputProps = {
   id: string;
@@ -11,9 +12,13 @@ type ValidatedInputProps = {
   required?: boolean;
   value: string | number;
   onChange: (val: string) => void;
-  // ── Props nuevas, opcionales — no rompen ningún uso existente ──
+  // ── Props opcionales — no rompen ningún uso existente ──
   maxErrorMessage?: string; // mensaje custom cuando se supera el max
   clampToMin?: boolean; // fuerza el valor a min en vez de mostrar error
+  as?: "input" | "textarea"; // renderiza textarea en lugar de input
+  rows?: number; // filas para textarea
+  showToggle?: boolean; // botón ojo para inputs de tipo password
+  autoFocus?: boolean; // enfoca el input automáticamente al montar
 };
 
 export default function ValidatedInput({
@@ -29,12 +34,40 @@ export default function ValidatedInput({
   onChange,
   maxErrorMessage,
   clampToMin = false,
+  as = "input",
+  rows = 3,
+  showToggle = false,
+  autoFocus = false,
 }: ValidatedInputProps) {
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const effectiveType =
+    showToggle && type === "password"
+      ? showPassword
+        ? "text"
+        : "password"
+      : type;
+
+  const baseClassName = `mt-1 w-full rounded-xl border bg-white px-3 py-2 text-gray-900 shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
+    error
+      ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+      : "border-gray-200 focus:border-emerald-400 focus:ring-emerald-500/20"
+  }`;
+
+  const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
+    validate(val);
+    onChange(val);
+  };
 
+  const handleChangeTextarea = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = e.target.value;
+    validate(val);
+    onChange(val);
+  };
+
+  const validate = (val: string) => {
     if (maxLength && val.length > maxLength) {
       setError(`Máximo ${maxLength} caracteres.`);
     } else if (type === "number" && val !== "") {
@@ -46,12 +79,10 @@ export default function ValidatedInput({
 
       if (isBelowMin) {
         if (clampToMin && min !== undefined) {
-          // Bloquea silenciosamente: fuerza el valor al mínimo
           setError("");
           onChange(String(min));
           return;
         }
-        // Comportamiento original: muestra el rango (edad, peso, altura)
         const unidades: Record<string, string> = {
           age: "años",
           weight: "kg",
@@ -60,7 +91,6 @@ export default function ValidatedInput({
         const unidad = unidades[id] || "";
         setError(`Rango permitido: ${min} a ${max} ${unidad}`.trim() + ".");
       } else if (isAboveMax) {
-        // Usa mensaje custom si se provee, si no el mensaje original
         const unidades: Record<string, string> = {
           age: "años",
           weight: "kg",
@@ -77,8 +107,6 @@ export default function ValidatedInput({
     } else {
       setError("");
     }
-
-    onChange(val);
   };
 
   return (
@@ -86,19 +114,54 @@ export default function ValidatedInput({
       <label htmlFor={id} className="block text-sm font-medium text-gray-700">
         {label}
       </label>
-      <input
-        id={id}
-        required={required}
-        type={type}
-        value={value}
-        onChange={handleChange}
-        placeholder={placeholder}
-        className={`mt-1 w-full rounded-xl border bg-white px-3 py-2 text-gray-900 shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
-          error
-            ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
-            : "border-gray-200 focus:border-emerald-400 focus:ring-emerald-500/20"
-        }`}
-      />
+      {as === "textarea" ? (
+        <textarea
+          id={id}
+          required={required}
+          value={value}
+          onChange={handleChangeTextarea}
+          placeholder={placeholder}
+          rows={rows}
+          autoFocus={autoFocus}
+          className={`${baseClassName} resize-none`}
+        />
+      ) : showToggle ? (
+        <div className="relative">
+          <input
+            id={id}
+            required={required}
+            type={effectiveType}
+            value={value}
+            onChange={handleChangeInput}
+            placeholder={placeholder}
+            autoFocus={autoFocus}
+            className={`${baseClassName} pr-10`}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((p) => !p)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            tabIndex={-1}
+          >
+            {showPassword ? (
+              <EyeOff className="w-4 h-4" />
+            ) : (
+              <Eye className="w-4 h-4" />
+            )}
+          </button>
+        </div>
+      ) : (
+        <input
+          id={id}
+          required={required}
+          type={type}
+          value={value}
+          onChange={handleChangeInput}
+          placeholder={placeholder}
+          autoFocus={autoFocus}
+          className={baseClassName}
+        />
+      )}
       {error && (
         <p className="text-[10px] uppercase font-semibold tracking-wider text-red-500 mt-1">
           {error}

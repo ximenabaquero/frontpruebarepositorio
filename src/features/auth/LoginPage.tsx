@@ -4,13 +4,12 @@ import { useMemo, useState, type CSSProperties } from "react";
 import {
   Mail,
   Lock,
-  Eye,
-  EyeOff,
   Shield,
   Home,
   User,
   ArrowRight,
 } from "lucide-react";
+import ValidatedInput from "@/components/ValidatedInput";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -27,7 +26,6 @@ function mulberry32(seed: number) {
 }
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -111,6 +109,11 @@ export default function LoginPage() {
     }));
   };
 
+  const handleEmailChange = (val: string) =>
+    setFormData((prev) => ({ ...prev, email: val }));
+  const handlePasswordChange = (val: string) =>
+    setFormData((prev) => ({ ...prev, password: val }));
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-emerald-50 via-white to-blue-50">
       {/* Floating decorative elements */}
@@ -129,27 +132,20 @@ export default function LoginPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-blue-600 p-[2px] shadow-sm group-hover:scale-105 transition-transform">
-                <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
-                  <Image
-                    src="/coldestheticlogo.png"
-                    alt="Coldesthetic"
-                    width={40}
-                    height={40}
-                    className="w-full h-full object-contain"
-                    priority
-                  />
-                </div>
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <div className="relative h-9 w-9">
+                <Image
+                  src="/coldestheticlogo.png"
+                  alt="Coldesthetic"
+                  width={32}
+                  height={32}
+                  className="h-full w-full object-contain"
+                  priority
+                />
               </div>
-              <div>
-                <h1 className="text-lg font-bold bg-gradient-to-r from-emerald-500 to-blue-600 bg-clip-text text-transparent">
-                  Coldesthetic
-                </h1>
-                <p className="text-xs text-gray-500">
-                  Estética Médica Avanzada
-                </p>
-              </div>
+              <span className="text-lg font-bold bg-gradient-to-r from-emerald-500 to-blue-500 bg-clip-text text-transparent tracking-tight">
+                Coldesthetic
+              </span>
             </Link>
 
             {/* Volver a inicio */}
@@ -196,68 +192,29 @@ export default function LoginPage() {
                 ) : null}
 
                 {/* Email field */}
-                <div className="space-y-2">
-                  <label
-                    htmlFor="email"
-                    className="flex items-center gap-2 text-sm font-medium text-gray-700"
-                  >
-                    <Mail className="w-4 h-4 text-emerald-500" />
-                    Correo Electrónico
-                  </label>
-                  <div className="relative group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-blue-600 rounded-xl blur opacity-0 group-focus-within:opacity-20 transition-opacity duration-300"></div>
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      required
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      placeholder="tu@email.com"
-                      className="relative w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:border-emerald-300 focus:ring-2 focus:ring-emerald-200 focus:outline-none transition-all duration-300 text-gray-900 placeholder-gray-400"
-                    />
-                  </div>
-                </div>
+                <ValidatedInput
+                  id="email"
+                  label="Correo Electrónico"
+                  type="email"
+                  placeholder="tu@email.com"
+                  value={formData.email}
+                  onChange={handleEmailChange}
+                  maxLength={150}
+                  required
+                />
 
                 {/* Password field */}
-                <div className="space-y-2">
-                  <label
-                    htmlFor="password"
-                    className="flex items-center gap-2 text-sm font-medium text-gray-700"
-                  >
-                    <Lock className="w-4 h-4 text-emerald-500" />
-                    Contraseña
-                  </label>
-                  <div className="relative group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-blue-600 rounded-xl blur opacity-0 group-focus-within:opacity-20 transition-opacity duration-300"></div>
-                    <input
-                      id="password"
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      required
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      placeholder="••••••••"
-                      className="relative w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:border-emerald-300 focus:ring-2 focus:ring-emerald-200 focus:outline-none transition-all duration-300 text-gray-900 placeholder-gray-400 pr-12"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-emerald-600 transition-colors"
-                      aria-label={
-                        showPassword
-                          ? "Ocultar contraseña"
-                          : "Mostrar contraseña"
-                      }
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-5 h-5" />
-                      ) : (
-                        <Eye className="w-5 h-5" />
-                      )}
-                    </button>
-                  </div>
-                </div>
+                <ValidatedInput
+                  id="password"
+                  label="Contraseña"
+                  type="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={handlePasswordChange}
+                  maxLength={128}
+                  required
+                  showToggle
+                />
 
                 {/* Submit button */}
                 <button

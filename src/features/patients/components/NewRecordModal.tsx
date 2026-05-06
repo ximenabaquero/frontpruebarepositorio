@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import ProceduresSelector from "../../post-login/components/ProceduresSelector";
 import NotesField from "../../post-login/components/NotesField";
+import ValidatedInput from "@/components/ValidatedInput";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
 
@@ -145,36 +146,28 @@ export default function NewRecordModal({ patientId, onClose, onSuccess }: Props)
           {step === 1 && (
             <>
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
-                    Peso (kg) *
-                  </label>
-                  <input
-                    type="number"
-                    value={weight}
-                    onChange={(e) => setWeight(e.target.value)}
-                    min={2}
-                    max={400}
-                    step="0.1"
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none"
-                    placeholder="Ej. 70.5"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
-                    Estatura (m) *
-                  </label>
-                  <input
-                    type="number"
-                    value={height}
-                    onChange={(e) => setHeight(e.target.value)}
-                    min={1.2}
-                    max={2.5}
-                    step="0.01"
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none"
-                    placeholder="Ej. 1.65"
-                  />
-                </div>
+                <ValidatedInput
+                  id="weight"
+                  label="Peso (kg) *"
+                  type="number"
+                  value={weight}
+                  onChange={setWeight}
+                  min={2}
+                  max={400}
+                  required
+                  placeholder="Ej. 70.5"
+                />
+                <ValidatedInput
+                  id="height"
+                  label="Estatura (m) *"
+                  type="number"
+                  value={height}
+                  onChange={setHeight}
+                  min={1.2}
+                  max={2.5}
+                  required
+                  placeholder="Ej. 1.65"
+                />
               </div>
 
               {bmiValue && (
@@ -188,18 +181,16 @@ export default function NewRecordModal({ patientId, onClose, onSuccess }: Props)
                 </div>
               )}
 
-              <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
-                  Antecedentes médicos *
-                </label>
-                <textarea
-                  value={medicalBackground}
-                  onChange={(e) => setMedicalBackground(e.target.value)}
-                  rows={4}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none resize-none"
-                  placeholder="Describe los antecedentes médicos relevantes..."
-                />
-              </div>
+              <ValidatedInput
+                id="medicalBackground"
+                label="Antecedentes médicos *"
+                as="textarea"
+                rows={4}
+                value={medicalBackground}
+                onChange={setMedicalBackground}
+                maxLength={500}
+                placeholder="Describe los antecedentes médicos relevantes..."
+              />
             </>
           )}
 

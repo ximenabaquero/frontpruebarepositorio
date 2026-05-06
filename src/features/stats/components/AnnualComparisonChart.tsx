@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import useSWR from "swr";
 import { endpoints } from "../services/StatsService";
 import { useAuth } from "@/features/auth/AuthContext";
@@ -20,9 +20,8 @@ import {
   ClipboardDocumentCheckIcon,
   ScissorsIcon,
   LockClosedIcon,
-  EyeIcon,
-  EyeSlashIcon,
 } from "@heroicons/react/24/outline";
+import ValidatedInput from "@/components/ValidatedInput";
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
 
@@ -119,17 +118,14 @@ export default function AnnualComparisonChart() {
   const [incomeRevealed, setIncomeRevealed] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [password, setPassword] = useState("");
-  const [showPass, setShowPass] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   function handleTabClick(key: Metric) {
     if (key === "income" && !incomeRevealed) {
       setAuthError(null);
       setPassword("");
       setShowModal(true);
-      setTimeout(() => inputRef.current?.focus(), 50);
     } else {
       setActiveMetric(key);
     }
@@ -193,7 +189,7 @@ export default function AnnualComparisonChart() {
           </p>
           {activeMetric === "income" && !incomeRevealed ? (
             <button
-              onClick={() => { setAuthError(null); setPassword(""); setShowModal(true); setTimeout(() => inputRef.current?.focus(), 50); }}
+              onClick={() => { setAuthError(null); setPassword(""); setShowModal(true); }}
               className="flex items-center gap-1 text-gray-400 hover:text-emerald-600 transition-colors mt-0.5 ml-auto"
             >
               <LockClosedIcon className="w-4 h-4" />
@@ -292,24 +288,18 @@ export default function AnnualComparisonChart() {
               </div>
             </div>
             <form onSubmit={handleVerify} className="space-y-4">
-              <div className="relative">
-                <input
-                  ref={inputRef}
-                  type={showPass ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Contraseña"
-                  required
-                  className="w-full px-4 py-2.5 pr-10 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-transparent"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPass((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPass ? <EyeSlashIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
-                </button>
-              </div>
+              <ValidatedInput
+                id="verify-password"
+                label="Contraseña"
+                type="password"
+                value={password}
+                onChange={setPassword}
+                maxLength={128}
+                required
+                showToggle
+                autoFocus
+                placeholder="Contraseña"
+              />
               {authError && <p className="text-xs text-red-500 font-medium">{authError}</p>}
               <div className="flex gap-2">
                 <button

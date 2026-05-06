@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import toast from "react-hot-toast";
+import { XMarkIcon, MagnifyingGlassIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 import { createUsage } from "../../../services/inventoryService";
 import ValidatedInput from "@/components/ValidatedInput";
 import type {
@@ -26,7 +25,27 @@ const TITLES: Record<string, string> = {
   sin_paciente: "Registrar Consumo Sin Paciente",
 };
 
-// ── Componente ─────────────────────────────────────────────────────────────
+// ── Componente ────────────────────────────────────────────────────────────
+
+function SuccessScreen({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 flex flex-col items-center text-center">
+        <div className="w-16 h-16 rounded-full bg-indigo-50 flex items-center justify-center mb-5">
+          <CheckCircleIcon className="w-9 h-9 text-indigo-600" />
+        </div>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">Consumo registrado</h2>
+        <p className="text-sm text-gray-500 mb-7">El consumo fue guardado correctamente en el inventario.</p>
+        <button
+          onClick={onClose}
+          className="w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors"
+        >
+          Cerrar
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function UsageForm({
   products,
@@ -46,6 +65,7 @@ export default function UsageForm({
   const [reason, setReason] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [saving, setSaving] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [errorType, setErrorType] = useState<
     UsageApiError["error_code"] | null
@@ -126,9 +146,8 @@ export default function UsageForm({
     setSaving(true);
     try {
       await createUsage(payload);
-      toast.success("Consumo registrado correctamente");
+      setShowSuccess(true);
       onSaved();
-      onClose();
     } catch (err: unknown) {
       const apiErr = err as Partial<UsageApiError>;
       if (apiErr.error_code === "insufficient_stock") {
@@ -160,6 +179,10 @@ export default function UsageForm({
   }, [items]);
 
   // ── Render ────────────────────────────────────────────────────────────────
+
+  if (showSuccess) {
+    return <SuccessScreen onClose={onClose} />;
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">

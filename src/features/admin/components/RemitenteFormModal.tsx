@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { XMarkIcon, CheckCircleIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 import { CheckCircleIcon as CheckCircleSolid } from "@heroicons/react/24/solid";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 import type { Remitente } from "../types";
+import ValidatedInput from "@/components/ValidatedInput";
+import PhoneInputField from "@/components/PhoneInputField";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
 
@@ -43,8 +45,6 @@ export default function RemitenteFormModal({ remitente, onClose, onSaved }: Prop
   );
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
 
   const setField = (field: keyof FormData, value: string) => {
     setForm((f) => ({ ...f, [field]: value }));
@@ -120,9 +120,6 @@ export default function RemitenteFormModal({ remitente, onClose, onSaved }: Prop
     }
   };
 
-  const inputCls = (field: string) =>
-    `w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none ${fieldErrors[field] ? "border-red-400" : "border-gray-200"}`;
-
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
@@ -141,58 +138,84 @@ export default function RemitenteFormModal({ remitente, onClose, onSaved }: Prop
         <div className="overflow-y-auto flex-1 px-6 py-5 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Nombre *</label>
-              <input type="text" value={form.first_name} onChange={(e) => setField("first_name", e.target.value)} className={inputCls("first_name")} placeholder="Nombre" />
+              <ValidatedInput
+                id="first_name"
+                label="Nombre *"
+                type="text"
+                value={form.first_name}
+                onChange={(val) => setField("first_name", val)}
+                maxLength={100}
+                required
+                placeholder="Nombre"
+              />
               {fieldErrors.first_name && <p className="mt-1 text-xs text-red-500">{fieldErrors.first_name}</p>}
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Apellido *</label>
-              <input type="text" value={form.last_name} onChange={(e) => setField("last_name", e.target.value)} className={inputCls("last_name")} placeholder="Apellido" />
+              <ValidatedInput
+                id="last_name"
+                label="Apellido *"
+                type="text"
+                value={form.last_name}
+                onChange={(val) => setField("last_name", val)}
+                maxLength={100}
+                required
+                placeholder="Apellido"
+              />
               {fieldErrors.last_name && <p className="mt-1 text-xs text-red-500">{fieldErrors.last_name}</p>}
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Nombre de usuario *</label>
-            <input type="text" value={form.name} onChange={(e) => setField("name", e.target.value)} className={inputCls("name")} placeholder="usuario_unico" />
+            <ValidatedInput
+              id="name"
+              label="Nombre de usuario *"
+              type="text"
+              value={form.name}
+              onChange={(val) => setField("name", val)}
+              maxLength={50}
+              required
+              placeholder="usuario_unico"
+            />
             {fieldErrors.name && <p className="mt-1 text-xs text-red-500">{fieldErrors.name}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Email *</label>
-              <input type="email" value={form.email} onChange={(e) => setField("email", e.target.value)} className={inputCls("email")} placeholder="correo@ejemplo.com" />
+              <ValidatedInput
+                id="email"
+                label="Email *"
+                type="email"
+                value={form.email}
+                onChange={(val) => setField("email", val)}
+                maxLength={150}
+                required
+                placeholder="correo@ejemplo.com"
+              />
               {fieldErrors.email && <p className="mt-1 text-xs text-red-500">{fieldErrors.email}</p>}
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Celular *</label>
-              <input type="text" value={form.cellphone} onChange={(e) => setField("cellphone", e.target.value)} className={inputCls("cellphone")} placeholder="3001234567" />
+              <PhoneInputField
+                label="Celular *"
+                value={form.cellphone}
+                onChange={(val) => setField("cellphone", val)}
+                variant="modal"
+              />
               {fieldErrors.cellphone && <p className="mt-1 text-xs text-red-500">{fieldErrors.cellphone}</p>}
             </div>
           </div>
 
           {/* Contraseña */}
           <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
-              Contraseña {editingId ? "(dejar vacío para no cambiar)" : "*"}
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                value={form.password}
-                onChange={(e) => setField("password", e.target.value)}
-                className={`${inputCls("password")} pr-10`}
-                placeholder="Mínimo 8 caracteres"
-                autoComplete="new-password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                {showPassword ? <EyeSlashIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
-              </button>
-            </div>
+            <ValidatedInput
+              id="password"
+              label={`Contraseña ${editingId ? "(dejar vacío para no cambiar)" : "*"}`}
+              type="password"
+              value={form.password}
+              onChange={(val) => setField("password", val)}
+              maxLength={128}
+              showToggle
+              placeholder="Mínimo 8 caracteres"
+            />
             {fieldErrors.password && <p className="mt-1 text-xs text-red-500">{fieldErrors.password}</p>}
 
             {/* Checklist de requisitos */}
@@ -214,26 +237,16 @@ export default function RemitenteFormModal({ remitente, onClose, onSaved }: Prop
           {/* Confirmación de contraseña */}
           {(form.password.length > 0 || (!editingId)) && (
             <div>
-              <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
-                Confirmar contraseña {!editingId && "*"}
-              </label>
-              <div className="relative">
-                <input
-                  type={showConfirm ? "text" : "password"}
-                  value={form.password_confirmation}
-                  onChange={(e) => setField("password_confirmation", e.target.value)}
-                  className={`${inputCls("password_confirmation")} pr-10 ${confirmMismatch ? "border-red-400" : form.password_confirmation && !confirmMismatch ? "border-emerald-400" : ""}`}
-                  placeholder="Repite la contraseña"
-                  autoComplete="new-password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirm((v) => !v)}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showConfirm ? <EyeSlashIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
-                </button>
-              </div>
+              <ValidatedInput
+                id="password_confirmation"
+                label={`Confirmar contraseña ${!editingId ? "*" : ""}`}
+                type="password"
+                value={form.password_confirmation}
+                onChange={(val) => setField("password_confirmation", val)}
+                maxLength={128}
+                showToggle
+                placeholder="Repite la contraseña"
+              />
               {confirmMismatch && <p className="mt-1 text-xs text-red-500">Las contraseñas no coinciden</p>}
               {!confirmMismatch && form.password_confirmation.length > 0 && (
                 <p className="mt-1 text-xs text-emerald-600 flex items-center gap-1">

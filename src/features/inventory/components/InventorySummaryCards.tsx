@@ -10,10 +10,9 @@ import {
   LockClosedIcon,
   LockOpenIcon,
   XMarkIcon,
-  EyeIcon,
-  EyeSlashIcon,
 } from "@heroicons/react/24/outline";
 import InfoTooltip from "@/components/InfoTooltip";
+import ValidatedInput from "@/components/ValidatedInput";
 import Cookies from "js-cookie";
 
 const SESSION_KEY = "inventory_summary_unlocked";
@@ -84,7 +83,6 @@ export default function InventorySummaryCards({ isAdmin }: Props) {
   const [unlocked, setUnlocked] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
@@ -243,28 +241,18 @@ export default function InventorySummaryCards({ isAdmin }: Props) {
             </p>
 
             <form onSubmit={handleConfirm} className="space-y-4">
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Contraseña"
-                  autoFocus
-                  required
-                  className="w-full rounded-xl border border-gray-200 px-4 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? (
-                    <EyeSlashIcon className="w-4 h-4" />
-                  ) : (
-                    <EyeIcon className="w-4 h-4" />
-                  )}
-                </button>
-              </div>
+              <ValidatedInput
+                id="inventory-password"
+                label="Contraseña de administrador"
+                type="password"
+                value={password}
+                onChange={setPassword}
+                maxLength={128}
+                required
+                showToggle
+                autoFocus
+                placeholder="Contraseña"
+              />
 
               {passwordError && (
                 <p className="text-xs text-rose-500">{passwordError}</p>

@@ -129,7 +129,8 @@ export default function StatsPage() {
                       </div>
                     </div>
 
-                    {/* Predicciones */}
+                    {/* Predicciones - Comentado: Recolectando datos, se activará en futuro */}
+                    {/* 
                     <div className="mt-8">
                       <div className="flex items-center gap-2 mb-3">
                         <SparklesIcon className="w-5 h-5 text-violet-400" />
@@ -139,6 +140,7 @@ export default function StatsPage() {
                       </div>
                       <RevenueForecastCard />
                     </div>
+                    */}
                   </>
                 ) : (
                   <div className="mt-4">

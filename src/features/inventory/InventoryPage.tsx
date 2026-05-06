@@ -179,7 +179,7 @@ export default function InventoryPage() {
             )}
 
             {/* Navegación por Pestañas */}
-            <InventoryNav activeTab={activeTab} onTabChange={setActiveTab} />
+            <InventoryNav activeTab={activeTab} onTabChange={setActiveTab} isAdmin={isAdmin} />
 
             {/* Área de Contenido Dinámico */}
             <div className="mt-4 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden min-h-[500px]">
@@ -218,7 +218,7 @@ export default function InventoryPage() {
                   />
                 )}
 
-                {activeTab === "reportes" && (
+                {activeTab === "reportes" && isAdmin && (
                   <ReportesTab products={products} />
                 )}
 

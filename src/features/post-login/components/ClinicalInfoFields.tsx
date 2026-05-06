@@ -104,23 +104,18 @@ export default function ClinicalInfoFields({
 
       {/* Antecedentes médicos */}
       <div className="mt-6">
-        <label
-          htmlFor="medical_background"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Antecedentes médicos relevantes
-        </label>
-        <textarea
+        <ValidatedInput
           id="medical_background"
-          name="medical_background"
+          label="Antecedentes médicos relevantes"
+          as="textarea"
           rows={4}
           required
           value={data.medicalBackground}
-          onChange={(e) => {
-            onChange("medicalBackground", e.target.value);
+          onChange={(val) => {
+            onChange("medicalBackground", val);
             onDirty();
           }}
-          className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+          maxLength={500}
           placeholder="Patologías previas, intervenciones quirúrgicas, alergias, medicación actual, condiciones relevantes para el procedimiento."
         />
       </div>

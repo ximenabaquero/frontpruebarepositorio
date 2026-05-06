@@ -57,7 +57,7 @@ export default function RemitentesTable({ remitentes, onEdit, onChangeStatus }: 
                     <p className="text-xs text-gray-400">{r.email}</p>
                   </td>
                   <td className="px-5 py-4 hidden md:table-cell">
-                    <span className="text-sm text-gray-600">@{r.name}</span>
+                    <span className="text-sm font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded">@{r.name}</span>
                   </td>
                   <td className="px-5 py-4 hidden sm:table-cell">
                     <span className="text-sm text-gray-600">{r.cellphone}</span>
