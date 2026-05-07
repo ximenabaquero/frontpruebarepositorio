@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { BookOpen, Brain, Shield, Sparkles, AlertCircle, Heart, Zap, ArrowRight } from 'lucide-react';
 
 const topics = [
@@ -26,6 +26,14 @@ const topics = [
     tag: "Recuperación Óptima"
   },
 ];
+
+const scrollToSection = (sectionId: string, event: MouseEvent<HTMLAnchorElement>) => {
+  event.preventDefault();
+  const section = document.getElementById(sectionId);
+  if (section) {
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+};
 
 export default function Education() {
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
@@ -280,6 +288,7 @@ export default function Education() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <a
                   href="#contacto"
+                  onClick={(event) => scrollToSection('contacto', event)}
                   className="group w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-gradient-to-r from-emerald-500 to-blue-600 text-white font-semibold py-3 md:py-4 px-6 md:px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                 >
                   <Zap className="w-5 h-5" />
@@ -289,6 +298,7 @@ export default function Education() {
                 
                 <a
                   href="#faq"
+                  onClick={(event) => scrollToSection('faq', event)}
                   className="inline-flex items-center gap-2 text-gray-700 hover:text-emerald-600 font-medium transition-colors duration-300 text-sm md:text-base"
                 >
                   <span>Ver más preguntas frecuentes</span>

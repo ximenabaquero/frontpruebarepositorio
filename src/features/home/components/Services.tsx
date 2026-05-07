@@ -1,7 +1,7 @@
 "use client";
 
 import { Zap, Sparkles, Droplets, Scissors, Activity, Eye } from 'lucide-react';
-import { useState } from 'react';
+import { useState, type MouseEvent } from 'react';
 
 const services = [
   {
@@ -54,6 +54,14 @@ const services = [
     color: "violet",
   },
 ];
+
+const scrollToSection = (sectionId: string, event: MouseEvent<HTMLAnchorElement>) => {
+  event.preventDefault();
+  const section = document.getElementById(sectionId);
+  if (section) {
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+};
 
 export default function Services() {
   // Cambiamos el tipo a number | null para poder almacenar el índice
@@ -170,6 +178,7 @@ export default function Services() {
               </p>
               <a
                 href="#contacto"
+                onClick={(event) => scrollToSection('contacto', event)}
                 className="inline-flex items-center gap-3 bg-gradient-to-r from-emerald-500 to-blue-600 text-white font-semibold py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 group"
               >
                 <span>Agenda una valoración personalizada</span>

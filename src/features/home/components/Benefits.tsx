@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { generateWhatsAppURL } from "@/utils/whatsapp";
 import { Target, Heart, Eye, Clock, Sparkles, CheckCircle, Zap, Shield, ArrowRight } from 'lucide-react';
 
@@ -42,6 +42,14 @@ const benefits: Benefit[] = [
     gradient: "from-cyan-400 to-teal-500",
   },
 ];
+
+const scrollToSection = (sectionId: string, event: MouseEvent<HTMLAnchorElement>) => {
+  event.preventDefault();
+  const section = document.getElementById(sectionId);
+  if (section) {
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+};
 
 export default function Benefits() {
   const [visible, setVisible] = useState<boolean[]>(() => benefits.map(() => false));
@@ -201,6 +209,7 @@ export default function Benefits() {
                 
                 <a
                   href="#contacto"
+                  onClick={(event) => scrollToSection('contacto', event)}
                   className="inline-flex items-center gap-2 text-gray-700 hover:text-emerald-600 font-medium transition-colors duration-300 text-sm md:text-base"
                 >
                   <span>O llámanos</span>

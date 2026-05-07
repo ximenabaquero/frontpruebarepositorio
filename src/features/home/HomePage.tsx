@@ -5,6 +5,7 @@ import Gallery from "@/features/home/components/Gallery";
 import Contact from "@/features/home/components/Contact";
 import Testimonials from "@/features/home/components/Testimonials";
 import Education from "@/features/home/components/Education";
+import { FAQSection } from "@/features/home/components/FAQSection";
 import MainLayout from "@/layouts/MainLayout";
 
 export default function HomePage() {
@@ -15,6 +16,7 @@ export default function HomePage() {
         <Services />
         <Benefits />
         <Education />
+        <FAQSection />
         <Testimonials />
         <Gallery />
         <Contact />
