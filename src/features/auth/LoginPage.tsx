@@ -41,11 +41,15 @@ export default function LoginPage() {
       const size = rand() * 100 + 50;
       const left = rand() * 100;
       const top = rand() * 100;
+      // Animación un poco más rápida (8s a 14s) para que se note el movimiento
+      const duration = rand() * 6 + 8; 
+      const delay = rand() * -20; // Delay negativo para que empiecen ya movidos
       return {
         width: `${size}px`,
         height: `${size}px`,
         left: `${left}%`,
         top: `${top}%`,
+        animation: `float-intense ${duration}s ease-in-out ${delay}s infinite alternate`,
       };
     });
   }, []);
@@ -59,14 +63,12 @@ export default function LoginPage() {
     setErrorMessage(null);
 
     try {
-      // 1️⃣ Pedir cookie CSRF
       await fetch(`${apiBaseUrl}/sanctum/csrf-cookie`, {
         credentials: "include",
       });
 
       const token = Cookies.get("XSRF-TOKEN") ?? "";
 
-      // 2️⃣ Login
       const res = await fetch(`${apiBaseUrl}/api/v1/login`, {
         method: "POST",
         credentials: "include",
@@ -88,7 +90,6 @@ export default function LoginPage() {
         return;
       }
 
-      // Guardar usuario completo (incluye role y status)
       setUser(data.user);
 
       const params = new URLSearchParams(window.location.search);
@@ -121,17 +122,26 @@ export default function LoginPage() {
         {floatStyles.map((style, i) => (
           <div
             key={i}
-            className="absolute rounded-full bg-emerald-300/10"
+            className="absolute rounded-full bg-emerald-300/15 shadow-inner"
             style={style}
           />
         ))}
       </div>
 
+      {/* Animación intensificada: Mayor rango de movimiento */}
+      <style jsx global>{`
+        @keyframes float-intense {
+          0% { transform: translate(0, 0) scale(1); }
+          33% { transform: translate(40px, -60px) scale(1.1); }
+          66% { transform: translate(-30px, 30px) scale(0.9); }
+          100% { transform: translate(20px, -20px) scale(1); }
+        }
+      `}</style>
+
       {/* Header/Navigation */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            {/* Logo */}
             <Link href="/" className="flex items-center gap-2.5 group">
               <div className="relative h-9 w-9">
                 <Image
@@ -148,7 +158,6 @@ export default function LoginPage() {
               </span>
             </Link>
 
-            {/* Volver a inicio */}
             <Link
               href="/"
               className="flex items-center gap-2 text-gray-600 hover:text-emerald-600 transition-colors"
@@ -160,11 +169,10 @@ export default function LoginPage() {
         </div>
       </header>
 
-      {/* Main Content - CENTRADO */}
+      {/* Main Content */}
       <main className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-8">
         <div className="w-full max-w-md">
-          <div className="bg-white/95 backdrop-blur-sm rounded-3xl border border-gray-100 shadow-2xl overflow-hidden">
-            {/* Gradient accent */}
+          <div className="relative bg-white/95 backdrop-blur-sm rounded-3xl border border-gray-100 shadow-2xl overflow-hidden">
             <div className="h-2 bg-gradient-to-r from-emerald-500 via-blue-600 to-emerald-500"></div>
 
             <div className="p-8 md:p-10">
@@ -185,13 +193,12 @@ export default function LoginPage() {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
-                {errorMessage ? (
+                {errorMessage && (
                   <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                     {errorMessage}
                   </div>
-                ) : null}
+                )}
 
-                {/* Email field */}
                 <ValidatedInput
                   id="email"
                   label="Correo Electrónico"
@@ -203,7 +210,6 @@ export default function LoginPage() {
                   required
                 />
 
-                {/* Password field */}
                 <ValidatedInput
                   id="password"
                   label="Contraseña"
@@ -216,7 +222,6 @@ export default function LoginPage() {
                   showToggle
                 />
 
-                {/* Submit button */}
                 <button
                   type="submit"
                   disabled={isLoading}
@@ -241,21 +246,17 @@ export default function LoginPage() {
               </form>
             </div>
           </div>
-
+          {/* ... Resto del componente idéntico ... */}
           <div className="mt-10 flex flex-col items-center">
-            {/* Texto + candado */}
             <div className="flex items-center gap-2">
               <Lock className="w-3 h-3 text-gray-500" />
               <p className="text-[11px] text-gray-400 uppercase tracking-wider font-semibold text-center">
                 Acceso Restringido a Personal Autorizado
               </p>
             </div>
-
-            {/* Línea horizontal */}
             <div className="mt-5 w-24 h-[1px] bg-gray-300"></div>
           </div>
 
-          {/* Security notice */}
           <div className="mt-4 px-3 py-2 bg-gradient-to-r from-emerald-50 to-blue-50 rounded-xl border border-emerald-100">
             <p className="text-[11px] leading-tight text-gray-500 text-center">
               Este sistema contiene información privada y protegida. El acceso
@@ -266,13 +267,10 @@ export default function LoginPage() {
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="py-3 border-t border-gray-100">
         <div className="container mx-auto px-4">
           <div className="text-center text-[11px] text-gray-400 leading-tight">
-            <p>
-              © {new Date().getFullYear()} Coldesthetic · Sistema de gestión
-            </p>
+            <p>© {new Date().getFullYear()} Coldesthetic · Sistema de gestión</p>
             <p>Uso autorizado exclusivo</p>
           </div>
         </div>
