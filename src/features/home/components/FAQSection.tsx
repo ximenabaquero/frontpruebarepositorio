@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type MouseEvent } from "react";
-import { ChevronDown, HelpCircle, MessageCircle, Sparkles } from "lucide-react";
+import { ChevronDown, HelpCircle, MessageCircle } from "lucide-react";
 
 const faqs = [
   {
@@ -114,23 +114,24 @@ export function FAQSection() {
         </div>
 
         {/* Banner inferior tipo CTA */}
-        <div className="mt-16 relative group">
-          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-blue-600/10 blur-xl rounded-3xl group-hover:opacity-100 transition-opacity" />
-          <div className="relative bg-white border border-blue-50 p-8 rounded-3xl text-center shadow-sm">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-blue-600 mb-4 shadow-lg shadow-blue-200">
-              <MessageCircle className="text-white w-6 h-6" />
+        <div className="mt-16">
+          <div className="relative overflow-hidden bg-gradient-to-br from-teal-50 via-emerald-50 to-blue-50 border border-teal-100/50 p-8 rounded-xl text-center shadow-sm hover:shadow-md transition-shadow">
+            {/* Decorative line */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-transparent via-teal-400 to-transparent" />
+            
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-white border border-teal-200 mb-4 shadow-sm">
+              <MessageCircle className="text-teal-600 w-7 h-7" />
             </div>
-            <h4 className="text-xl font-bold text-gray-900 mb-2">¿Aún tienes dudas técnicas?</h4>
-            <p className="text-gray-600 mb-6">
+            <h4 className="text-lg font-bold text-gray-900 mb-2">¿Aún tienes dudas técnicas?</h4>
+            <p className="text-gray-600 mb-6 max-w-sm mx-auto">
               Cada cuerpo es único. Agenda una valoración para un plan personalizado.
             </p>
             <a
               href="#contacto"
               onClick={(event) => scrollToSection('contacto', event)}
-              className="inline-flex items-center gap-2 text-blue-600 font-bold hover:text-emerald-500 transition-all duration-300 active:scale-95 group"
+              className="inline-block px-8 py-3 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 transition-colors shadow-sm hover:shadow-md"
             >
               Hablar con un especialista
-              <Sparkles className="w-4 h-4 transition-transform duration-300 group-hover:-translate-y-1" />
             </a>
           </div>
         </div>

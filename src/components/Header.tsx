@@ -146,18 +146,7 @@ export default function Header() {
                   </svg>
                   <span className="font-medium text-sm">Cerrar sesión</span>
                 </button>
-              ) : (
-                <Link
-                  href="/login"
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-all duration-200 font-medium text-sm"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                  <span>Iniciar sesión</span>
-                </Link>
-              )}
+              ) : null}
             </div>
           </div>
         )}
