@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+/* Font classes */
+@layer components {
+  .font-playfair {
+    font-family: var(--font-playfair);
+  }
+}
+
 /* Estilos base - Los colores ahora se manejan desde src/config/colors.ts */
 
 /* Hero animations */
