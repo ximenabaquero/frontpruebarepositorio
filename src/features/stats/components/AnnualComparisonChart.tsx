@@ -31,7 +31,7 @@ const fetcher = (url: string) =>
     headers: { Accept: "application/json" },
   })
     .then((res) => res.json())
-    .then((json) => json.data || json);
+    .then((json) => json.data || null);
 
 type Metric = "income" | "patients" | "sessions" | "procedures";
 
@@ -47,8 +47,8 @@ const METRICS: {
     key: "income",
     label: "Ingresos",
     icon: <BanknotesIcon className="w-4 h-4" />,
-    color: "#10b981",
-    lightColor: "#d1fae5",
+    color: "#8b5cf6",
+    lightColor: "#ede9fe",
     format: (v) =>
       new Intl.NumberFormat("es-CO", {
         style: "currency",
@@ -68,8 +68,8 @@ const METRICS: {
     key: "sessions",
     label: "Registros",
     icon: <ClipboardDocumentCheckIcon className="w-4 h-4" />,
-    color: "#8b5cf6",
-    lightColor: "#ede9fe",
+    color: "#10b981",
+    lightColor: "#d1fae5",
     format: (v) => `${v} reg.`,
   },
   {
@@ -110,12 +110,16 @@ function CustomTooltip({ active, payload, label, metric }: any) {
   );
 }
 
-export default function AnnualComparisonChart() {
+interface Props {
+  incomeRevealed: boolean;
+  onReveal: () => void;
+}
+
+export default function AnnualComparisonChart({ incomeRevealed, onReveal }: Props) {
   const [activeMetric, setActiveMetric] = useState<Metric>("patients");
   const { data, error, isLoading } = useSWR(endpoints.annualComparison, fetcher);
   const { user } = useAuth();
 
-  const [incomeRevealed, setIncomeRevealed] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [password, setPassword] = useState("");
   const [authError, setAuthError] = useState<string | null>(null);
@@ -150,7 +154,7 @@ export default function AnnualComparisonChart() {
         body: JSON.stringify({ email: user.email, password }),
       });
       if (!res.ok) { setAuthError("Contraseña incorrecta."); return; }
-      setIncomeRevealed(true);
+      onReveal();
       setActiveMetric("income");
       setShowModal(false);
     } catch {
@@ -163,8 +167,8 @@ export default function AnnualComparisonChart() {
   const metric = METRICS.find((m) => m.key === activeMetric)!;
 
   const chartData =
-    data?.months?.map((m: any, i: number) => ({
-      name: MONTH_ABBR[i],
+    data?.months?.map((m: any) => ({
+      name: MONTH_ABBR[(m.month ?? 1) - 1],
       value: m[activeMetric] ?? 0,
     })) ?? [];
 
@@ -228,7 +232,7 @@ export default function AnnualComparisonChart() {
         <div className="h-52 flex items-center justify-center">
           <p className="text-sm text-gray-400 italic">Cargando datos...</p>
         </div>
-      ) : error ? (
+      ) : error || !data ? (
         <div className="h-52 flex items-center justify-center">
           <p className="text-sm text-red-400">Error al cargar datos.</p>
         </div>
@@ -279,8 +283,8 @@ export default function AnnualComparisonChart() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4 border border-gray-100">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
-                <LockClosedIcon className="w-5 h-5 text-emerald-600" />
+              <div className="w-9 h-9 rounded-xl bg-violet-50 flex items-center justify-center shrink-0">
+                <LockClosedIcon className="w-5 h-5 text-violet-500" />
               </div>
               <div>
                 <p className="font-semibold text-gray-900 text-sm">Verificar identidad</p>
@@ -312,7 +316,7 @@ export default function AnnualComparisonChart() {
                 <button
                   type="submit"
                   disabled={authLoading || !password}
-                  className="flex-1 py-2 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="flex-1 py-2 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {authLoading ? "Verificando..." : "Confirmar"}
                 </button>
