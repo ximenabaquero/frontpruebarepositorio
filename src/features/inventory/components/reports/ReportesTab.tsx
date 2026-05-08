@@ -52,6 +52,8 @@ export default function ReportesTab({ products }: Props) {
 
   const [loadingSpend, setLoadingSpend] = useState(true);
   const [loadingHistory, setLoadingHistory] = useState(false);
+  const [spendError, setSpendError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
   const [month, setMonth] = useState<number | undefined>(undefined);
   const [year, setYear] = useState<number>(currentYear);
@@ -63,6 +65,7 @@ export default function ReportesTab({ products }: Props) {
   useEffect(() => {
     const load = async () => {
       setLoadingSpend(true);
+      setSpendError(false);
       try {
         const [cat, dist] = await Promise.all([
           getSpendByCategory({ month, year }),
@@ -70,14 +73,14 @@ export default function ReportesTab({ products }: Props) {
         ]);
         setCategoryData(cat);
         setDistributorData(dist);
-      } catch (e) {
-        console.error("Error cargando reportes:", e);
+      } catch {
+        setSpendError(true);
       } finally {
         setLoadingSpend(false);
       }
     };
     load();
-  }, [month, year]);
+  }, [month, year, retryCount]);
 
   // Cargar historial cuando cambia el producto
   useEffect(() => {
@@ -143,13 +146,25 @@ export default function ReportesTab({ products }: Props) {
       </div>
 
       {/* ── Gasto por categoría y distribuidor ─────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <SpendByCategoryChart data={categoryData} loading={loadingSpend} />
-        <SpendByDistributorChart
-          data={distributorData}
-          loading={loadingSpend}
-        />
-      </div>
+      {spendError ? (
+        <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <span>No se pudieron cargar los reportes. Verificá que el servidor esté activo y volvé a intentarlo.</span>
+          <button
+            onClick={() => setRetryCount((n) => n + 1)}
+            className="ml-auto underline hover:no-underline shrink-0"
+          >
+            Reintentar
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <SpendByCategoryChart data={categoryData} loading={loadingSpend} />
+          <SpendByDistributorChart
+            data={distributorData}
+            loading={loadingSpend}
+          />
+        </div>
+      )}
 
       {/* ── Histórico de precios ────────────────────────────────────────── */}
       <div className="flex flex-col gap-3">
