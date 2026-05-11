@@ -35,15 +35,15 @@ const services = [
 const contactInfo = [
   {
     icon: <Phone className="w-4 h-4" />,
-    text: "+57 (300) 143-4089",
-    href: "tel:+573001434089",
+    text: "+57 (300) 410-8199",
+    href: "tel:+573004108199",
   },
   {
     icon: <Mail className="w-4 h-4" />,
     text: "info@coldesthetic.com",
     href: "mailto:info@coldesthetic.com",
   },
-  { icon: <MapPin className="w-4 h-4" />, text: "Medellín, Colombia", href: "#" },
+  { icon: <MapPin className="w-4 h-4" />, text: "Bogotá, Colombia", href: "#" },
   {
     icon: <Clock className="w-4 h-4" />,
     text: "Lun-Vie: 9AM - 7PM | Sáb: 9AM - 2PM",
@@ -54,7 +54,7 @@ const contactInfo = [
 const socialLinks = [
   {
     icon: <MessageCircle className="w-5 h-5" />,
-    href: "https://wa.me/573001434089",
+    href: "https://wa.me/573004108199",
     color: "bg-gradient-to-br from-teal-400 to-cyan-500 hover:from-teal-500 hover:to-cyan-600",
     name: "WhatsApp",
   },
@@ -228,7 +228,7 @@ export default function Footer() {
                 </p>
               </div>
               <a
-                href="https://wa.me/573001434089"
+                href="https://wa.me/573004108199"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group inline-flex items-center gap-3 bg-gradient-to-r from-teal-400 to-cyan-500 text-white font-semibold py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"

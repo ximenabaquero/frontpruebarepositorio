@@ -114,7 +114,7 @@ const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
                 </div>
               </div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent tracking-tight">
-                {evaluation.user?.brand_name}
+                Cold Esthetic
               </h1>
             </div>
             <p className="ml-12 text-[10px] uppercase tracking-wider text-gray-400">

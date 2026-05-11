@@ -28,7 +28,7 @@ const InvoicePdf = forwardRef<HTMLDivElement, Props>(
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "32px" }}>
             <div>
               <p style={{ fontSize: "22px", fontWeight: 800, color: "#059669", marginBottom: "2px" }}>
-                {evaluation?.user?.brand_name ?? "Coldesthetic"}
+                Coldesthetic
               </p>
               <p style={{ fontSize: "10px", color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.1em" }}>
                 Realiza tus sueños de una forma segura

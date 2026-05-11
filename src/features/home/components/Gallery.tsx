@@ -113,7 +113,7 @@ export default function Gallery() {
               historia de éxito!
             </p>
             <a
-              href="https://wa.me/573001434089?text=Hola,%20quiero%20agendar%20mi%20valoración%20médica"
+              href="https://wa.me/573004108199?text=Hola,%20quiero%20agendar%20mi%20valoración%20médica"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-semibold px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
@@ -247,7 +247,7 @@ export default function Gallery() {
                 Agenda tu valoración médica y descubre el plan personalizado para tu transformación.
               </p>
               <a
-                href="https://wa.me/573001434089?text=Hola,%20quiero%20agendar%20mi%20valoración%20médica"
+                href="https://wa.me/573004108199?text=Hola,%20quiero%20agendar%20mi%20valoración%20médica"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-semibold px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"

@@ -7,6 +7,7 @@ import Testimonials from "@/features/home/components/Testimonials";
 import Education from "@/features/home/components/Education";
 import { FAQSection } from "@/features/home/components/FAQSection";
 import MainLayout from "@/layouts/MainLayout";
+import Footer from "@/components/Footer";
 
 export default function HomePage() {
   return (
@@ -21,6 +22,7 @@ export default function HomePage() {
         <Gallery />
         <Contact />
       </main>
+      <Footer />
     </MainLayout>
   );
 }

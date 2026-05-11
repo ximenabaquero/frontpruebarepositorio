@@ -16,15 +16,15 @@ function mulberry32(seed: number) {
 const socialLinks = [
   {
     name: 'WhatsApp',
-    href: 'https://wa.me/573001434089',
+    href: 'https://wa.me/573004108199',
     icon: <MessageCircle className="w-6 h-6 md:w-7 md:h-7" />,
     color: 'bg-gradient-to-br from-emerald-500 to-green-400',
-    description: '+57 (300) 143-4089',
+    description: '+57 (300) 410-8199',
     gradient: 'from-emerald-400 to-green-500'
   },
   {
     name: 'Teléfono',
-    href: 'tel:+573001434089',
+    href: 'tel:+573004108199',
     icon: <Phone className="w-6 h-6 md:w-7 md:h-7" />,
     color: 'bg-gradient-to-br from-teal-400 to-cyan-500',
     description: 'Llamada directa',
@@ -191,8 +191,8 @@ export default function Contact() {
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-900">Teléfono</h4>
-                    <a href="tel:+573001434089" className="text-gray-600 hover:text-teal-600 transition-colors">
-                      +57 (300) 143-4089
+                    <a href="tel:+573004108199" className="text-gray-600 hover:text-teal-600 transition-colors">
+                      +57 (300) 410-8199
                     </a>
                   </div>
                 </div>
@@ -288,7 +288,7 @@ export default function Contact() {
                   </a>
                   
                   <a
-                    href="tel:+573001434089"
+                    href="tel:+573004108199"
                     className="group w-full inline-flex items-center justify-center gap-3 bg-gradient-to-r from-teal-400 to-cyan-500 text-white font-semibold py-3 md:py-4 px-6 md:px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                   >
                     <Phone className="w-5 h-5 md:w-6 md:h-6" />

@@ -57,7 +57,7 @@ const HistoriaClinicaPdf = forwardRef<HTMLDivElement, Props>(
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "28px" }}>
             <div>
               <p style={{ fontSize: "20px", fontWeight: 800, color: "#111827", marginBottom: "2px" }}>
-                {evaluation.user?.brand_name ?? "Cold Esthetic"}
+                Cold Esthetic
               </p>
               <p style={{ fontSize: "9px", color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.1em" }}>
                 Historia Clínica — Documento confidencial
