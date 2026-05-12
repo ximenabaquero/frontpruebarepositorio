@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Header from "@/components/Header"; 
+import Footer from "@/components/Footer"; 
 import { AuthProvider } from "@/features/auth/AuthContext";
 
 export const metadata: Metadata = {
-  title: "Olga - Estética Médica Avanzada",
-  description:
-    "Lipólisis láser asistida. Procedimiento mínimamente invasivo para reducción de grasa localizada con tecnología médica certificada",
+  title: "Olga",
+  description: "Olga es una plataforma de coordinación de cuidados...",
   icons: {
-    icon: { url: "/a-Olga.png", type: "image/png" },
-    apple: "/a-Olga.png",
-    shortcut: "/a-Olga.png",
+    icon: "/a-Olga.png",
   },
 };
 
@@ -23,13 +22,14 @@ export default function RootLayout({
       <head>
         <link rel="stylesheet" href="https://use.typekit.net/jaq6hps.css" />
       </head>
-      <body>
-        {/* ¿TIENES HEADER Y FOOTER AQUÍ? */}
-        {/* <Header /> */}
+      <body className="antialiased">
         <AuthProvider>
-          <main className="min-h-screen">{children}</main>
+          <Header />
+          <main className="min-h-screen">
+            {children}
+          </main>
+          <Footer />
         </AuthProvider>
-        {/* <Footer /> */}
       </body>
     </html>
   );
