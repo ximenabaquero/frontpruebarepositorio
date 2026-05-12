@@ -32,48 +32,61 @@ const SolutionSection = () => {
   return (
     <section 
       id="solution" 
-      className="min-h-screen flex flex-col justify-center py-20 px-10 max-w-[1200px] mx-auto relative"
+      className="py-24 px-6 max-w-7xl mx-auto relative overflow-hidden"
     >
       {/* Etiqueta de sección */}
-      <div className="text-[0.7rem] font-bold tracking-[3px] uppercase text-[#0FB888] mb-[14px]">
+      <div className="inline-block px-3 py-1 bg-[#0FB888]/10 text-[#0FB888] rounded-full text-[10px] font-bold tracking-[2px] uppercase mb-6">
         La solución
       </div>
 
       {/* Título */}
-      <h2 className="font-['Instrument_Serif',serif] text-[clamp(2rem,4vw,3rem)] text-[#0A1F1A] mb-[10px] font-normal leading-tight">
-        OLGA reemplaza el silencio con <em className="text-[#0FB888] italic">coordinación en tiempo real</em>
+      <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl text-[#0A1F1A] mb-8 font-light leading-tight">
+        OLGA reemplaza el silencio con <br />
+        <em className="text-[#0FB888] italic">coordinación en tiempo real</em>
       </h2>
 
-      <p className="text-[#1F3A33] text-[1rem] max-w-[720px] leading-[1.7] mb-11">
+      <p className="text-[#4A6B62] text-lg md:text-xl max-w-3xl leading-relaxed font-light mb-20">
         Un flujo donde cada servicio es solicitado, autorizado, agendado, ejecutado, verificado y visible — todo dentro de una sola plataforma.
       </p>
 
-      {/* Contenedor del Flujo */}
-      <div className="relative flex flex-col gap-0">
-        {steps.map((step, index) => (
-          <div key={index} className="flex items-start gap-[22px] relative py-[22px]">
-            
-            {/* Círculo con número */}
-            <div className="w-10 h-10 min-w-[40px] rounded-full flex items-center justify-center text-[0.9rem] font-bold text-[#FAFDFB] bg-[#0FB888] relative z-10 font-['DM_Sans',sans-serif]">
-              {step.number}
-            </div>
+      {/* Contenedor del Flujo Horizontal */}
+      <div className="relative">
+        {/* Línea de fondo (Desktop) */}
+        <div className="absolute top-6 left-0 w-full h-[2px] bg-slate-100 hidden lg:block z-0" />
 
-            {/* Línea conectora (No se muestra en el último paso) */}
-            {index !== steps.length - 1 && (
-              <div className="absolute left-[19px] top-[46px] w-[2px] h-[calc(100%-24px)] bg-gradient-to-b from-[#0FB888] to-[#0FB888]/[0.22]" />
-            )}
+        <div className="flex flex-col lg:flex-row gap-12 lg:gap-6 relative z-10 overflow-x-auto pb-8 scrollbar-hide">
+          {steps.map((step, index) => (
+            <div key={index} className="flex-1 min-w-[280px] relative group">
+              
+              {/* Círculo con número y Línea conectora interna */}
+              <div className="flex items-center mb-8">
+                <div className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold text-white bg-[#0FB888] shadow-lg shadow-[#0FB888]/20 group-hover:scale-110 transition-transform duration-300">
+                  {step.number}
+                </div>
+                {/* Línea que conecta al siguiente (Solo visible en desktop) */}
+                {index !== steps.length - 1 && (
+                  <div className="flex-1 h-[2px] bg-gradient-to-r from-[#0FB888] to-slate-100 hidden lg:block" />
+                )}
+              </div>
 
-            {/* Contenido del paso */}
-            <div className="pt-2">
-              <h4 className="text-[#0A1F1A] text-[1rem] font-semibold mb-1.5">
-                {step.title}
-              </h4>
-              <p className="text-[#4A6B62] text-[0.86rem] leading-[1.6]">
-                {step.desc}
-              </p>
+              {/* Contenido del paso */}
+              <div className="pr-4">
+                <h4 className="text-[#0A1F1A] text-xl font-bold mb-4 tracking-tight">
+                  {step.title}
+                </h4>
+                <div className="w-10 h-1 bg-[#0FB888]/20 mb-4 rounded-full" />
+                <p className="text-[#4A6B62] text-sm leading-relaxed font-normal">
+                  {step.desc}
+                </p>
+              </div>
+
+              {/* Línea vertical para móviles */}
+              {index !== steps.length - 1 && (
+                <div className="absolute left-6 top-12 w-[2px] h-12 bg-gradient-to-b from-[#0FB888] to-transparent lg:hidden" />
+              )}
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   );
