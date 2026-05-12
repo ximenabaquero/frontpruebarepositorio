@@ -101,7 +101,7 @@ export default function Benefits() {
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 md:mb-6">
             <span className="text-gray-900">¿Por qué elegir</span>{' '}
             <span className="bg-gradient-to-r from-emerald-500 to-blue-600 bg-clip-text text-transparent block sm:inline">
-              Coldesthetic?
+              Olga?
             </span>
           </h2>
           

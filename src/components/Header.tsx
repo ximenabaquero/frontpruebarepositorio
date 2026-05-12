@@ -42,8 +42,8 @@ export default function Header() {
             <Link href="/" className="flex items-center gap-2.5 group">
               <div className="relative h-9 w-9">
                 <Image
-                  src="/coldestheticlogo.png"
-                  alt="Coldesthetic"
+                  src="/a-Olga.png"
+                  alt="Olga"
                   width={32}
                   height={32}
                   className="h-full w-full object-contain"
@@ -51,7 +51,7 @@ export default function Header() {
                 />
               </div>
               <span className="text-lg font-bold bg-gradient-to-r from-emerald-500 to-blue-500 bg-clip-text text-transparent tracking-tight">
-                Coldesthetic
+                Olga
               </span>
             </Link>
 

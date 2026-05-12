@@ -104,8 +104,8 @@ const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
               <div className="h-10 w-10 rounded-full bg-gradient-to-br from-emerald-400 to-blue-500 p-[2px] shadow-sm">
                 <div className="h-full w-full rounded-full bg-white flex items-center justify-center overflow-hidden">
                   <Image
-                    src="/coldestheticlogo.png"
-                    alt="Coldesthetic"
+                    src="/a-Olga.png"
+                    alt="Olga"
                     width={32}
                     height={32}
                     className="h-full w-full object-contain"
@@ -114,7 +114,7 @@ const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
                 </div>
               </div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent tracking-tight">
-                Cold Esthetic
+                Olga
               </h1>
             </div>
             <p className="ml-12 text-[10px] uppercase tracking-wider text-gray-400">
@@ -368,7 +368,7 @@ const ClinicalRecordView = forwardRef<HTMLDivElement, Props>(
         )}
 
         <div className="border-t border-gray-200 text-center text-[10px] text-gray-400 py-4">
-          Coldesthetic - Historia Clinica (c) {currentYear} | Documento
+          Olga - Historia Clinica (c) {currentYear} | Documento
           confidencial
         </div>
       </div>

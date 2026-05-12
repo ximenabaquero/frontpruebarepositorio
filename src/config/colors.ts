@@ -1,4 +1,4 @@
-// Configuración de colores para Coldesthetic
+// Configuración de colores para Olga
 // Puedes cambiar estos colores directamente aquí sin tocar globals.css
 
 export const colors = {

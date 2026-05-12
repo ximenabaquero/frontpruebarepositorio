@@ -113,7 +113,7 @@ export default function Hero() {
               {/* Main image */}
               <Image
                 src="/mainfigurecoldesthetic.png"
-                alt="Coldesthetic - Lipólisis láser sin cirugía"
+                alt="Olga - Lipólisis láser sin cirugía"
                 width={900}
                 height={900}
                 className="w-full h-auto max-h-[85vh] object-contain drop-shadow-xl"

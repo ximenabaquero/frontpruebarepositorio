@@ -3,13 +3,13 @@ import "./globals.css";
 import { AuthProvider } from "@/features/auth/AuthContext";
 
 export const metadata: Metadata = {
-  title: "Coldesthetic - Estética Médica Avanzada",
+  title: "Olga - Estética Médica Avanzada",
   description:
     "Lipólisis láser asistida. Procedimiento mínimamente invasivo para reducción de grasa localizada con tecnología médica certificada",
   icons: {
-    icon: { url: "/coldestheticlogo.png", type: "image/png" },
-    apple: "/coldestheticlogo.png",
-    shortcut: "/coldestheticlogo.png",
+    icon: { url: "/a-Olga.png", type: "image/png" },
+    apple: "/a-Olga.png",
+    shortcut: "/a-Olga.png",
   },
 };
 
@@ -20,6 +20,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
+      <head>
+        <link rel="stylesheet" href="https://use.typekit.net/jaq6hps.css" />
+      </head>
       <body>
         {/* ¿TIENES HEADER Y FOOTER AQUÍ? */}
         {/* <Header /> */}

@@ -103,8 +103,8 @@ export default function Footer() {
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 flex items-center justify-center flex-shrink-0">
                 <Image
-                  src="/coldestheticlogo.png"
-                  alt="Coldesthetic"
+                  src="/a-Olga.png"
+                  alt="Olga"
                   width={48}
                   height={48}
                   className="w-full h-full object-contain"
@@ -112,7 +112,7 @@ export default function Footer() {
               </div>
               <div>
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-teal-300 to-cyan-300 bg-clip-text text-transparent">
-                  Coldesthetic
+                  Olga
                 </h2>
                 <p className="text-sm text-gray-300">
                   Estética Médica Avanzada
@@ -245,7 +245,7 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-8 border-t border-gray-700">
           <div className="text-center md:text-left">
             <p className="text-gray-400 text-sm">
-              © {currentYear} Coldesthetic. Todos los derechos reservados.
+              © {currentYear} Olga. Todos los derechos reservados.
             </p>
             <p className="text-gray-500 text-xs mt-1">
               Diseñado con <Heart className="w-3 h-3 inline text-emerald-400" />{" "}

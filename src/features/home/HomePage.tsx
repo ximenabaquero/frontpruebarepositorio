@@ -1,28 +1,5 @@
-import Hero from "@/features/home/components/Hero";
-import Services from "@/features/home/components/Services";
-import Benefits from "@/features/home/components/Benefits";
-import Gallery from "@/features/home/components/Gallery";
-import Contact from "@/features/home/components/Contact";
-import Testimonials from "@/features/home/components/Testimonials";
-import Education from "@/features/home/components/Education";
-import { FAQSection } from "@/features/home/components/FAQSection";
-import MainLayout from "@/layouts/MainLayout";
-import Footer from "@/components/Footer";
+import SalesPage from "@/features/home/SalesPage";
 
 export default function HomePage() {
-  return (
-    <MainLayout>
-      <main className="min-h-screen">
-        <Hero />
-        <Services />
-        <Benefits />
-        <Education />
-        <FAQSection />
-        <Testimonials />
-        <Gallery />
-        <Contact />
-      </main>
-      <Footer />
-    </MainLayout>
-  );
+  return <SalesPage />;
 }

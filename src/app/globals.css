@@ -5,6 +5,9 @@
   .font-playfair {
     font-family: var(--font-playfair);
   }
+  .font-reross {
+    font-family: "reross-quadratic", sans-serif;
+  }
 }
 
 /* Estilos base - Los colores ahora se manejan desde src/config/colors.ts */

@@ -35,7 +35,7 @@ const socialLinks = [
     href: 'https://www.instagram.com/coldesthetic/',
     icon: <Instagram className="w-6 h-6 md:w-7 md:h-7" />,
     color: 'bg-gradient-to-br from-cyan-400 to-teal-500',
-    description: '@coldesthetic',
+    description: '@olga',
     gradient: 'from-cyan-400 to-teal-500'
   }
 ];

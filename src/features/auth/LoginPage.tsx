@@ -93,7 +93,7 @@ export default function LoginPage() {
       setUser(data.user);
 
       const params = new URLSearchParams(window.location.search);
-      const next = params.get("next") || "/register-patient";
+      const next = params.get("next") || "/dashboard";
       router.push(next);
     } catch (error) {
       setErrorMessage("Error de conexión con el servidor.");
@@ -128,8 +128,7 @@ export default function LoginPage() {
         ))}
       </div>
 
-      {/* Animación intensificada: Mayor rango de movimiento */}
-      <style jsx global>{`
+      <style>{`
         @keyframes float-intense {
           0% { transform: translate(0, 0) scale(1); }
           33% { transform: translate(40px, -60px) scale(1.1); }
@@ -145,8 +144,8 @@ export default function LoginPage() {
             <Link href="/" className="flex items-center gap-2.5 group">
               <div className="relative h-9 w-9">
                 <Image
-                  src="/coldestheticlogo.png"
-                  alt="Coldesthetic"
+                  src="/a-Olga.png"
+                  alt="Olga"
                   width={32}
                   height={32}
                   className="h-full w-full object-contain"
@@ -154,7 +153,7 @@ export default function LoginPage() {
                 />
               </div>
               <span className="text-lg font-bold bg-gradient-to-r from-emerald-500 to-blue-500 bg-clip-text text-transparent tracking-tight">
-                Coldesthetic
+                Olga
               </span>
             </Link>
 
@@ -170,13 +169,30 @@ export default function LoginPage() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-8">
-        <div className="w-full max-w-md">
+      <main className="flex-1 flex flex-col justify-center px-4 sm:px-6 lg:px-8 py-8">
+        <div className="w-full max-w-md mx-auto">
           <div className="relative bg-white/95 backdrop-blur-sm rounded-3xl border border-gray-100 shadow-2xl overflow-hidden">
             <div className="h-2 bg-gradient-to-r from-emerald-500 via-blue-600 to-emerald-500"></div>
 
             <div className="p-8 md:p-10">
               <div className="text-center mb-8">
+                <div className="flex justify-center mb-4">
+                  <div className="relative w-24 h-24">
+                    <Image
+                      src="/a-Olga.png"
+                      alt="Olga"
+                      width={96}
+                      height={96}
+                      className="w-full h-full object-contain drop-shadow-md"
+                      priority
+                    />
+                  </div>
+                </div>
+
+                <h2 className="font-reross text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+                  Acceso al Sistema
+                </h2>
+
                 <div className="inline-flex items-center gap-2 bg-emerald-50 rounded-full px-4 py-2 mb-4">
                   <Shield className="w-4 h-4 text-emerald-500" />
                   <span className="text-sm font-semibold text-emerald-700">
@@ -184,12 +200,24 @@ export default function LoginPage() {
                   </span>
                 </div>
 
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-                  Acceso al Sistema
-                </h2>
-                <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1">
-                  Ingrese sus credenciales para continuar
-                </p>
+                {/* Multi-pagador */}
+                <div className="w-full mb-4">
+                  <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-2">Selecciona tu organización</p>
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {["EPS Sura", "Compensar", "Nueva EPS", "Salud Total"].map((payer, idx) => (
+                      <span
+                        key={payer}
+                        className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors cursor-default ${
+                          idx === 0
+                            ? "bg-emerald-600 text-white border-emerald-600"
+                            : "border-gray-200 bg-gray-50 text-gray-500"
+                        }`}
+                      >
+                        {payer}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -270,7 +298,7 @@ export default function LoginPage() {
       <footer className="py-3 border-t border-gray-100">
         <div className="container mx-auto px-4">
           <div className="text-center text-[11px] text-gray-400 leading-tight">
-            <p>© {new Date().getFullYear()} Coldesthetic · Sistema de gestión</p>
+            <p>© {new Date().getFullYear()} Olga · Sistema de gestión</p>
             <p>Uso autorizado exclusivo</p>
           </div>
         </div>
