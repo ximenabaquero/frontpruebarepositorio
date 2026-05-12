@@ -21,13 +21,14 @@ const Benefit = ({ icon, title, desc }: { icon: string, title: string, desc: str
 const OlgaPlatform = () => {
   return (
     <div className="bg-white">
-      {/* PLATFORM SECTION */}
       <section className="py-24 px-6 max-w-7xl mx-auto" id="platform">
-        <div className="inline-block px-3 py-1 rounded-full bg-[#0FB888]/10 text-[#0FB888] text-[0.7rem] font-black uppercase tracking-[0.3em] mb-6">
+        <div className="inline-block text-[#0FB888] text-[0.7rem] font-bold tracking-[3px] uppercase mb-6">
           La plataforma
         </div>
-        <h2 className="text-5xl md:text-6xl font-serif italic text-gray-900 mb-20 leading-[1.1]">
-          Lo que ve cada actor en <span className="text-[#0FB888] not-italic font-sans uppercase tracking-tighter">OLGA</span>
+        
+        {/* Aplicando el estilo de fuente solicitado */}
+        <h2 className="font-['Instrument_Serif',serif] text-[clamp(2.5rem,5vw,4.5rem)] text-[#0A1F1A] mb-20 font-normal leading-tight">
+          Lo que ve cada actor en <em className="text-[#0FB888] italic">OLGA</em>
         </h2>
 
         {/* PAYER BLOCK */}
@@ -38,7 +39,7 @@ const OlgaPlatform = () => {
             </div>
             <div>
               <div className="text-xl font-bold text-[#0A1F1A]">Asegurador (EPS / Prepagada)</div>
-              <div className="text-[#4A6B62] text-sm">Verificación en tiempo real · Eliminación de fraude · Visibilidad poblacional</div>
+              <div className="text-[#4A6B62] text-sm font-medium">Verificación en tiempo real · Eliminación de fraude · Visibilidad poblacional</div>
             </div>
           </div>
 
@@ -111,7 +112,7 @@ const OlgaPlatform = () => {
             </div>
             <div>
               <div className="text-xl font-bold text-[#0A1F1A]">Hospital / Clínica</div>
-              <div className="text-[#4A6B62] text-sm">Visibilidad post-alta · Giro cama · Continuidad del cuidado</div>
+              <div className="text-[#4A6B62] text-sm font-medium">Visibilidad post-alta · Giro cama · Continuidad del cuidado</div>
             </div>
           </div>
           <div className="grid lg:grid-cols-12 gap-12 items-start">
@@ -166,10 +167,10 @@ const OlgaPlatform = () => {
         {/* PROVIDER BLOCK */}
         <div className="mb-32 bg-[#F0FBF6] rounded-[3rem] p-10 md:p-16 border border-[#0FB888]/10">
           <div className="flex items-center gap-5 mb-12">
-            <div className="w-14 h-14 rounded-2xl bg-[#0FB888] text-white flex items-center justify-center"><Ico id="i-stethoscope" className="w-7 h-7" /></div>
+            <div className="w-14 h-14 rounded-2xl bg-[#0FB888] text-white flex items-center justify-center shadow-lg shadow-[#0FB888]/20"><Ico id="i-stethoscope" className="w-7 h-7" /></div>
             <div>
               <div className="text-xl font-bold text-[#0A1F1A]">Prestador Extramural (IPS Domiciliaria)</div>
-              <div className="text-[#4A6B62] text-sm">Dashboard de operaciones + App móvil para profesionales en campo</div>
+              <div className="text-[#4A6B62] text-sm font-medium">Operaciones + App móvil para campo</div>
             </div>
           </div>
           
@@ -180,28 +181,24 @@ const OlgaPlatform = () => {
                 <div className="bg-white/5 p-4 rounded-xl border border-white/10">
                   <div className="text-[#0FB888] text-[9px] font-bold uppercase mb-1">En campo hoy</div>
                   <div className="text-xl font-bold text-white leading-none">24</div>
-                  <div className="text-[9px] text-white/30 mt-1 leading-tight">profesionales activos</div>
                 </div>
                 <div className="bg-white/5 p-4 rounded-xl border border-white/10">
                   <div className="text-indigo-400 text-[9px] font-bold uppercase mb-1">Visitas</div>
                   <div className="text-xl font-bold text-white leading-none">87</div>
-                  <div className="text-[9px] text-white/30 mt-1 leading-tight">programadas — 52 completadas</div>
                   <div className="h-1 bg-white/10 rounded-full mt-3 overflow-hidden"><div className="h-full bg-teal-400 w-[60%]" /></div>
                 </div>
                 <div className="bg-white/5 p-4 rounded-xl border border-white/10">
                   <div className="text-orange-400 text-[9px] font-bold uppercase mb-1">Compliance</div>
                   <div className="text-xl font-bold text-white leading-none">94%</div>
-                  <div className="text-[9px] text-white/30 mt-1 leading-tight">GPS verificado a tiempo</div>
                 </div>
                 <div className="bg-white/5 p-4 rounded-xl border border-white/10">
                   <div className="text-[#0FB888] text-[9px] font-bold uppercase mb-1">Score</div>
                   <div className="text-xl font-bold text-white leading-none">4.7</div>
-                  <div className="text-[9px] text-white/30 mt-1 leading-tight">satisfacción paciente</div>
                 </div>
               </div>
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="bg-white/5 p-5 rounded-2xl border border-white/10">
-                  <div className="text-white/30 text-[9px] font-black uppercase mb-4">Estado del equipo</div>
+                  <div className="text-white/30 text-[9px] font-black uppercase mb-4 text-center">Estado del equipo</div>
                   <ul className="text-[10px] text-white/70 space-y-2.5">
                     <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-[#0FB888] shadow-[0_0_6px_#0FB888]"/> Sandra M. — En ruta visita 3/5</li>
                     <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-[#0FB888] shadow-[0_0_6px_#0FB888]"/> Jorge L. — En domicilio (GPS)</li>
@@ -209,11 +206,10 @@ const OlgaPlatform = () => {
                   </ul>
                 </div>
                 <div className="bg-white/5 p-5 rounded-2xl border border-white/10 text-white/70">
-                  <div className="text-white/30 text-[9px] font-black uppercase mb-4">Facturación</div>
+                  <div className="text-white/30 text-[9px] font-black uppercase mb-4 text-center">Facturación</div>
                   <ul className="text-[10px] space-y-2.5">
-                    <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-[#0FB888]"/> 142 servicios listos para cobrar</li>
+                    <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-[#0FB888]"/> 142 servicios listos</li>
                     <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-[#0FB888]"/> $18.4M COP facturable</li>
-                    <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-[#0FB888]"/> 0 rechazados — 100% verificado</li>
                   </ul>
                 </div>
               </div>
@@ -221,61 +217,12 @@ const OlgaPlatform = () => {
             <div className="lg:col-span-5 space-y-6">
               <Benefit icon="i-smartphone" title="Gestión centralizada" desc="Todo su equipo visible en una pantalla. Quién está dónde, qué falta, qué va retrasado." />
               <Benefit icon="i-dollar" title="Facturación sin fricción" desc="Cada servicio tiene evidencia verificable. Cobren todo lo que prestan." />
-              <Benefit icon="i-pin" title="Bajo costo de adquisición" desc="Reciban pacientes desde la plataforma sin invertir en marketing ni relacionamiento." />
-              <Benefit icon="i-star" title="Reputación medible" desc="Score de calidad visible para aseguradores. Los mejores prestadores ganan más pacientes." />
-            </div>
-          </div>
-
-          <div className="text-[#0FB888] text-[0.65rem] font-black uppercase tracking-[0.3em] mb-12 mt-20 text-center">App del profesional en campo</div>
-          <div className="flex flex-wrap justify-center gap-8 md:gap-16">
-            <div className="w-[260px] h-[480px] bg-[#0A1F1A] rounded-[3rem] border-[8px] border-[#1f3a33] p-6 shadow-2xl flex flex-col relative overflow-hidden">
-               <div className="text-white text-xs font-bold mb-6">Visitas de hoy</div>
-               <div className="bg-white/5 p-4 rounded-2xl mb-3">
-                 <div className="flex justify-between text-[11px] text-white font-bold"><span>María García</span> <span className="text-[#0FB888]">9:00 AM</span></div>
-                 <div className="text-[9px] text-white/30 mt-1">Cra 45 #32-12</div>
-               </div>
-               <div className="bg-white/10 p-4 rounded-2xl mb-3 border border-[#0FB888]/40 shadow-lg shadow-[#0FB888]/10 ring-1 ring-[#0FB888]/20">
-                 <div className="flex justify-between text-[11px] text-white font-bold"><span>Carlos Ruiz</span> <span className="text-orange-400 animate-pulse uppercase">Ahora</span></div>
-                 <div className="text-[9px] text-white/30 mt-1">Cll 52 #28-45</div>
-                 <button className="w-full mt-4 bg-[#0FB888] text-white text-[10px] font-bold py-2.5 rounded-xl flex items-center justify-center gap-2">
-                   Iniciar Visita <Ico id="i-arrow-right" className="w-3 h-3" />
-                 </button>
-               </div>
-               <div className="bg-white/5 p-4 rounded-2xl opacity-40">
-                 <div className="flex justify-between text-[11px] text-white font-bold"><span>Ana Pérez</span> <span className="text-white/30">2:30 PM</span></div>
-               </div>
-            </div>
-
-            <div className="w-[260px] h-[480px] bg-white rounded-[3rem] border-[8px] border-[#e2f0e9] p-6 shadow-2xl flex flex-col relative overflow-hidden mt-8 md:mt-16">
-              <div className="text-[#0A1F1A] text-xs font-bold mb-4">Visita activa — Carlos Ruiz</div>
-              <div className="bg-[#0FB888]/10 p-3 rounded-2xl flex items-center gap-2 mb-4 text-[#0FB888] font-bold text-[10px]">
-                <Ico id="i-check" className="w-3.5 h-3.5" /> GPS Verificado
-              </div>
-              <div className="bg-[#0A1F1A]/[0.03] p-4 rounded-2xl mb-4">
-                 <div className="text-[9px] font-black text-gray-400 uppercase mb-3">Signos vitales</div>
-                 <div className="flex justify-between text-center">
-                    <div><div className="text-xs font-bold text-[#0A1F1A]">128/82</div><div className="text-[8px] opacity-40 font-bold uppercase">PA</div></div>
-                    <div><div className="text-xs font-bold text-[#0A1F1A]">72</div><div className="text-[8px] opacity-40 font-bold uppercase">FC</div></div>
-                    <div><div className="text-xs font-bold text-[#0FB888]">96%</div><div className="text-[8px] opacity-40 font-bold uppercase">SpO2</div></div>
-                 </div>
-              </div>
-              <div className="bg-[#0A1F1A]/[0.02] p-4 rounded-2xl mb-6">
-                <div className="text-[9px] font-black text-gray-400 uppercase mb-2">Notas clínicas</div>
-                <div className="h-4 bg-black/[0.05] rounded-full w-3/4 mb-1" />
-                <div className="h-4 bg-black/[0.05] rounded-full w-1/2" />
-              </div>
-              <div className="mt-auto space-y-2">
-                <button className="w-full bg-[#0A1F1A] text-white text-[10px] font-bold py-3 rounded-2xl flex items-center justify-center gap-2">
-                  Capturar Firma <Ico id="i-pencil" className="w-3 h-3" />
-                </button>
-                <button className="w-full border border-black/10 text-[#0A1F1A] text-[10px] font-bold py-3 rounded-2xl">
-                  Completar Visita
-                </button>
-              </div>
+              <Benefit icon="i-pin" title="Bajo costo de adquisición" desc="Reciban pacientes desde la plataforma sin invertir en marketing." />
+              <Benefit icon="i-star" title="Reputación medible" desc="Score de calidad visible para aseguradores." />
             </div>
           </div>
         </div>
-
+    
         {/* PATIENT BLOCK */}
         <div className="pb-24">
           <div className="flex items-center gap-5 mb-10">
@@ -322,11 +269,8 @@ const OlgaPlatform = () => {
           </div>
         </div>
       </section>
-
-
     </div>
   );
 };
-
 
 export default OlgaPlatform;

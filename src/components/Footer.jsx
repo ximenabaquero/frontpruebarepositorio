@@ -1,74 +1,64 @@
 "use client";
 
 import {
-  Heart,
+  Shield,
   MapPin,
-  Phone,
   Mail,
-  Clock,
-  MessageCircle,
-  Facebook,
-  Instagram,
+  Linkedin,
   ArrowUp,
+  Activity,
+  Globe,
+  ExternalLink,
 } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
 
 const quickLinks = [
-  { name: "Inicio", href: "#inicio" },
-  { name: "Servicios", href: "#servicios" },
-  { name: "Resultados", href: "#resultados" },
-  { name: "Testimonios", href: "#testimonios" },
-  { name: "Educación", href: "#educacion" },
-  { name: "Contacto", href: "#contacto" },
+  { name: "Plataforma", href: "#platform" },
+  { name: "Fase 2", href: "#future" },
+  { name: "Contacto", href: "#contact" },
+  { name: "OLGA Healthtech", href: "https://olga.health" },
 ];
 
-const services = [
-  { name: "Lipólisis Láser" },
-  { name: "Tensamax" },
-  { name: "Ácido Hialurónico" },
-  { name: "Hilos Tensores" },
-  { name: "Plasma Rico en Plaquetas" },
-  { name: "Botox" },
+const olgaServices = [
+  { name: "Verificación GPS & Antifraude" },
+  { name: "Continuidad del Cuidado" },
+  { name: "Evidencia Clínica Digital" },
+  { name: "Gestión de Pacientes Post-Alta" },
+  { name: "Dashboard de Operaciones IPS" },
+  { name: "Infraestructura Hospital at Home" },
 ];
 
 const contactInfo = [
   {
-    icon: <Phone className="w-4 h-4" />,
-    text: "+57 (300) 410-8199",
-    href: "tel:+573004108199",
-  },
-  {
     icon: <Mail className="w-4 h-4" />,
-    text: "info@coldesthetic.com",
-    href: "mailto:info@coldesthetic.com",
+    text: "camilocortesu@gmail.com",
+    href: "mailto:camilocortesu@gmail.com",
   },
-  { icon: <MapPin className="w-4 h-4" />, text: "Bogotá, Colombia", href: "#" },
-  {
-    icon: <Clock className="w-4 h-4" />,
-    text: "Lun-Vie: 9AM - 7PM | Sáb: 9AM - 2PM",
-    href: "#",
+  { 
+    icon: <Globe className="w-4 h-4" />, 
+    text: "www.olga.health", 
+    href: "https://olga.health" 
+  },
+  { 
+    icon: <MapPin className="w-4 h-4" />, 
+    text: "Bogotá, Colombia", 
+    href: "#" 
   },
 ];
 
 const socialLinks = [
   {
-    icon: <MessageCircle className="w-5 h-5" />,
-    href: "https://wa.me/573004108199",
-    color: "bg-gradient-to-br from-teal-400 to-cyan-500 hover:from-teal-500 hover:to-cyan-600",
-    name: "WhatsApp",
+    icon: <Linkedin className="w-5 h-5" />,
+    href: "https://www.linkedin.com/company/olga-healthtech",
+    color: "bg-[#0FB888] hover:bg-[#12d19b]",
+    name: "OLGA LinkedIn",
   },
   {
-    icon: <Facebook className="w-5 h-5" />,
-    href: "https://facebook.com/coldesthetic",
-    color: "bg-gradient-to-br from-cyan-400 to-teal-500 hover:from-cyan-500 hover:to-teal-600",
-    name: "Facebook",
-  },
-  {
-    icon: <Instagram className="w-5 h-5" />,
-    href: "https://www.instagram.com/coldesthetic",
-    color: "bg-gradient-to-br from-teal-400 to-cyan-500 hover:from-teal-500 hover:to-cyan-600",
-    name: "Instagram",
+    icon: <Activity className="w-5 h-5" />,
+    href: "https://www.linkedin.com/in/camilocortesu/",
+    color: "bg-[#0A1F1A] hover:bg-[#1A2E29] border border-white/10",
+    name: "Founder LinkedIn",
   },
 ];
 
@@ -80,60 +70,58 @@ export default function Footer() {
   };
 
   return (
-    <footer className="relative bg-gradient-to-br from-gray-900 to-gray-800 text-white overflow-hidden">
-      {/* Background pattern */}
-      <div className="absolute inset-0 opacity-5">
+    <footer className="relative bg-[#0A1F1A] text-white overflow-hidden border-t border-white/5">
+      {/* Patrón de fondo sutil */}
+      <div className="absolute inset-0 opacity-[0.03]">
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
-            backgroundSize: "40px 40px",
+            backgroundImage: `radial-gradient(circle at 1px 1px, #0FB888 1px, transparent 0)`,
+            backgroundSize: "32px 32px",
           }}
         />
       </div>
 
-      {/* Top gradient accent */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-400 via-cyan-500 to-teal-400"></div>
+      {/* Acento superior esmeralda */}
+      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#0FB888] to-transparent"></div>
 
-      {/* Main footer content */}
-      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 md:gap-12 mb-10 md:mb-16">
+      <div className="relative z-10 container mx-auto px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 mb-16">
+          
           {/* Brand & Description */}
-          <div className="space-y-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 flex items-center justify-center flex-shrink-0">
+          <div className="space-y-8">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 flex items-center justify-center flex-shrink-0 bg-white rounded-xl p-2">
                 <Image
                   src="/a-Olga.png"
-                  alt="Olga"
-                  width={48}
-                  height={48}
+                  alt="OLGA Logo"
+                  width={40}
+                  height={40}
                   className="w-full h-full object-contain"
                 />
               </div>
               <div>
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-teal-300 to-cyan-300 bg-clip-text text-transparent">
-                  Olga
-                </h2>
-                <p className="text-sm text-gray-300">
-                  Estética Médica Avanzada
+      <div className="text-[1.65rem] font-extrabold tracking-[-1.5px] leading-none text-[#fff]">
+        olga
+      </div>
+                <p className="text-[10px] text-[#0FB888] font-black uppercase tracking-[0.2em] mt-1">
+                  Healthtech
                 </p>
               </div>
             </div>
 
-            <p className="text-gray-300 leading-relaxed text-sm md:text-base">
-              Especialistas en lipólisis láser sin cirugía, con tecnología
-              avanzada y resultados visibles desde la primera sesión.
+            <p className="text-white/60 leading-relaxed text-sm md:text-base">
+              Infraestructura tecnológica para la coordinación, verificación y visibilidad total del cuidado de salud extramural en Latinoamérica.
             </p>
 
-            {/* Social media */}
-            <div className="flex gap-3">
+            <div className="flex gap-4">
               {socialLinks.map((social, index) => (
                 <a
                   key={index}
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`w-10 h-10 rounded-full flex items-center justify-center ${social.color} transition-all duration-300 hover:scale-110 hover:shadow-lg`}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center ${social.color} transition-all duration-300 hover:scale-105 shadow-lg shadow-black/20`}
                   aria-label={social.name}
                 >
                   {social.icon}
@@ -144,20 +132,18 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-6 pb-3 border-b border-gray-700 flex items-center gap-2">
-              <span className="bg-gradient-to-r from-teal-400 to-cyan-500 bg-clip-text text-transparent">
-                Enlaces Rápidos
-              </span>
+            <h3 className="font-['Instrument_Serif',serif] text-xl text-white mb-8 italic">
+              Navegación
             </h3>
-            <ul className="space-y-3">
+            <ul className="space-y-4">
               {quickLinks.map((link, index) => (
                 <li key={index}>
                   <a
                     href={link.href}
-                    className="text-gray-300 hover:text-white transition-colors duration-300 flex items-center gap-2 group"
+                    className="text-white/50 hover:text-[#0FB888] transition-colors duration-300 flex items-center gap-2 group text-sm"
                   >
-                    <ArrowUp className="w-3 h-3 rotate-90 text-teal-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <span className="group-hover:translate-x-1 transition-transform">
+                    <div className="w-1 h-1 rounded-full bg-[#0FB888] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <span className="group-hover:translate-x-1 transition-transform italic">
                       {link.name}
                     </span>
                   </a>
@@ -166,23 +152,16 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Services */}
+          {/* OLGA Core Solutions */}
           <div>
-            <h3 className="text-lg font-semibold mb-6 pb-3 border-b border-gray-700">
-              <span className="bg-gradient-to-r from-teal-400 to-cyan-500 bg-clip-text text-transparent">
-                Nuestros Servicios
-              </span>
+            <h3 className="font-['Instrument_Serif',serif] text-xl text-white mb-8 italic">
+              Soluciones
             </h3>
-            <ul className="space-y-3">
-              {services.map((service, index) => (
-                <li key={index}>
-                  <a
-                    href="#servicios"
-                    className="text-gray-300 hover:text-white transition-colors duration-300 flex items-center gap-2 group"
-                  >
-                    <div className="w-1.5 h-1.5 rounded-full bg-teal-400 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <span>{service.name}</span>
-                  </a>
+            <ul className="space-y-4">
+              {olgaServices.map((service, index) => (
+                <li key={index} className="text-white/50 flex items-center gap-3 text-sm">
+                  <Shield className="w-3 h-3 text-[#0FB888]/40" />
+                  <span>{service.name}</span>
                 </li>
               ))}
             </ul>
@@ -190,22 +169,20 @@ export default function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h3 className="text-lg font-semibold mb-6 pb-3 border-b border-gray-700">
-              <span className="bg-gradient-to-r from-teal-400 to-cyan-500 bg-clip-text text-transparent">
-                Contacto
-              </span>
+            <h3 className="font-['Instrument_Serif',serif] text-xl text-white mb-8 italic">
+              Contacto
             </h3>
-            <ul className="space-y-4">
+            <ul className="space-y-6">
               {contactInfo.map((info, index) => (
                 <li key={index}>
                   <a
                     href={info.href}
-                    className="text-gray-300 hover:text-white transition-colors duration-300 flex items-start gap-3 group"
+                    className="text-white/50 hover:text-white transition-colors duration-300 flex items-start gap-4 group"
                   >
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-800 to-gray-700 flex items-center justify-center flex-shrink-0 group-hover:bg-gradient-to-br group-hover:from-teal-400 group-hover:to-cyan-500 transition-all">
+                    <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0 group-hover:bg-[#0FB888]/20 group-hover:text-[#0FB888] transition-all">
                       {info.icon}
                     </div>
-                    <span className="text-sm md:text-base leading-relaxed">
+                    <span className="text-sm leading-relaxed truncate">
                       {info.text}
                     </span>
                   </a>
@@ -215,59 +192,47 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Newsletter & CTA */}
-        <div className="mb-10 md:mb-16">
-          <div className="bg-gradient-to-r from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-gray-700/50">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="text-center md:text-left">
-                <h3 className="text-xl font-bold mb-2">
-                  ¿Lista para comenzar?
-                </h3>
-                <p className="text-gray-300">
-                  Recibe asesoría personalizada sin compromiso
-                </p>
-              </div>
-              <a
-                href="https://wa.me/573004108199"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group inline-flex items-center gap-3 bg-gradient-to-r from-teal-400 to-cyan-500 text-white font-semibold py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-              >
-                <MessageCircle className="w-5 h-5" />
-                <span>Agendar Consulta Gratis</span>
-                <ArrowUp className="w-4 h-4 rotate-45 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-              </a>
+        {/* Global Context Note */}
+        <div className="mb-16">
+          <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="text-center md:text-left">
+              <h4 className="text-white font-bold mb-1">¿Listo para conectar su ecosistema?</h4>
+              <p className="text-white/40 text-sm italic font-['Instrument_Serif',serif] text-lg">
+                Agende una demostración técnica de la plataforma.
+              </p>
             </div>
+            <a
+              href="mailto:camilocortesu@gmail.com"
+              className="group inline-flex items-center gap-3 bg-[#0FB888] text-[#0A1F1A] font-bold py-4 px-8 rounded-xl transition-all duration-300 hover:scale-105 shadow-xl shadow-[#0FB888]/10"
+            >
+              Contactar ahora
+              <ExternalLink className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+            </a>
           </div>
         </div>
 
-        {/* Copyright & Back to Top */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-8 border-t border-gray-700">
+        {/* Bottom bar */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-8 border-t border-white/5">
           <div className="text-center md:text-left">
-            <p className="text-gray-400 text-sm">
-              © {currentYear} Olga. Todos los derechos reservados.
+            <p className="text-white/30 text-[10px] font-black uppercase tracking-[0.2em]">
+              © {currentYear} OLGA Healthtech S.A.S.
             </p>
-            <p className="text-gray-500 text-xs mt-1">
-              Diseñado con <Heart className="w-3 h-3 inline text-emerald-400" />{" "}
-              para tu bienestar
+            <p className="text-white/20 text-[9px] mt-2 italic font-['Instrument_Serif',serif] text-sm">
+              Infraestructura para la transparencia clínica.
             </p>
           </div>
 
           <button
             onClick={scrollToTop}
-            className="group flex items-center gap-2 text-gray-300 hover:text-white transition-colors duration-300"
-            aria-label="Volver arriba"
+            className="group flex items-center gap-3 text-white/30 hover:text-[#0FB888] transition-colors duration-300"
           >
-            <span className="text-sm">Volver arriba</span>
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-800 to-gray-700 group-hover:from-emerald-500 group-hover:to-blue-600 flex items-center justify-center transition-all">
-              <ArrowUp className="w-5 h-5 group-hover:-translate-y-1 transition-transform" />
+            <span className="text-[10px] font-black uppercase tracking-widest">Back to top</span>
+            <div className="w-10 h-10 rounded-full bg-white/5 group-hover:bg-[#0FB888]/10 flex items-center justify-center transition-all">
+              <ArrowUp className="w-4 h-4 group-hover:-translate-y-1 transition-transform text-[#0FB888]" />
             </div>
           </button>
         </div>
       </div>
-
-      {/* Bottom decorative line */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700"></div>
     </footer>
   );
 }
