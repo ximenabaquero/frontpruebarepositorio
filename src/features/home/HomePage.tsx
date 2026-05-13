@@ -1,3 +1,4 @@
+import HomeNav from "./components/HomeNav";
 import Hero from "./components/Hero";
 import ProblemSection from "./components/ProblemSection";
 import SolutionSection from "./components/SolutionSection";
@@ -9,6 +10,7 @@ import CallToAction from "./components/CTASection";
 export default function HomePage() {
   return (
     <>
+      <HomeNav />
       <Hero />
       <ProblemSection />
       <SolutionSection />
