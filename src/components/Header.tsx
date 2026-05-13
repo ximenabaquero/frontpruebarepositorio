@@ -30,13 +30,13 @@ const Header = () => {
 
   return (
     <header 
-      className={`fixed top-0 w-full z-[100] px-6 md:px-10 py-5 flex items-center justify-between font-['DM_Sans',sans-serif] transition-all duration-500 ${
+      className={`fixed top-0 w-full z-[100] px-6 md:px-10 py-5 flex items-center justify-between transition-all duration-500 ${
         isScrolled || isMenuOpen
           ? "bg-white shadow-md border-b border-slate-100" 
           : "bg-transparent border-b border-transparent"
       }`}
     >
-      {/* Importación de la fuente idéntica al Login */}
+      {/* Importación de la fuente */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@800&display=swap');
       `}</style>
@@ -45,22 +45,24 @@ const Header = () => {
         <defs dangerouslySetInnerHTML={{ __html: SVG_DEFS }} />
       </svg>
 
-      {/* LOGO - Con los estilos exactos extraídos del componente Login */}
+      {/* LOGO - FUERZA BRUTA CON INLINE STYLES */}
       <div 
-        className={`text-[1.65rem] transition-colors duration-300 z-[110] ${
+        className={`transition-colors duration-300 z-[110] ${
           isScrolled || isMenuOpen ? "text-[#0A1F1A]" : "text-white"
         }`}
         style={{
           fontFamily: "'DM Sans', sans-serif",
-          fontWeight: 800,
-          letterSpacing: "-1.5px",
-          lineHeight: 1,
+          fontWeight: '800',
+          letterSpacing: '-1.5px',
+          fontSize: '1.65rem',
+          lineHeight: '1',
+          display: 'block'
         }}
       >
-        olga
+        <span>o</span>lga
       </div>
 
-      {/* NAVEGACIÓN CENTRAL - TOTALMENTE BLANCA */}
+      {/* NAVEGACIÓN CENTRAL */}
       <div className="absolute left-1/2 -translate-x-1/2 hidden xl:block">
         <nav className="flex items-center gap-1 bg-white border border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.08)] rounded-full px-2 py-1.5">
           {navLinks.map((link) => (
