@@ -20,8 +20,8 @@ const ALERTS = [
   { id: 1, patient: "Carlos Mendoza R.", msg: "Sin visita confirmada en 48h · GPS error", level: "critical" },
   { id: 2, patient: "María F. Gómez", msg: "SpO₂ 88% registrado · requiere revisión", level: "critical" },
   { id: 3, patient: "Jorge Andrés Palacio", msg: "Medicamento no dispensado · falta firma", level: "warning" },
-  { id: 4, patient: "Roberto Silva M.", msg: "Visita reportada pero sin verificación", level: "warning" },
-  { id: 5, patient: "Claudia Peña V.", msg: "Signos no registrados en 24h", level: "warning" },
+  { id: 4, patient: "Ana Lucía Torres", msg: "Visita reportada pero sin verificación", level: "warning" },
+  { id: 5, patient: "Roberto Silva Montoya", msg: "Signos no registrados en 24h", level: "warning" },
 ];
 
 const REQUESTS = [
