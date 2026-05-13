@@ -2,7 +2,6 @@
 
 import { useMemo, useState, type CSSProperties } from "react";
 import {
-  Mail,
   Lock,
   Shield,
   Home,
@@ -13,7 +12,6 @@ import ValidatedInput from "@/components/ValidatedInput";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
 import { useAuth } from "./AuthContext";
 
 function mulberry32(seed: number) {
@@ -63,19 +61,11 @@ export default function LoginPage() {
     setErrorMessage(null);
 
     try {
-      await fetch(`${apiBaseUrl}/sanctum/csrf-cookie`, {
-        credentials: "include",
-      });
-
-      const token = Cookies.get("XSRF-TOKEN") ?? "";
-
       const res = await fetch(`${apiBaseUrl}/api/v1/login`, {
         method: "POST",
-        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          "X-XSRF-TOKEN": token,
         },
         body: JSON.stringify({
           email: formData.email,
@@ -90,12 +80,14 @@ export default function LoginPage() {
         return;
       }
 
+      // Guardar token en localStorage
+      localStorage.setItem("auth_token", data.token);
       setUser(data.user);
 
       const params = new URLSearchParams(window.location.search);
       const next = params.get("next") || "/dashboard";
       router.push(next);
-    } catch (error) {
+    } catch {
       setErrorMessage("Error de conexión con el servidor.");
     } finally {
       setIsLoading(false);

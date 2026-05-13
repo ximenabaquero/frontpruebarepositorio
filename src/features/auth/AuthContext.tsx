@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
-import Cookies from "js-cookie";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 type User = {
   id: number;
@@ -39,14 +32,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function checkSession() {
     try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+      if (!token) {
+        setUser(null);
+        return;
+      }
+
       const res = await fetch(`${API}/api/v1/me`, {
-        credentials: "include",
         headers: {
           Accept: "application/json",
+          Authorization: `Bearer ${token}`,
         },
       });
 
       if (!res.ok) {
+        localStorage.removeItem("auth_token");
         setUser(null);
         return;
       }
@@ -64,21 +64,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function logout() {
     try {
       setIsLoggingOut(true);
-
-      const token = Cookies.get("XSRF-TOKEN") ?? "";
+      const token = localStorage.getItem("auth_token");
 
       await fetch(`${API}/api/v1/logout`, {
         method: "POST",
-        credentials: "include",
         headers: {
-          "Content-Type": "application/json",
           Accept: "application/json",
-          "X-XSRF-TOKEN": token,
+          Authorization: `Bearer ${token}`,
         },
       });
     } catch (err) {
       console.error("Logout error:", err);
     } finally {
+      localStorage.removeItem("auth_token");
       setUser(null);
       setIsLoggingOut(false);
     }
@@ -89,17 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        setUser,
-        checkSession,
-        logout,
-        loading,
-        authChecked,
-        isLoggingOut,
-      }}
-    >
+    <AuthContext.Provider value={{ user, setUser, checkSession, logout, loading, authChecked, isLoggingOut }}>
       {children}
     </AuthContext.Provider>
   );
