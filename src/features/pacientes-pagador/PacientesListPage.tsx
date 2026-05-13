@@ -2,23 +2,42 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Search, ChevronDown, Eye, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { 
+  Search, 
+  ChevronDown, 
+  Eye, 
+  TrendingUp, 
+  TrendingDown, 
+  Minus,
+  CheckCircle2,
+  AlertTriangle,
+  AlertCircle
+} from "lucide-react";
 import { usePagination } from "@/utils/usePagination";
 import PaginationBar from "@/components/PaginationBar";
 import { pacientesPagador, type Riesgo, type Tendencia } from "@/data/mock/pacientes";
 
 const RIESGO_STYLES: Record<Riesgo, { bg: string; text: string; dot: string; label: string }> = {
-  alto:  { bg: "bg-red-100",    text: "text-red-700",    dot: "bg-red-500",    label: "Alto"  },
+  alto:  { bg: "bg-red-100",     text: "text-red-700",     dot: "bg-red-500",     label: "Alto"  },
   medio: { bg: "bg-amber-100",  text: "text-amber-700",  dot: "bg-amber-500",  label: "Medio" },
   bajo:  { bg: "bg-emerald-100",text: "text-emerald-700",dot: "bg-emerald-500",label: "Bajo"  },
 };
 
 function AdherenciaBadge({ pct }: { pct: number }) {
-  const emoji = pct >= 90 ? "🟢" : pct >= 70 ? "🟡" : "🔴";
-  const color = pct >= 90 ? "text-emerald-700" : pct >= 70 ? "text-amber-700" : "text-red-700";
+  let Icon = AlertCircle;
+  let color = "text-red-700";
+
+  if (pct >= 90) {
+    Icon = CheckCircle2;
+    color = "text-emerald-700";
+  } else if (pct >= 70) {
+    Icon = AlertTriangle;
+    color = "text-amber-700";
+  }
+
   return (
-    <span className={`text-xs font-bold ${color} flex items-center gap-1`}>
-      <span>{emoji}</span>
+    <span className={`text-xs font-bold ${color} flex items-center gap-1.5`}>
+      <Icon className="w-4 h-4" />
       <span>{pct}%</span>
     </span>
   );

@@ -1,6 +1,6 @@
 import React from 'react';
 
-// Componente Interno de Iconos para asegurar independencia
+// Assumes SVG sprite is reliably injected. If not, this is your failure point.
 const Ico = ({ id, className = "w-6 h-6" }: { id: string, className?: string }) => (
   <svg className={`${className} fill-none stroke-currentColor stroke-[1.75]`} strokeLinecap="round" strokeLinejoin="round">
     <use href={`#${id}`} />
@@ -21,8 +21,9 @@ const FeaturesSection = () => {
   ];
 
   return (
+    // Note: Replace arbitrary hex codes with tailwind config variables in production
     <section className="py-24 bg-[#0A1F1A] text-white overflow-hidden relative" id="features">
-      {/* Efectos de fondo */}
+      {/* Background radial gradient */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#0FB888]/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/4 pointer-events-none" />
       
       <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -41,9 +42,9 @@ const FeaturesSection = () => {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {features.map((feat, idx) => (
+          {features.map((feat) => (
             <div 
-              key={idx} 
+              key={feat.id} // Replaced index with stable identifier
               className="group bg-white/5 p-8 rounded-[2.5rem] border border-white/5 hover:border-[#0FB888]/30 transition-all duration-500 hover:-translate-y-2"
             >
               <div className="w-12 h-12 rounded-2xl bg-[#0FB888] text-white flex items-center justify-center mb-6 shadow-lg shadow-[#0FB888]/20 group-hover:scale-110 transition-transform duration-500">

@@ -125,7 +125,10 @@ export default function PacienteDetallePage({ id }: { id: number }) {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-3">
-            <p className="text-sm text-gray-700"><strong className="text-gray-900 font-semibold">Plan:</strong> PHD — Hospitalización Domiciliaria</p>
+            <p className="text-sm text-gray-700">
+              <strong className="text-gray-900 font-semibold">Plan autorizado:</strong>{' '}
+              <span className="font-bold text-emerald-700">PHD</span> <span className="text-gray-400 mx-1">·</span> <span className="text-gray-600">Enfermería diaria + cardiología 3x/sem + medicamentos IV</span>
+            </p>
             <p className="text-sm text-gray-700"><strong className="text-gray-900 font-semibold">Duración:</strong> 14 días · Día {meta.dias_post_alta} de 14</p>
             <div>
               <p className="text-sm font-semibold text-gray-900 mb-2">Incluye:</p>

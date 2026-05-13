@@ -48,6 +48,7 @@ export default function AutorizacionesPage() {
   const [search, setSearch] = useState("");
   const [filterUrgencia, setFilterUrgencia] = useState<"todos" | "urgente" | "programado">("todos");
   const [filterTipo, setFilterTipo] = useState("Todos");
+  const [masInfoSolicitud, setMasInfoSolicitud] = useState<Solicitud | null>(null);
 
   const filtered = useMemo(() => {
     return mockSolicitudes.filter((s) => {
