@@ -36,14 +36,27 @@ const Header = () => {
           : "bg-transparent border-b border-transparent"
       }`}
     >
+      {/* Importación de la fuente idéntica al Login */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@800&display=swap');
+      `}</style>
+
       <svg width="0" height="0" className="absolute" aria-hidden="true">
         <defs dangerouslySetInnerHTML={{ __html: SVG_DEFS }} />
       </svg>
 
-      {/* LOGO */}
-      <div className={`text-2xl font-black tracking-tighter leading-none transition-colors duration-300 z-[110] ${
-        isScrolled || isMenuOpen ? "text-[#0A1F1A]" : "text-white"
-      }`}>
+      {/* LOGO - Con los estilos exactos extraídos del componente Login */}
+      <div 
+        className={`text-[1.65rem] transition-colors duration-300 z-[110] ${
+          isScrolled || isMenuOpen ? "text-[#0A1F1A]" : "text-white"
+        }`}
+        style={{
+          fontFamily: "'DM Sans', sans-serif",
+          fontWeight: 800,
+          letterSpacing: "-1.5px",
+          lineHeight: 1,
+        }}
+      >
         olga
       </div>
 

@@ -38,13 +38,23 @@ export default function PagadorLayout({ children }: { children: React.ReactNode 
 
   return (
     <div className="min-h-screen flex bg-gray-50">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
+        .olga-logo-font {
+          font-family: 'DM Sans', sans-serif;
+          font-weight: 800;
+          letter-spacing: -1.5px;
+          line-height: 1;
+        }
+      `}</style>
+
       {/* ── SIDEBAR ── */}
       <aside className="w-64 flex-shrink-0 bg-white border-r border-gray-200 flex flex-col sticky top-0 h-screen">
         {/* Logo */}
         <div className="px-5 py-5 border-b border-gray-100">
           <div className="flex items-center gap-2.5 mb-3">
             <Image src="/a-Olga.png" alt="Olga" width={28} height={28} className="object-contain" />
-            <span className="font-black text-gray-900 text-lg tracking-tight">olga</span>
+            <span className="olga-logo-font text-gray-900 text-lg">olga</span> 
           </div>
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-emerald-500" />
