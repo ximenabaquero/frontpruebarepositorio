@@ -210,7 +210,10 @@ export default function AutorizacionesPage() {
                       </span>
                     </td>
                     <td className="px-4 py-4">
-                      <p className="text-gray-600 text-xs max-w-[180px] leading-snug">{s.plan_propuesto}</p>
+                      <p className="text-gray-600 text-xs max-w-[180px] leading-snug">
+                        <span className="font-bold text-gray-800">{s.plan_nombre}</span>
+                        {" · "}{s.plan_propuesto}
+                      </p>
                     </td>
                     <td className="px-4 py-4">
                       <p className="font-medium text-gray-800 text-xs">{s.medico_solicitante}</p>
@@ -263,10 +266,10 @@ export default function AutorizacionesPage() {
                             >
                               <XCircle className="w-3.5 h-3.5" /> Negar
                             </motion.button>
-                            {/* Más info */}
+                            {/* Más info — abre modal de documentos */}
                             <motion.button
                               whileTap={{ scale: 0.96 }}
-                              onClick={() => handleAccion(s.id, "mas_info")}
+                              onClick={() => setMasInfoSolicitud(s)}
                               className="flex items-center gap-1.5 w-full text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition-colors"
                             >
                               <Info className="w-3.5 h-3.5" /> Más info
@@ -338,7 +341,7 @@ export default function AutorizacionesPage() {
                 return sol ? (
                   <div className="bg-gray-50 rounded-xl p-4 mb-5 space-y-1.5">
                     <p className="text-sm font-semibold text-gray-900">{sol.paciente}</p>
-                    <p className="text-xs text-gray-500">{sol.plan_propuesto}</p>
+                    <p className="text-xs text-gray-500"><span className="font-semibold text-gray-700">{sol.plan_nombre}</span> · {sol.plan_propuesto}</p>
                     <p className="text-sm font-bold text-emerald-700">{formatCOP(sol.costo_estimado)} / mes</p>
                   </div>
                 ) : null;
@@ -359,6 +362,80 @@ export default function AutorizacionesPage() {
                   Autorizar servicio
                 </motion.button>
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Modal Más info — documentos clínicos ── */}
+      <AnimatePresence>
+        {masInfoSolicitud && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setMasInfoSolicitud(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.92, opacity: 0, y: 16 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.92, opacity: 0, y: 16 }}
+              transition={{ type: "spring" as const, stiffness: 300, damping: 25 }}
+              className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-start gap-3 mb-5">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+                  <Info className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900">Documentos de soporte</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">{masInfoSolicitud.paciente} · {masInfoSolicitud.plan_nombre}</p>
+                </div>
+              </div>
+
+              {/* Resumen clínico */}
+              <div className="bg-gray-50 rounded-xl p-3 mb-5 space-y-1">
+                <p className="text-xs text-gray-500">Diagnóstico</p>
+                <p className="text-sm font-semibold text-gray-900">{masInfoSolicitud.diagnostico}</p>
+                <p className="text-xs text-gray-500 mt-1">{masInfoSolicitud.plan_nombre} · {masInfoSolicitud.plan_propuesto}</p>
+              </div>
+
+              {/* Documentos PDF mock */}
+              <div className="space-y-3 mb-6">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Documentos adjuntos</p>
+
+                <button className="w-full flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 hover:border-blue-300 hover:bg-blue-50 rounded-xl transition-all group">
+                  <div className="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
+                    <span className="text-xs font-black text-red-600">PDF</span>
+                  </div>
+                  <div className="text-left flex-1">
+                    <p className="text-sm font-semibold text-gray-900 group-hover:text-blue-700">Orden médica</p>
+                    <p className="text-xs text-gray-400">{masInfoSolicitud.medico_solicitante} · {masInfoSolicitud.hospital}</p>
+                  </div>
+                  <span className="text-xs text-blue-500 font-semibold opacity-0 group-hover:opacity-100 transition-opacity">Ver →</span>
+                </button>
+
+                <button className="w-full flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 hover:border-blue-300 hover:bg-blue-50 rounded-xl transition-all group">
+                  <div className="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
+                    <span className="text-xs font-black text-red-600">PDF</span>
+                  </div>
+                  <div className="text-left flex-1">
+                    <p className="text-sm font-semibold text-gray-900 group-hover:text-blue-700">Historia clínica resumida</p>
+                    <p className="text-xs text-gray-400">{masInfoSolicitud.paciente} · CC {masInfoSolicitud.cedula}</p>
+                  </div>
+                  <span className="text-xs text-blue-500 font-semibold opacity-0 group-hover:opacity-100 transition-opacity">Ver →</span>
+                </button>
+              </div>
+
+              <button
+                onClick={() => setMasInfoSolicitud(null)}
+                className="w-full py-2.5 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
+              >
+                Cerrar
+              </button>
             </motion.div>
           </motion.div>
         )}
