@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   ArrowLeft, CheckCircle, Clock, XCircle,
   AlertTriangle, TrendingUp, TrendingDown, Minus,
@@ -182,6 +183,14 @@ export default function PacienteDetallePage({ id }: { id: number }) {
                     <p className="text-xs font-bold text-gray-500">{item.fecha}</p>
                     <p className="text-sm font-semibold text-gray-900 leading-tight">{item.servicio}</p>
                     <p className="text-xs text-gray-400">{item.profesional}</p>
+                    {item.estado === "cumplido" && (
+                      <Link
+                        href={`/evidencia/${idx + 1}`}
+                        className="inline-flex items-center gap-1 mt-1 text-[11px] font-semibold text-emerald-600 hover:text-emerald-700"
+                      >
+                        Ver evidencia →
+                      </Link>
+                    )}
                     {item.nota && (
                       <p className={`text-xs mt-1 px-2 py-1 rounded-lg ${
                         item.estado === "no_cumplido" ? "bg-red-50 text-red-700" : "bg-amber-50 text-amber-700"
