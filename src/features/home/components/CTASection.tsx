@@ -8,7 +8,7 @@ const Ico = ({ id, className = "w-4 h-4" }: { id: string, className?: string }) 
 
 const CallToAction = () => {
   return (
-    <section className="relative py-24 px-6 overflow-hidden bg-[#0A1F1A]" id="contact">
+    <section className="relative py-24 px-6 overflow-hidden bg-[#0A1F1A]" id="contacto">
       {/* Elementos decorativos de fondo para impacto visual */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-full opacity-20">
         <div className="absolute top-10 left-10 w-72 h-72 bg-[#0FB888] blur-[120px] rounded-full" />

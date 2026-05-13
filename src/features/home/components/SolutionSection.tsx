@@ -47,7 +47,7 @@ const PROCESS_STEPS: ProcessStep[] = [
 const SolutionSection: React.FC = () => {
   return (
     <section 
-      id="solution" 
+      id="solucion" 
       aria-labelledby="solution-heading"
       className="py-24 px-6 max-w-7xl mx-auto relative overflow-hidden"
     >

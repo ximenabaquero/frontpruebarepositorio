@@ -69,7 +69,7 @@ const PhaseTwo = () => {
   ];
 
   return (
-    <section className="py-32 px-6 max-w-7xl mx-auto overflow-hidden" id="future">
+    <section className="py-32 px-6 max-w-7xl mx-auto overflow-hidden" id="fase2">
       <div className="flex flex-col items-center text-center mb-20">
         {/* Badge Dinámico */}
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#0FB888]/5 border border-[#0FB888]/10 text-[#0FB888] text-[0.65rem] font-black uppercase tracking-[3px] mb-8">
