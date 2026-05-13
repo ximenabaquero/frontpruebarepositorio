@@ -77,10 +77,10 @@ export default function AutorizacionesPage() {
     setConfirming(null);
 
     const labels: Record<EstadoSolicitud, string> = {
-      aprobado:             "✅ Servicio autorizado",
-      aprobado_condiciones: "⚠️ Aprobado con condiciones",
-      negado:               "❌ Solicitud negada",
-      mas_info:             "ℹ️ Se solicitó más información",
+      aprobado:             "Servicio autorizado",
+      aprobado_condiciones: "Aprobado con condiciones",
+      negado:               "Solicitud negada",
+      mas_info:             "ℹSe solicitó más información",
       pendiente:            "",
     };
 
