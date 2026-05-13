@@ -9,78 +9,110 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { serviciosEvidencia } from "@/data/mock/servicios";
-import ConfirmModal from "@/components/ConfirmModal";
 import toast, { Toaster } from "react-hot-toast";
 
-// SSR false obligatorio para Leaflet
+// SSR false is mandatory for Leaflet to avoid hydration mismatches
 const MapaEvidencia = dynamic(() => import("./MapaEvidencia"), { ssr: false });
+
+// Extracted animation configs to prevent JSX bloating
+const modalAnimation = {
+  initial: { scale: 0.9, opacity: 0, y: 20 },
+  animate: { scale: 1, opacity: 1, y: 0 },
+  exit: { scale: 0.9, opacity: 0, y: 20 },
+  transition: { type: "spring" as const, stiffness: 300, damping: 25 },
+};
+
+const checkAnimation = {
+  initial: { scale: 0, opacity: 0 },
+  animate: { scale: 1.3, opacity: 1 },
+  exit: { scale: 0, opacity: 0 },
+  transition: { type: "spring" as const, stiffness: 400, damping: 15 },
+};
 
 export default function EvidenciaPage({ id }: { id: number }) {
   const router = useRouter();
+  
+  // Data resolution
   const servicio = serviciosEvidencia.find((s) => s.id === id) ?? serviciosEvidencia[0];
-  const esIrregular = servicio.estado === "irregularidad";
-
+  
+  // State
   const [modalIrregular, setModalIrregular] = useState(false);
   const [aprobado, setAprobado] = useState(servicio.estado === "verificado");
   const [showCheck, setShowCheck] = useState(false);
   const [motivoIrregular, setMotivoIrregular] = useState("");
 
-  const horaInicio = servicio.hora_inicio;
-  const horaFin = servicio.hora_fin;
-  const [h1, m1] = horaInicio.split(":").map(Number);
-  const [h2, m2] = horaFin.split(":").map(Number);
+  // Derived logical state (eliminates inline JSX clutter)
+  const esIrregular = servicio.estado === "irregularidad";
+  const isApprovedAndNormal = aprobado && !esIrregular;
+  const canApprove = !aprobado && !esIrregular;
+  const isGpsValid = servicio.distancia_metros <= 200;
+
+  // Time calculations
+  const [h1, m1] = servicio.hora_inicio.split(":").map(Number);
+  const [h2, m2] = servicio.hora_fin.split(":").map(Number);
   const duracion = (h2 * 60 + m2) - (h1 * 60 + m1);
 
-  function handleAprobar() {
+  // Handlers
+  const handleAprobar = () => {
     setAprobado(true);
     setShowCheck(true);
     setTimeout(() => setShowCheck(false), 2000);
     toast("✅ Servicio aprobado para auditoría", {
       style: { background: "#059669", color: "#fff", fontWeight: "600", borderRadius: "10px" },
     });
-  }
+  };
 
-  function handleIrregularidad() {
+  const handleIrregularidad = () => {
     setModalIrregular(false);
     toast("⚠️ Irregularidad marcada — auditoria notificada", {
       style: { background: "#DC2626", color: "#fff", fontWeight: "600", borderRadius: "10px" },
     });
-  }
+  };
+
+  // Static data arrays for clean mapping
+  const infoData = [
+    { icon: User, label: "Paciente", value: servicio.paciente },
+    { icon: User, label: "Profesional", value: servicio.profesional },
+    { icon: FileText, label: "Tipo", value: servicio.tipo },
+    { icon: Clock, label: "Hora inicio", value: servicio.hora_inicio },
+    { icon: Clock, label: "Hora fin", value: servicio.hora_fin },
+    { icon: Clock, label: "Duración", value: `${duracion} minutos` },
+  ];
 
   return (
-    <div className="p-6 space-y-6 max-w-6xl">
+    <main className="p-6 space-y-6 max-w-6xl mx-auto">
       <Toaster position="top-right" />
 
-      {/* Back + header */}
-      <div className="flex items-start gap-4">
+      <header className="flex items-start gap-4">
         <button
           onClick={() => router.push("/pacientes")}
           className="mt-1 p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+          aria-label="Volver a pacientes"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
+        
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-gray-900">Evidencia de Servicio</h1>
           <p className="text-sm text-gray-500 mt-0.5">{servicio.tipo} · {servicio.fecha}</p>
         </div>
-        {/* Estado badge */}
+        
         <div className="flex items-center gap-2">
           {esIrregular && (
             <span className="flex items-center gap-1.5 text-xs font-bold bg-red-100 text-red-700 px-3 py-1.5 rounded-full">
               <AlertTriangle className="w-3.5 h-3.5" /> Irregularidad detectada
             </span>
           )}
-          {aprobado && !esIrregular && (
+          {isApprovedAndNormal && (
             <span className="flex items-center gap-1.5 text-xs font-bold bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full">
               <CheckCircle className="w-3.5 h-3.5" /> Auditado con evidencia
             </span>
           )}
         </div>
-      </div>
+      </header>
 
-      {/* Banner de alerta para irregularidad */}
       {esIrregular && (
-        <div className="bg-red-50 border border-red-200 rounded-2xl px-5 py-4 flex items-start gap-3">
+        <article className="bg-red-50 border border-red-200 rounded-2xl px-5 py-4 flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-bold text-red-800">Posible visita fantasma detectada</p>
@@ -89,24 +121,24 @@ export default function EvidenciaPage({ id }: { id: number }) {
               El rango máximo permitido es 200m. Se requiere revisión manual.
             </p>
           </div>
-        </div>
+        </article>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-        {/* Mapa */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Map Container */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
           <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <MapPin className="w-4 h-4 text-emerald-600" />
               <h2 className="text-sm font-bold text-gray-900">Verificación GPS</h2>
             </div>
             <div className="flex items-center gap-3 text-xs">
-              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-emerald-500 inline-block" />Domicilio</span>
-              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-blue-500 inline-block" />GPS real</span>
+              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-emerald-500" />Domicilio</span>
+              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-blue-500" />GPS real</span>
             </div>
           </div>
-          <div style={{ height: "340px" }} className="relative">
+          
+          <div className="h-[340px] relative w-full">
             <MapaEvidencia
               latDestino={servicio.lat_destino}
               lngDestino={servicio.lng_destino}
@@ -118,28 +150,20 @@ export default function EvidenciaPage({ id }: { id: number }) {
               esIrregular={esIrregular}
             />
           </div>
+          
           <div className="px-5 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
             <span className="text-xs text-gray-500">Distancia al destino</span>
-            <span className={`text-sm font-bold ${servicio.distancia_metros <= 200 ? "text-emerald-700" : "text-red-700"}`}>
-              {servicio.distancia_metros}m {servicio.distancia_metros <= 200 ? "✅" : "⚠️"}
+            <span className={`text-sm font-bold ${isGpsValid ? "text-emerald-700" : "text-red-700"}`}>
+              {servicio.distancia_metros}m {isGpsValid ? "✅" : "⚠️"}
             </span>
           </div>
         </div>
 
-        {/* Info del servicio */}
+        {/* Service Info */}
         <div className="flex flex-col gap-4">
-
-          {/* Card info */}
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 space-y-4">
             <h2 className="text-sm font-bold text-gray-900">Información del servicio</h2>
-            {[
-              { icon: User,      label: "Paciente",     value: servicio.paciente },
-              { icon: User,      label: "Profesional",  value: servicio.profesional },
-              { icon: FileText,  label: "Tipo",         value: servicio.tipo },
-              { icon: Clock,     label: "Hora inicio",  value: servicio.hora_inicio },
-              { icon: Clock,     label: "Hora fin",     value: servicio.hora_fin },
-              { icon: Clock,     label: "Duración",     value: `${duracion} minutos` },
-            ].map((item) => (
+            {infoData.map((item) => (
               <div key={item.label} className="flex items-center gap-3">
                 <div className="w-7 h-7 rounded-lg bg-gray-50 flex items-center justify-center flex-shrink-0">
                   <item.icon className="w-3.5 h-3.5 text-gray-500" />
@@ -152,7 +176,6 @@ export default function EvidenciaPage({ id }: { id: number }) {
             ))}
           </div>
 
-          {/* Timestamp verificado */}
           <div className={`rounded-2xl border p-4 flex items-center gap-3 ${esIrregular ? "bg-red-50 border-red-200" : "bg-emerald-50 border-emerald-200"}`}>
             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${esIrregular ? "bg-red-100" : "bg-emerald-100"}`}>
               <MapPin className={`w-5 h-5 ${esIrregular ? "text-red-600" : "text-emerald-600"}`} />
@@ -169,12 +192,9 @@ export default function EvidenciaPage({ id }: { id: number }) {
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Nota clínica + firma */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-        {/* Nota clínica */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
           <div className="flex items-center gap-2 mb-3">
             <FileText className="w-4 h-4 text-emerald-600" />
@@ -183,14 +203,12 @@ export default function EvidenciaPage({ id }: { id: number }) {
           <p className="text-sm text-gray-700 leading-relaxed">{servicio.nota_clinica}</p>
         </div>
 
-        {/* Firma digital */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
           <div className="flex items-center gap-2 mb-3">
             <Pen className="w-4 h-4 text-emerald-600" />
             <h2 className="text-sm font-bold text-gray-900">Firma digital del paciente</h2>
           </div>
-          {/* Firma mock SVG */}
-          <div className="border-2 border-dashed border-gray-200 rounded-xl bg-gray-50 flex items-center justify-center" style={{ height: 120 }}>
+          <div className="border-2 border-dashed border-gray-200 rounded-xl bg-gray-50 flex items-center justify-center h-[120px]">
             <svg viewBox="0 0 300 100" width="260" height="90" xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M20 70 Q40 30 60 55 Q80 80 100 45 Q120 10 140 50 Q160 85 180 40 Q200 5 220 45 Q240 80 260 55 Q275 40 285 45"
@@ -206,11 +224,10 @@ export default function EvidenciaPage({ id }: { id: number }) {
             </p>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Botones de acción */}
-      <div className="flex flex-wrap gap-3 justify-end">
-        {!aprobado && !esIrregular && (
+      <footer className="flex flex-wrap gap-3 justify-end">
+        {canApprove && (
           <div className="relative">
             <motion.button
               whileTap={{ scale: 0.97 }}
@@ -222,13 +239,7 @@ export default function EvidenciaPage({ id }: { id: number }) {
             </motion.button>
             <AnimatePresence>
               {showCheck && (
-                <motion.div
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1.3, opacity: 1 }}
-                  exit={{ scale: 0, opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 15 }}
-                  className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                >
+                <motion.div {...checkAnimation} className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg">
                     <CheckCircle className="w-7 h-7 text-white" />
                   </div>
@@ -237,11 +248,13 @@ export default function EvidenciaPage({ id }: { id: number }) {
             </AnimatePresence>
           </div>
         )}
-        {aprobado && !esIrregular && (
+
+        {isApprovedAndNormal && (
           <span className="flex items-center gap-2 text-sm font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-6 py-3 rounded-xl">
             <CheckCircle className="w-4 h-4" /> Aprobado para auditoría
           </span>
         )}
+
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={() => setModalIrregular(true)}
@@ -250,9 +263,9 @@ export default function EvidenciaPage({ id }: { id: number }) {
           <AlertTriangle className="w-4 h-4" />
           Marcar irregularidad
         </motion.button>
-      </div>
+      </footer>
 
-      {/* Modal irregularidad */}
+      {/* Irregularity Modal */}
       <AnimatePresence>
         {modalIrregular && (
           <motion.div
@@ -263,14 +276,11 @@ export default function EvidenciaPage({ id }: { id: number }) {
             onClick={() => setModalIrregular(false)}
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              {...modalAnimation}
               className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center gap-3 mb-4">
+              <header className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
                   <AlertTriangle className="w-6 h-6 text-red-600" />
                 </div>
@@ -278,7 +288,7 @@ export default function EvidenciaPage({ id }: { id: number }) {
                   <h3 className="font-bold text-gray-900">Marcar irregularidad</h3>
                   <p className="text-xs text-gray-500">Se notificará al equipo de auditoría</p>
                 </div>
-              </div>
+              </header>
               <textarea
                 className="w-full text-sm border border-gray-200 rounded-xl p-3 resize-none focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400"
                 rows={4}
@@ -286,8 +296,11 @@ export default function EvidenciaPage({ id }: { id: number }) {
                 value={motivoIrregular}
                 onChange={(e) => setMotivoIrregular(e.target.value)}
               />
-              <div className="flex gap-3 mt-4">
-                <button onClick={() => setModalIrregular(false)} className="flex-1 py-2.5 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">
+              <footer className="flex gap-3 mt-4">
+                <button 
+                  onClick={() => setModalIrregular(false)} 
+                  className="flex-1 py-2.5 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
+                >
                   Cancelar
                 </button>
                 <button
@@ -296,11 +309,11 @@ export default function EvidenciaPage({ id }: { id: number }) {
                 >
                   Reportar irregularidad
                 </button>
-              </div>
+              </footer>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </main>
   );
 }

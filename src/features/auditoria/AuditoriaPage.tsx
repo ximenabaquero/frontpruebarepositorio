@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   CheckCircle, AlertTriangle, DollarSign, TrendingUp,
   Star, Download, FileBarChart, Building2, Loader2,
+  ChevronRight, Activity
 } from "lucide-react";
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
@@ -25,34 +26,34 @@ const SCORING = [
 ];
 
 const EXPORTES = [
-  { id: "rips",      label: "Exportar RIPS Mayo 2025",    icon: FileBarChart, color: "emerald" },
-  { id: "supersalud",label: "Indicadores Supersalud",     icon: Building2,    color: "blue"    },
-  { id: "adres",     label: "Reporte ADRES",              icon: Download,     color: "violet"  },
+  { id: "rips",       label: "Exportar RIPS Mayo 2025",     icon: FileBarChart },
+  { id: "supersalud", label: "Indicadores Supersalud",      icon: Building2    },
+  { id: "adres",      label: "Reporte ADRES",               icon: Download     },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const ESTADO: Record<string, { bg: string; text: string; border: string; label: string }> = {
-  aprobada:  { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200", label: "Aprobada" },
-  revision:  { bg: "bg-amber-50",   text: "text-amber-700",   border: "border-amber-200",   label: "Revisar" },
-  rechazada: { bg: "bg-red-50",     text: "text-red-700",     border: "border-red-200",     label: "Rechazada" },
+const ESTADO: Record<string, { bg: string; text: string; icon: any }> = {
+  aprobada:  { bg: "bg-emerald-500/10", text: "text-emerald-700", icon: CheckCircle },
+  revision:  { bg: "bg-amber-500/10",   text: "text-amber-700",   icon: AlertTriangle },
+  rechazada: { bg: "bg-rose-500/10",    text: "text-rose-700",    icon: AlertTriangle },
 };
 
 function Stars({ score }: { score: number }) {
   return (
     <div className="flex gap-0.5">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <Star
-          key={i}
-          className={`w-3.5 h-3.5 ${
-            i <= Math.round(score)
-              ? score >= 4 ? "text-amber-400 fill-amber-400"
-                : score >= 3 ? "text-amber-300 fill-amber-300"
-                : "text-red-400 fill-red-400"
-              : "text-gray-200 fill-gray-200"
-          }`}
-        />
-      ))}
+      {[1, 2, 3, 4, 5].map((i) => {
+        const isFilled = i <= Math.round(score);
+        const isHigh = score >= 4;
+        const isMed = score >= 3;
+        
+        let color = "text-slate-200 fill-slate-200";
+        if (isFilled) {
+          color = isHigh ? "text-amber-400 fill-amber-400" : isMed ? "text-amber-500 fill-amber-500" : "text-rose-500 fill-rose-500";
+        }
+        
+        return <Star key={i} className={`w-3.5 h-3.5 ${color}`} />;
+      })}
     </div>
   );
 }
@@ -63,207 +64,175 @@ export default function AuditoriaPage() {
   const [exportando, setExportando] = useState<string | null>(null);
 
   function handleExport(id: string) {
+    if (exportando) return;
     setExportando(id);
-    setTimeout(() => setExportando(null), 2500);
+    setTimeout(() => setExportando(null), 2000);
   }
 
   return (
-    <div className="p-6 space-y-6 max-w-6xl mx-auto">
-
-      {/* ── Encabezado ── */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Auditoría y reportes</h1>
-          <p className="text-sm text-gray-500 mt-0.5">EPS Sura · Verificación de servicios domiciliarios</p>
-        </div>
-        <div className="flex items-center gap-3 flex-shrink-0">
-          <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-3 py-1.5 rounded-lg">
-            📅 Mayo 2025
-          </span>
+    <div className="min-h-screen bg-slate-50/50 p-6 font-sans text-slate-900">
+      <div className="space-y-8 max-w-[1200px] mx-auto">
+        
+        {/* ── Header ── */}
+        <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-6">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="flex h-6 items-center rounded-full bg-indigo-500/10 px-2.5 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-500/20">
+                EPS Sura
+              </span>
+              <span className="text-sm font-medium text-slate-500">Mayo 2025</span>
+            </div>
+            <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Auditoría Domiciliaria</h1>
+            <p className="text-sm text-slate-500 mt-1">Monitoreo sistémico de servicios y verificación de firmas.</p>
+          </div>
+          
           <button
             onClick={() => handleExport("rips")}
-            className="flex items-center gap-2 text-sm font-semibold text-white px-4 py-2 rounded-xl transition-all"
-            style={{ background: "#0FB888" }}
+            disabled={!!exportando}
+            className="group relative inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {exportando === "rips" ? (
-              <><Loader2 className="w-4 h-4 animate-spin" /> Generando...</>
+              <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
             ) : (
-              <><Download className="w-4 h-4" /> Exportar RIPS</>
+              <Activity className="h-4 w-4 text-slate-400 group-hover:text-white transition-colors" />
             )}
+            {exportando === "rips" ? "Procesando matriz..." : "Generar RIPS Central"}
           </button>
-        </div>
-      </div>
+        </header>
 
-      {/* ── Sección 1: 4 KPIs ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-
-        <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-          <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center mb-3">
-            <CheckCircle className="w-5 h-5 text-emerald-600" />
-          </div>
-          <p className="text-3xl font-black text-emerald-600">100%</p>
-          <p className="text-sm text-gray-600 mt-1 leading-tight">Servicios con GPS + firma verificados</p>
-          <div className="mt-3 w-full bg-gray-100 rounded-full h-1.5">
-            <div className="h-1.5 rounded-full bg-emerald-500 w-full" />
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl border-2 border-red-200 p-5 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-red-500" />
-          <div className="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center mb-3">
-            <AlertTriangle className="w-5 h-5 text-red-600" />
-          </div>
-          <p className="text-3xl font-black text-red-600">3</p>
-          <p className="text-sm text-gray-600 mt-1 leading-tight">Visitas con irregularidades detectadas</p>
-          <p className="text-xs text-red-500 font-semibold mt-2">GPS fuera de rango o firma ausente</p>
-        </div>
-
-        <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-          <div className="w-9 h-9 rounded-xl bg-violet-50 flex items-center justify-center mb-3">
-            <DollarSign className="w-5 h-5 text-violet-600" />
-          </div>
-          <p className="text-3xl font-black text-gray-900">$18.4M</p>
-          <p className="text-xs text-gray-400 font-medium">COP</p>
-          <p className="text-sm text-gray-600 mt-1 leading-tight">Listo para facturar</p>
-        </div>
-
-        <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-          <div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center mb-3">
-            <TrendingUp className="w-5 h-5 text-amber-600" />
-          </div>
-          <p className="text-3xl font-black text-gray-900">2.1%</p>
-          <p className="text-sm text-gray-600 mt-1 leading-tight">Siniestralidad extramural del mes</p>
-          <p className="text-xs text-emerald-600 font-semibold mt-2">↓ 0.3pp vs abril</p>
-        </div>
-      </div>
-
-      {/* ── Sección 2: Tabla de prestadores ── */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100">
-          <h2 className="text-base font-bold text-gray-900">Estado de cuentas por prestador</h2>
-          <p className="text-xs text-gray-400 mt-0.5">142 servicios ejecutados · Mayo 2025</p>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="text-left px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Prestador</th>
-                <th className="text-center px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Servicios</th>
-                <th className="text-center px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">GPS ✅</th>
-                <th className="text-center px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Firma ✅</th>
-                <th className="text-right px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Monto radicado</th>
-                <th className="text-left px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Estado</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {PRESTADORES.map((p) => {
-                const est = ESTADO[p.estado];
-                const rowBg = p.estado === "rechazada" ? "bg-red-50/30" : p.estado === "revision" ? "bg-amber-50/30" : "";
-                return (
-                  <tr key={p.nombre} className={`${rowBg} hover:bg-gray-50/60 transition-colors`}>
-                    <td className="px-5 py-4 font-semibold text-gray-900">{p.nombre}</td>
-                    <td className="px-4 py-4 text-center font-bold text-gray-900">{p.servicios}</td>
-                    <td className="px-4 py-4 text-center">
-                      <span className={`font-bold ${p.gps === p.servicios ? "text-emerald-600" : "text-red-600"}`}>
-                        {p.gps} {p.gps < p.servicios && <span className="text-xs text-red-500">({p.servicios - p.gps} sin GPS)</span>}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4 text-center">
-                      <span className={`font-bold ${p.firma === p.servicios ? "text-emerald-600" : "text-amber-600"}`}>
-                        {p.firma} {p.firma < p.servicios && <span className="text-xs text-amber-500">({p.servicios - p.firma} sin firma)</span>}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4 text-right font-bold text-gray-900">{p.monto} COP</td>
-                    <td className="px-5 py-4">
-                      <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full border ${est.bg} ${est.text} ${est.border}`}>
-                        {p.estado === "aprobada" && <CheckCircle className="w-3 h-3" />}
-                        {p.estado === "revision" && <AlertTriangle className="w-3 h-3" />}
-                        {p.estado === "rechazada" && <AlertTriangle className="w-3 h-3" />}
-                        {est.label}
-                        {p.razon && <span className="opacity-70">· {p.razon}</span>}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* ── Sección 3: Scoring ── */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100">
-          <h2 className="text-base font-bold text-gray-900">Scoring de prestadores</h2>
-          <p className="text-xs text-gray-400 mt-0.5">Calificación basada en GPS, firma y cumplimiento</p>
-        </div>
-        <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-          {SCORING.map((s) => {
-            const color = s.score >= 4.5 ? "emerald" : s.score >= 3.5 ? "amber" : "red";
-            const colors: Record<string, string> = {
-              emerald: "bg-emerald-50 border-emerald-200 text-emerald-700",
-              amber:   "bg-amber-50 border-amber-200 text-amber-700",
-              red:     "bg-red-50 border-red-200 text-red-700",
-            };
-            const scoreColors: Record<string, string> = {
-              emerald: "text-emerald-600",
-              amber:   "text-amber-600",
-              red:     "text-red-600",
-            };
-            return (
-              <div key={s.nombre} className={`rounded-2xl border p-4 flex flex-col gap-2 ${colors[color]}`}>
-                <p className="text-sm font-bold text-gray-900">{s.nombre}</p>
-                <div className="flex items-center gap-2">
-                  <span className={`text-2xl font-black ${scoreColors[color]}`}>★ {s.score}</span>
+        {/* ── KPIs ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { label: "Cumplimiento GPS/Firma", value: "100%", sub: "Servicios verificados", icon: CheckCircle, color: "text-emerald-600", bg: "bg-emerald-50" },
+            { label: "Irregularidades Activas", value: "3", sub: "GPS o firma ausente", icon: AlertTriangle, color: "text-rose-600", bg: "bg-rose-50", alert: true },
+            { label: "Capital Radicado", value: "$18.4M", sub: "COP · Listo para facturar", icon: DollarSign, color: "text-slate-900", bg: "bg-slate-100" },
+            { label: "Siniestralidad Extramural", value: "2.1%", sub: "↓ 0.3pp vs Abril", icon: TrendingUp, color: "text-slate-900", bg: "bg-slate-100" }
+          ].map((kpi, i) => (
+            <div key={i} className="relative overflow-hidden rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+              {kpi.alert && <div className="absolute top-0 left-0 w-full h-1 bg-rose-500" />}
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-slate-500">{kpi.label}</p>
+                <div className={`flex h-8 w-8 items-center justify-center rounded-md ${kpi.bg}`}>
+                  <kpi.icon className={`h-4 w-4 ${kpi.color}`} />
                 </div>
-                <Stars score={s.score} />
-                <p className="text-xs text-gray-500 leading-snug">{s.razon}</p>
               </div>
-            );
-          })}
+              <div className="mt-4">
+                <p className={`text-3xl font-semibold tracking-tight ${kpi.color}`}>{kpi.value}</p>
+                <p className="text-xs text-slate-400 mt-1">{kpi.sub}</p>
+              </div>
+            </div>
+          ))}
         </div>
-      </div>
 
-      {/* ── Sección 4: Exportes regulatorios ── */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100">
-          <h2 className="text-base font-bold text-gray-900">Exportes regulatorios</h2>
-          <p className="text-xs text-gray-400 mt-0.5">Reportes requeridos por entes de control · Mayo 2025</p>
-        </div>
-        <div className="p-6 flex flex-wrap gap-4">
-          {EXPORTES.map((e) => {
-            const Icon = e.icon;
-            const isLoading = exportando === e.id;
-            const btnColors: Record<string, string> = {
-              emerald: "bg-emerald-600 hover:bg-emerald-700",
-              blue:    "bg-blue-600 hover:bg-blue-700",
-              violet:  "bg-violet-600 hover:bg-violet-700",
-            };
-            return (
-              <button
-                key={e.id}
-                onClick={() => handleExport(e.id)}
-                disabled={!!exportando}
-                className={`flex items-center gap-3 px-6 py-3 rounded-xl text-white font-semibold text-sm transition-all shadow-sm disabled:opacity-60 ${btnColors[e.color]}`}
-              >
-                {isLoading ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" /> Generando reporte...</>
-                ) : (
-                  <><Icon className="w-4 h-4" /> {e.label}</>
-                )}
-              </button>
-            );
-          })}
-        </div>
-        {exportando && (
-          <div className="mx-6 mb-6 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl">
-            <p className="text-sm text-emerald-700 font-semibold">
-              ⏳ Generando reporte... Este proceso puede tardar unos segundos.
-            </p>
+        {/* ── Table & Scoring Grid ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* Table */}
+          <div className="lg:col-span-2 rounded-xl bg-white shadow-sm ring-1 ring-slate-200 overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+              <h2 className="text-base font-semibold text-slate-900">Estado de Liquidación</h2>
+              <span className="text-xs text-slate-400">142 operaciones totales</span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm text-left">
+                <thead className="bg-slate-50/50 text-slate-500 text-xs uppercase tracking-wider">
+                  <tr>
+                    <th className="px-5 py-3 font-medium">Prestador</th>
+                    <th className="px-4 py-3 font-medium text-center">Volumen</th>
+                    <th className="px-4 py-3 font-medium text-center">Tasa GPS</th>
+                    <th className="px-4 py-3 font-medium text-center">Tasa Firma</th>
+                    <th className="px-4 py-3 font-medium text-right">Monto</th>
+                    <th className="px-5 py-3 font-medium">Estado</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {PRESTADORES.map((p) => {
+                    const est = ESTADO[p.estado];
+                    const StateIcon = est.icon;
+                    return (
+                      <tr key={p.nombre} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-5 py-3 font-medium text-slate-900">{p.nombre}</td>
+                        <td className="px-4 py-3 text-center text-slate-600">{p.servicios}</td>
+                        <td className="px-4 py-3 text-center">
+                          <span className={p.gps === p.servicios ? "text-slate-900" : "text-rose-600 font-medium"}>
+                            {p.gps}/{p.servicios}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <span className={p.firma === p.servicios ? "text-slate-900" : "text-amber-600 font-medium"}>
+                            {p.firma}/{p.servicios}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right tabular-nums text-slate-600">{p.monto}</td>
+                        <td className="px-5 py-3">
+                          <div className="flex flex-col items-start gap-1">
+                            <span className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ${est.bg} ${est.text}`}>
+                              <StateIcon className="h-3 w-3" />
+                              {p.estado.charAt(0).toUpperCase() + p.estado.slice(1)}
+                            </span>
+                            {p.razon && <span className="text-[10px] text-slate-400 font-medium tracking-tight">{p.razon}</span>}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
-        )}
-      </div>
 
+          {/* Scoring List */}
+          <div className="rounded-xl bg-white shadow-sm ring-1 ring-slate-200 overflow-hidden flex flex-col">
+            <div className="px-5 py-4 border-b border-slate-100">
+              <h2 className="text-base font-semibold text-slate-900">Índice de Confiabilidad</h2>
+              <p className="text-xs text-slate-400 mt-0.5">Métrica compuesta de cumplimiento</p>
+            </div>
+            <div className="p-2 flex-1 overflow-y-auto">
+              {SCORING.map((s) => (
+                <div key={s.nombre} className="flex items-start justify-between p-3 hover:bg-slate-50 rounded-lg transition-colors">
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">{s.nombre}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">{s.razon}</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="text-sm font-semibold tabular-nums text-slate-900">{s.score}</span>
+                    <Stars score={s.score} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+
+        {/* ── Subrutinas de Exportación ── */}
+        <section className="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+          <h2 className="text-sm font-semibold text-slate-900 mb-4">Módulos de Reporte Regulatorio</h2>
+          <div className="flex flex-wrap gap-3">
+            {EXPORTES.map((e) => {
+              const Icon = e.icon;
+              const isProcessing = exportando === e.id;
+              return (
+                <button
+                  key={e.id}
+                  onClick={() => handleExport(e.id)}
+                  disabled={!!exportando}
+                  className="flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-700 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 hover:text-slate-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isProcessing ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+                  ) : (
+                    <Icon className="h-4 w-4 text-slate-400" />
+                  )}
+                  {e.label}
+                  <ChevronRight className="h-3 w-3 text-slate-300 ml-1" />
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+      </div>
     </div>
   );
 }
