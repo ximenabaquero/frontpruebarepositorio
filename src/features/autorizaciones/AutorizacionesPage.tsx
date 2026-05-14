@@ -21,16 +21,16 @@ const COMPLEJIDAD_STYLES = {
 };
 
 const URGENCIA_STYLES = {
-  urgente:    { bg: "bg-red-50",   text: "text-red-600",   label: "🔴 Urgente"    },
-  programado: { bg: "bg-gray-50",  text: "text-gray-600",  label: "⏱ Programado" },
+  urgente:    { bg: "bg-red-50",   text: "text-red-600",   label: "Urgente"    },
+  programado: { bg: "bg-gray-50",  text: "text-gray-600",  label: "Programado" },
 };
 
 const ESTADO_STYLES: Record<EstadoSolicitud, { bg: string; text: string; label: string }> = {
   pendiente:           { bg: "bg-gray-100",    text: "text-gray-600",   label: "Pendiente"             },
-  aprobado:            { bg: "bg-emerald-100", text: "text-emerald-700",label: "✅ Aprobado"            },
-  aprobado_condiciones:{ bg: "bg-amber-100",   text: "text-amber-700",  label: "⚠️ Aprobado con cond." },
-  negado:              { bg: "bg-red-100",     text: "text-red-700",    label: "❌ Negado"              },
-  mas_info:            { bg: "bg-blue-100",    text: "text-blue-700",   label: "ℹ️ Más info solicitada" },
+  aprobado:            { bg: "bg-emerald-100", text: "text-emerald-700",label: "Aprobado"            },
+  aprobado_condiciones:{ bg: "bg-amber-100",   text: "text-amber-700",  label: "Aprobado con cond." },
+  negado:              { bg: "bg-red-100",     text: "text-red-700",    label: "Negado"              },
+  mas_info:            { bg: "bg-blue-100",    text: "text-blue-700",   label: "ℹMás info solicitada" },
 };
 
 const TIPOS_SERVICIO = ["Todos", "Enfermería domiciliaria", "Fisioterapia respiratoria", "Fisioterapia", "Curación herida", "Infusión IV", "Rehabilitación neurológica"];
@@ -144,7 +144,7 @@ export default function AutorizacionesPage() {
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
               >
-                {u === "todos" ? "Todos" : u === "urgente" ? "🔴 Urgentes" : "⏱ Programados"}
+                {u === "todos" ? "Todos" : u === "urgente" ? "Urgentes" : "Programados"}
               </button>
             ))}
           </div>
