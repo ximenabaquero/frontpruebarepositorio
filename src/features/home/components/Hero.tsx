@@ -12,13 +12,13 @@ interface Metric {
 const HERO_METRICS: Metric[] = [
   {
     id: 'metric-preventable-er',
-    value: 'USD 14.500M',
+    value: 'USD 14.5B',
     label: 'en cuidado domiciliario pagados sin verificación electrónica en NY en un año'
   },
   {
     id: 'metric-unmonitored',
     value: '10%',
-    label: 'de pacientes hospitalizados reingresan dentro de los 30 días post-alta en Colombia'
+    label: 'de pacientes reingresan al hospital dentro de los 30 días post-alta en Colombia'
   },
   { 
     id: 'metric-cost', 
@@ -82,7 +82,7 @@ const OlgaHero: React.FC = () => {
                     <dt className="order-2 text-[10px] leading-relaxed uppercase tracking-widest text-slate-300 mt-3">
                       {metric.label}
                     </dt>
-                    <dd className="order-1 text-4xl md:text-5xl font-light text-[#2BB38E] m-0">
+                    <dd className={`order-1 font-light text-[#2BB38E] m-0 ${metric.value.length > 6 ? 'text-3xl md:text-4xl' : 'text-4xl md:text-5xl'}`}>
                       {metric.value}
                     </dd>
                   </div>
