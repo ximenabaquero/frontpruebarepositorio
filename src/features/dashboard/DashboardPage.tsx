@@ -52,7 +52,7 @@ const PRESUPUESTO_LIMITE = 21.5;
 const MiniKpi = ({ title, value, icon: Icon, color, bg, tooltip }: { title: string, value: string, icon: LucideIcon, color: string, bg: string, tooltip?: string }) => {
   const [show, setShow] = useState(false);
   return (
-    <div className="relative overflow-hidden rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+    <div className="relative rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           <p className="text-sm font-medium text-slate-500 uppercase tracking-tight">{title}</p>

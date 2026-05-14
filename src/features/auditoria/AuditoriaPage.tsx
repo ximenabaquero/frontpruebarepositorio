@@ -124,8 +124,8 @@ export default function AuditoriaPage() {
             { label: "Capital Radicado", value: "$18.4M", sub: "COP · Listo para facturar", icon: DollarSign, color: "text-slate-900", bg: "bg-slate-100" },
             { label: "Siniestralidad Extramural", value: "2.1%", sub: "↓ 0.3pp vs Abril", icon: TrendingUp, color: "text-slate-900", bg: "bg-slate-100" }
           ].map((kpi, i) => (
-            <div key={i} className="relative overflow-hidden rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-              {kpi.alert && <div className="absolute top-0 left-0 w-full h-1 bg-rose-500" />}
+            <div key={i} className={`relative rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200 ${kpi.alert ? 'border-t-2 border-t-rose-500' : ''}`}>
+              {false && null}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5 flex-1 min-w-0">
                   <p className="text-sm font-medium text-slate-500 truncate">{kpi.label}</p>
