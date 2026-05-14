@@ -326,21 +326,6 @@ export default function AuditoriaPage() {
           </div>
         </header>
 
-        {/* ── Banner de contexto ── */}
-        <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-5">
-          <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-2">¿Qué muestra esta pantalla?</p>
-          <p className="text-sm text-slate-700 leading-relaxed">
-            Esta pantalla responde dos preguntas que ningún pagador puede responder hoy sin OLGA:{" "}
-            <strong>¿Me cobraron por visitas que realmente ocurrieron?</strong> y{" "}
-            <strong>¿las visitas que pagué mejoraron al paciente?</strong>{" "}
-            Cada fila es un prestador. Cada número es verificable con GPS, firma digital y nota clínica.
-          </p>
-          <div className="mt-3 flex flex-wrap gap-4 text-xs font-medium text-slate-600">
-            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" /> Capital aprobado = visita con triple evidencia, lista para pago</span>
-            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" /> En cuarentena = fallo técnico, retenido hasta aclaración</span>
-            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block" /> Rechazado = fraude comprobado, no se paga</span>
-          </div>
-        </div>
 
         {/* ── KPI Cards (4) ── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
