@@ -278,7 +278,7 @@ export default function AuditoriaPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/50 p-6 font-sans text-slate-900">
+    <div className="min-h-screen bg-slate-50/50 p-4 lg:p-6 font-sans text-slate-900">
       <div className="space-y-8 max-w-[1200px] mx-auto">
 
         {/* ── Header ── */}
@@ -290,7 +290,7 @@ export default function AuditoriaPage() {
               </span>
               <span className="text-sm font-medium text-slate-500">Mayo 2026</span>
             </div>
-            <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Auditoría Domiciliaria</h1>
+            <h1 className="text-xl sm:text-3xl font-semibold tracking-tight text-slate-900">Auditoría Domiciliaria</h1>
             <p className="text-sm text-slate-500 mt-1">
               {TOTAL_OPS} operaciones auditadas · {TOTAL_FALLOS} con fallo registrado · Conciliación financiera activa.
             </p>

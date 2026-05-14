@@ -103,7 +103,7 @@ export default function PacientesListPage() {
             </span>
             <span className="text-sm font-medium text-slate-500 tracking-tight">Mayo 2026</span>
           </div>
-          <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Pacientes Monitoreados</h1>
+          <h1 className="text-xl sm:text-3xl font-semibold tracking-tight text-slate-900">Pacientes Monitoreados</h1>
           <p className="text-sm font-medium text-slate-500 mt-1">
             {pacientesPagador.length} registros en red activa
           </p>

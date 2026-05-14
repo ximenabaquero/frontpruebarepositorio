@@ -106,7 +106,7 @@ export default function AutorizacionesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Solicitudes de Autorización</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Solicitudes de Autorización</h1>
           <p className="text-sm text-gray-500 mt-0.5">
             {pendientes} pendientes de revisión · Mayo 2026
           </p>
