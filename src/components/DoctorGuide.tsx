@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import Lottie from "lottie-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, MessageCircle } from "lucide-react";
+import { X } from "lucide-react";
 
 // Mensajes contextuales por ruta
 const MENSAJES: Record<string, string[]> = {
@@ -53,26 +52,13 @@ function getMensaje(pathname: string): string[] {
   return DEFAULT;
 }
 
-// Animación Lottie inline — doctor saludando (SVG animado simple como fallback)
-// URL de Lottie pública de un médico
-const LOTTIE_URL = "https://lottie.host/4db68bbd-31f6-4cd8-84eb-189de081159a/KniiFBWCIb.json";
-
 export default function DoctorGuide() {
   const pathname = usePathname() ?? "/dashboard";
-  const [animData, setAnimData] = useState<object | null>(null);
   const [visible, setVisible] = useState(true);
   const [bubbleVisible, setBubbleVisible] = useState(false);
   const [msgIdx, setMsgIdx] = useState(0);
 
   const mensajes = getMensaje(pathname);
-
-  // Cargar la animación Lottie desde URL
-  useEffect(() => {
-    fetch(LOTTIE_URL)
-      .then((r) => r.json())
-      .then(setAnimData)
-      .catch(() => setAnimData(null));
-  }, []);
 
   // Al cambiar de pantalla: mostrar burbuja automáticamente con el primer mensaje
   useEffect(() => {
@@ -134,24 +120,15 @@ export default function DoctorGuide() {
           className="relative w-16 h-16 rounded-full bg-emerald-600 border-4 border-white shadow-xl overflow-hidden flex items-center justify-center cursor-pointer hover:shadow-2xl transition-shadow"
           title="Doctor OLGA"
         >
-          {animData ? (
-            <Lottie
-              animationData={animData}
-              loop
-              style={{ width: 64, height: 64 }}
-            />
-          ) : (
-            // Fallback SVG doctor si no carga Lottie
-            <svg viewBox="0 0 64 64" className="w-full h-full" fill="none">
-              <circle cx="32" cy="32" r="32" fill="#059669" />
-              <circle cx="32" cy="22" r="10" fill="#fff" />
-              <path d="M12 56c0-11 8.95-20 20-20s20 8.95 20 20" fill="#fff" />
-              <line x1="28" y1="35" x2="28" y2="42" stroke="#059669" strokeWidth="2" />
-              <line x1="36" y1="35" x2="36" y2="42" stroke="#059669" strokeWidth="2" />
-              <line x1="32" y1="38" x2="32" y2="44" stroke="#059669" strokeWidth="2" />
-              <rect x="28" y="42" width="8" height="4" rx="2" fill="#059669" />
-            </svg>
-          )}
+          <svg viewBox="0 0 64 64" className="w-full h-full" fill="none">
+            <circle cx="32" cy="32" r="32" fill="#059669" />
+            <circle cx="32" cy="22" r="10" fill="#fff" />
+            <path d="M12 56c0-11 8.95-20 20-20s20 8.95 20 20" fill="#fff" />
+            <line x1="28" y1="35" x2="28" y2="42" stroke="#059669" strokeWidth="2" />
+            <line x1="36" y1="35" x2="36" y2="42" stroke="#059669" strokeWidth="2" />
+            <line x1="32" y1="38" x2="32" y2="44" stroke="#059669" strokeWidth="2" />
+            <rect x="28" y="42" width="8" height="4" rx="2" fill="#059669" />
+          </svg>
           {/* Badge verde de disponible */}
           <span className="absolute bottom-0.5 right-0.5 w-4 h-4 bg-emerald-400 border-2 border-white rounded-full" />
         </motion.button>
