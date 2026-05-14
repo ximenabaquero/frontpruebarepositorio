@@ -194,7 +194,7 @@ export default function PagadorLayout({ children }: { children: React.ReactNode 
         </main>
       </div>
 
-      <DoctorGuide />
+      {/* <DoctorGuide /> */}
     </div>
   );
 }
