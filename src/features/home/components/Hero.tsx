@@ -10,15 +10,15 @@ interface Metric {
 // 2. Extraer datos estáticos. Dejar esto dentro del componente hace que React 
 // reasigne memoria en cada renderizado. Ineficiencia pura.
 const HERO_METRICS: Metric[] = [
-  { 
-    id: 'metric-preventable-er', 
-    value: '67%', 
-    label: 'de urgencias en LATAM son prevenibles' 
+  {
+    id: 'metric-preventable-er',
+    value: 'USD 14.500M',
+    label: 'en cuidado domiciliario pagados sin verificación electrónica en NY en un año'
   },
-  { 
-    id: 'metric-unmonitored', 
-    value: '85%', 
-    label: 'de pacientes sin monitoreo entre citas' 
+  {
+    id: 'metric-unmonitored',
+    value: '10%',
+    label: 'de pacientes hospitalizados reingresan dentro de los 30 días post-alta en Colombia'
   },
   { 
     id: 'metric-cost', 
