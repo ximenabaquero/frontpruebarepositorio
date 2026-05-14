@@ -146,7 +146,6 @@ const CUPS_MEDICOS = [
 ];
 
 const EXPORTES = [
-  { id: "rips",       label: "Exportar RIPS Mayo 2026",  icon: FileBarChart },
   { id: "supersalud", label: "Indicadores Supersalud",   icon: Building2    },
   { id: "adres",      label: "Reporte ADRES",            icon: Download     },
 ];
@@ -296,17 +295,7 @@ export default function AuditoriaPage() {
               {TOTAL_OPS} operaciones auditadas · {TOTAL_FALLOS} con fallo registrado · Conciliación financiera activa.
             </p>
           </div>
-          <button
-            onClick={() => handleExport("rips")}
-            disabled={!!exportando}
-            className="group inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-slate-800 disabled:opacity-70 disabled:cursor-not-allowed"
-          >
-            {exportando === "rips"
-              ? <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
-              : <Activity className="h-4 w-4 text-slate-400 group-hover:text-white transition-colors" />
-            }
-            {exportando === "rips" ? "Procesando matriz..." : "Generar RIPS Central"}
-          </button>
+          
         </header>
 
         {/* ── KPI Cards (5) ── */}
