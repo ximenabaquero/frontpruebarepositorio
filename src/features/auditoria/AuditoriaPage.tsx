@@ -8,23 +8,6 @@ import {
   ChevronRight, Activity, HelpCircle, Users2,
   X, Cpu, ShieldX, Clock
 } from "lucide-react";
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip as RechartsTooltip, Legend, ReferenceLine, ResponsiveContainer,
-} from "recharts";
-
-// ─── Comparativo data ─────────────────────────────────────────────────────────
-
-const COMPARATIVO = [
-  { mes: "Dic", inversion: 18.2, gasto: 16.8 },
-  { mes: "Ene", inversion: 19.0, gasto: 17.4 },
-  { mes: "Feb", inversion: 18.5, gasto: 19.1 },
-  { mes: "Mar", inversion: 20.0, gasto: 18.3 },
-  { mes: "Abr", inversion: 21.0, gasto: 19.7 },
-  { mes: "May", inversion: 22.0, gasto: 18.4 },
-];
-const PRESUPUESTO_LIMITE = 21.5;
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function fmtM(n: number) {
@@ -434,48 +417,6 @@ export default function AuditoriaPage() {
 
         </div>
 
-        {/* ── Comparativo inversión vs gasto ── */}
-        <div className="rounded-xl bg-white shadow-sm ring-1 ring-slate-200 overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-1.5">
-                <h2 className="text-base font-semibold text-slate-900">Inversión contratada vs. Gasto real</h2>
-                <Tip text="Inversión contratada: valor pactado en el contrato con cada prestador por mes. Gasto real: lo que efectivamente se ejecutó y auditó. La línea roja es el techo presupuestal ($21.5M COP). El triángulo ▲ indica mes donde el gasto superó la inversión." wide />
-              </div>
-              <p className="text-xs text-slate-400 mt-0.5">Millones COP · Dic 2025 – May 2026</p>
-            </div>
-            <div className="text-right">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ahorro acumulado</p>
-              <p className="text-lg font-bold text-emerald-600">$9.4M COP</p>
-            </div>
-          </div>
-          <div className="p-4">
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={COMPARATIVO} margin={{ top: 8, right: 16, left: -8, bottom: 4 }} barCategoryGap="30%">
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis dataKey="mes" tick={{ fontSize: 11, fill: '#64748b' }} />
-                <YAxis tick={{ fontSize: 11, fill: '#64748b' }} unit="M" domain={[14, 24]} />
-                <RechartsTooltip
-                  formatter={(v: number | undefined) => v !== undefined ? [`$${v}M COP`] : ['']}
-                  contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e2e8f0' }}
-                />
-                <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
-                <ReferenceLine y={PRESUPUESTO_LIMITE} stroke="#f43f5e" strokeDasharray="4 4"
-                  label={{ value: 'Límite presup.', fill: '#f43f5e', fontSize: 10, position: 'right' }} />
-                <Bar dataKey="inversion" name="Inversión contratada" fill="#6366f1" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="gasto" name="Gasto real" fill="#10b981" radius={[4, 4, 0, 0]}
-                  label={(props: any) => {
-                    const { x, y, width, value, index } = props;
-                    return value > COMPARATIVO[index].inversion
-                      ? <text x={x + width / 2} y={y - 4} fill="#f43f5e" fontSize={9} textAnchor="middle" fontWeight={700}>▲</text>
-                      : null;
-                  }}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
         {/* ── Tabla de Liquidación + Scoring ── */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
@@ -634,52 +575,39 @@ export default function AuditoriaPage() {
           </div>
         </div>
 
-        {/* ── CUPS por profesional ── */}
+        {/* ── Atenciones efectivas por CUPS ── */}
         <div className="rounded-xl bg-white shadow-sm ring-1 ring-slate-200 overflow-hidden">
           <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Users2 className="h-4 w-4 text-indigo-500" />
-              <h2 className="text-base font-semibold text-slate-900">Atenciones efectivas por profesional</h2>
-              <Tip text="Desglose de servicios por profesional con su código CUPS (Clasificación Única de Procedimientos en Salud). Permite detectar concentración de servicios en un solo profesional, patrón de facturación inusual o profesionales con bajo cumplimiento GPS." wide />
+              <h2 className="text-base font-semibold text-slate-900">Atenciones efectivas por CUPS</h2>
+              <Tip text="Agrupa los servicios por tipo de procedimiento (código CUPS del Ministerio de Salud). Permite detectar qué tipo de atención domiciliaria se está prestando más, cuánto cuesta y si el volumen es coherente con los contratos firmados." wide />
             </div>
-            <span className="text-xs text-slate-400">Mayo 2026 · CUPS verificados</span>
+            <span className="text-xs text-slate-400">Mayo 2026</span>
           </div>
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm text-left">
               <thead className="bg-slate-50/50 text-slate-500 text-xs uppercase tracking-wider">
                 <tr>
-                  <th className="px-5 py-3 font-medium">Médico / Profesional</th>
-                  <th className="px-4 py-3 font-medium">IPS</th>
+                  <th className="px-5 py-3 font-medium">IPS</th>
                   <th className="px-4 py-3 font-medium">
-                    <span className="flex items-center gap-1">CUPS principal <Tip text="Código CUPS: identificador único del tipo de procedimiento según el Ministerio de Salud. Base para tarifación y glosas en el sistema de salud colombiano." /></span>
+                    <span className="flex items-center gap-1">CUPS <Tip text="Código único del procedimiento según el Ministerio de Salud. Define exactamente qué tipo de servicio se prestó y determina la tarifa oficial de pago." /></span>
                   </th>
                   <th className="px-4 py-3 font-medium text-center">
-                    <span className="flex items-center justify-center gap-1">Atenciones <Tip text="Número de visitas domiciliarias facturadas por este profesional en el mes bajo este CUPS." /></span>
+                    <span className="flex items-center justify-center gap-1">Atenciones <Tip text="Número de veces que se prestó este servicio en el mes. Si el número es muy alto para una sola IPS, puede indicar sobrefacturación." /></span>
                   </th>
                   <th className="px-4 py-3 font-medium text-right">
-                    <span className="flex items-center justify-end gap-1">Monto total <Tip text="Valor total facturado por este profesional en el período. Se cruza contra el contrato de la IPS para detectar sobrefacturación." /></span>
-                  </th>
-                  <th className="px-5 py-3 font-medium text-center">
-                    <span className="flex items-center justify-center gap-1">% GPS <Tip text="Porcentaje de visitas de este profesional donde el GPS fue verificado exitosamente. Verde = 100%. Ámbar = fallos técnicos pendientes." /></span>
+                    <span className="flex items-center justify-end gap-1">Monto total <Tip text="Total facturado por este tipo de servicio en el mes. Se cruza contra las tarifas del contrato para detectar cobros por encima de lo acordado." /></span>
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {CUPS_MEDICOS.map((row) => (
-                  <tr key={row.medico} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-5 py-3 font-medium text-slate-900">{row.medico}</td>
-                    <td className="px-4 py-3 text-slate-500">{row.ips}</td>
-                    <td className="px-4 py-3 text-slate-600 text-xs font-mono">{row.cups}</td>
-                    <td className="px-4 py-3 text-center text-slate-700 font-semibold">{row.atenciones}</td>
-                    <td className="px-4 py-3 text-right tabular-nums text-slate-600">{row.monto}</td>
-                    <td className="px-5 py-3 text-center">
-                      <span className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold ${
-                        row.gps_pct === 100 ? "bg-emerald-500/10 text-emerald-700" : "bg-amber-500/10 text-amber-700"
-                      }`}>
-                        {row.gps_pct === 100 ? <CheckCircle className="h-3 w-3" /> : <Cpu className="h-3 w-3" />}
-                        {row.gps_pct}%
-                      </span>
-                    </td>
+                  <tr key={row.cups} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="px-5 py-3 text-slate-500">{row.ips}</td>
+                    <td className="px-4 py-3 text-slate-700 text-xs font-mono">{row.cups}</td>
+                    <td className="px-4 py-3 text-center text-slate-900 font-semibold">{row.atenciones}</td>
+                    <td className="px-4 py-3 text-right tabular-nums font-semibold text-slate-900">{row.monto}</td>
                   </tr>
                 ))}
               </tbody>

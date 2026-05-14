@@ -4,16 +4,16 @@ import React, { useState } from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
-  Users,
-  FileText,
   ChevronRight,
   ArrowUpRight,
   LucideIcon,
   Activity,
-  CheckCircle,
-  ShieldAlert,
+  TrendingDown,
+  Star,
+  BarChart2,
   Zap,
   HelpCircle,
+  FileText,
 } from "lucide-react";
 
 // --- DATA (Preservada íntegramente) ---
@@ -33,7 +33,7 @@ const REQUESTS = [
 ];
 
 // --- COMPONENTS ---
-const MiniKpi = ({ title, value, icon: Icon, color, bg, tooltip }: { title: string, value: string, icon: LucideIcon, color: string, bg: string, tooltip?: string }) => {
+const MiniKpi = ({ title, value, sub, icon: Icon, color, bg, tooltip }: { title: string, value: string, sub?: string, icon: LucideIcon, color: string, bg: string, tooltip?: string }) => {
   const [show, setShow] = useState(false);
   return (
     <div className="relative rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
@@ -62,6 +62,7 @@ const MiniKpi = ({ title, value, icon: Icon, color, bg, tooltip }: { title: stri
       </div>
       <div className="mt-4">
         <p className={`text-3xl font-semibold tracking-tight text-slate-900`}>{value}</p>
+        {sub && <p className="text-xs text-slate-400 mt-1">{sub}</p>}
       </div>
     </div>
   );
@@ -95,14 +96,18 @@ export default function DashboardCompacto() {
 
         {/* KPI GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <MiniKpi title="Pacientes activos" value="47" icon={Users} color="text-indigo-600" bg="bg-indigo-50"
-            tooltip="Total de afiliados con plan domiciliario autorizado y activo en la red de prestadores." />
-          <MiniKpi title="Alertas críticas" value="05" icon={ShieldAlert} color="text-rose-600" bg="bg-rose-50"
-            tooltip="Pacientes con visita no confirmada en 48h o signos vitales fuera de rango. Requieren intervención inmediata." />
-          <MiniKpi title="Por autorizar" value="08" icon={FileText} color="text-amber-600" bg="bg-amber-50"
-            tooltip="Solicitudes de autorización pendientes de revisión. Incluye PHD, PAD, PARD y curaciones en casa." />
-          <MiniKpi title="Ejecución mes" value="80%" icon={CheckCircle} color="text-emerald-600" bg="bg-emerald-50"
-            tooltip="Porcentaje de servicios programados ejecutados y verificados con GPS + firma digital en el mes." />
+          <MiniKpi title="Presupuesto" value="83%" icon={BarChart2} color="text-indigo-600" bg="bg-indigo-50"
+            sub="$18.4M de $22M ejecutados"
+            tooltip="Porcentaje del presupuesto mensual de atención domiciliaria consumido. Si supera el 90% antes del cierre del mes, se activa alerta de sobrecosto." />
+          <MiniKpi title="Servicios realizados" value="138/142" icon={Activity} color="text-emerald-600" bg="bg-emerald-50"
+            sub="97.2% de lo pactado"
+            tooltip="Servicios efectivamente verificados vs. los pactados en contrato con los prestadores. Los 4 faltantes están en proceso de conciliación." />
+          <MiniKpi title="% Reingresos 30d" value="8%" icon={TrendingDown} color="text-amber-600" bg="bg-amber-50"
+            sub="Meta: < 10% · ↓ 2pp vs abril"
+            tooltip="Pacientes que regresaron a hospitalización dentro de los 30 días posteriores al alta. Indicador clave de calidad del cuidado domiciliario." />
+          <MiniKpi title="Índice de confiabilidad" value="4.1/5" icon={Star} color="text-slate-700" bg="bg-slate-100"
+            sub="Promedio red de prestadores"
+            tooltip="Puntaje promedio de la red de prestadores activos. Se calcula sobre GPS, firma digital, irregularidades históricas y tiempos de respuesta." />
         </div>
 
         {/* SECCIONES: 75% / 25% */}
