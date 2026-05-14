@@ -150,6 +150,27 @@ const EXPORTES = [
   { id: "adres",      label: "Reporte ADRES",            icon: Download     },
 ];
 
+// ─── Tooltip helper ───────────────────────────────────────────────────────────
+
+function Tip({ text, wide }: { text: string; wide?: boolean }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative inline-flex flex-shrink-0">
+      <HelpCircle
+        className="w-3.5 h-3.5 text-slate-300 cursor-help hover:text-slate-500 transition-colors"
+        onMouseEnter={() => setShow(true)}
+        onMouseLeave={() => setShow(false)}
+      />
+      {show && (
+        <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 ${wide ? 'w-72' : 'w-60'} bg-slate-900 text-white text-xs rounded-lg p-2.5 shadow-xl z-50 leading-relaxed pointer-events-none`}>
+          {text}
+          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900" />
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 function Stars({ score }: { score: number }) {
@@ -327,7 +348,10 @@ export default function AuditoriaPage() {
           <div className="lg:col-span-1 relative rounded-xl bg-slate-800 p-5 shadow-sm border-t-2 border-t-slate-600">
             <div className="flex items-start justify-between mb-4">
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest leading-tight">Fallos de<br/>hardware / red</p>
-              <Cpu className="w-4 h-4 text-slate-500 flex-shrink-0" />
+              <div className="flex items-center gap-1.5">
+                <Tip text="Errores técnicos del dispositivo del profesional: GPS timeout (sin señal), OS denied (permisos revocados), batería agotada. No implican intención de fraude — van a cuarentena para conciliación con el prestador." wide />
+                <Cpu className="w-4 h-4 text-slate-500 flex-shrink-0" />
+              </div>
             </div>
             <p className="text-4xl font-bold tabular-nums text-slate-100 tracking-tight">{TOTAL_FALLOS_HW}</p>
             <p className="text-xs text-slate-500 mt-1">Timeout · OS denied · Sin señal</p>
@@ -337,7 +361,10 @@ export default function AuditoriaPage() {
           <div className="lg:col-span-1 relative rounded-xl bg-rose-950 p-5 shadow-sm border-t-2 border-t-rose-700">
             <div className="flex items-start justify-between mb-4">
               <p className="text-xs font-bold text-rose-400 uppercase tracking-widest leading-tight">Alertas de<br/>fraude clínico</p>
-              <ShieldX className="w-4 h-4 text-rose-600 flex-shrink-0" />
+              <div className="flex items-center gap-1.5">
+                <Tip text="Servicios donde la evidencia indica intención de fraude: GPS spoofing (coordenadas falsificadas), visita fantasma (coordenadas a más de 500m del domicilio), o servicios simultáneos del mismo profesional. El capital va a rechazo definitivo." wide />
+                <ShieldX className="w-4 h-4 text-rose-600 flex-shrink-0" />
+              </div>
             </div>
             <p className="text-4xl font-bold tabular-nums text-rose-200 tracking-tight">{TOTAL_FRAUDE}</p>
             <p className="text-xs text-rose-700 mt-1">GPS spoofing · Visita fantasma</p>
@@ -395,7 +422,10 @@ export default function AuditoriaPage() {
         <div className="rounded-xl bg-white shadow-sm ring-1 ring-slate-200 overflow-hidden">
           <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
             <div>
-              <h2 className="text-base font-semibold text-slate-900">Inversión contratada vs. Gasto real</h2>
+              <div className="flex items-center gap-1.5">
+                <h2 className="text-base font-semibold text-slate-900">Inversión contratada vs. Gasto real</h2>
+                <Tip text="Inversión contratada: valor pactado en el contrato con cada prestador por mes. Gasto real: lo que efectivamente se ejecutó y auditó. La línea roja es el techo presupuestal ($21.5M COP). El triángulo ▲ indica mes donde el gasto superó la inversión." wide />
+              </div>
               <p className="text-xs text-slate-400 mt-0.5">Millones COP · Dic 2025 – May 2026</p>
             </div>
             <div className="text-right">
@@ -451,11 +481,21 @@ export default function AuditoriaPage() {
                 <thead className="bg-slate-50/50 text-slate-500 text-xs uppercase tracking-wider">
                   <tr>
                     <th className="px-5 py-3 font-medium">Prestador</th>
-                    <th className="px-3 py-3 font-medium text-center">Ops</th>
-                    <th className="px-3 py-3 font-medium text-right">Capital aprobado</th>
-                    <th className="px-3 py-3 font-medium text-right">En cuarentena</th>
-                    <th className="px-3 py-3 font-medium text-right">Rechazado</th>
-                    <th className="px-4 py-3 font-medium text-center">Fallos</th>
+                    <th className="px-3 py-3 font-medium text-center">
+                      <span className="flex items-center justify-center gap-1">Ops <Tip text="Total de servicios domiciliarios facturados por esta IPS en el período." /></span>
+                    </th>
+                    <th className="px-3 py-3 font-medium text-right">
+                      <span className="flex items-center justify-end gap-1">Capital aprobado <Tip text="Servicios con GPS verificado + firma digital + nota clínica completa. Listos para pago sin glosa." /></span>
+                    </th>
+                    <th className="px-3 py-3 font-medium text-right">
+                      <span className="flex items-center justify-end gap-1">En cuarentena <Tip text="Servicios con fallo técnico (hardware o red) que impidió capturar evidencia. Están en proceso de conciliación con el prestador antes de decidir pago." wide /></span>
+                    </th>
+                    <th className="px-3 py-3 font-medium text-right">
+                      <span className="flex items-center justify-end gap-1">Rechazado <Tip text="Servicios con fraude comprobado (GPS spoofing, visita fantasma). El capital queda bloqueado y el caso se deriva a fiscalía interna." wide /></span>
+                    </th>
+                    <th className="px-4 py-3 font-medium text-center">
+                      <span className="flex items-center justify-center gap-1">Fallos <Tip text="Chip gris = fallo de hardware/red (conciliable). Chip rojo = fraude clínico (rechazo definitivo)." /></span>
+                    </th>
                     <th className="px-4 py-3 font-medium"></th>
                   </tr>
                 </thead>
@@ -533,7 +573,10 @@ export default function AuditoriaPage() {
           {/* Scoring */}
           <div className="rounded-xl bg-white shadow-sm ring-1 ring-slate-200 overflow-hidden flex flex-col">
             <div className="px-5 py-4 border-b border-slate-100">
-              <h2 className="text-base font-semibold text-slate-900">Índice de Confiabilidad</h2>
+              <div className="flex items-center gap-1.5">
+                <h2 className="text-base font-semibold text-slate-900">Índice de Confiabilidad</h2>
+                <Tip text="Puntaje de 1 a 5 calculado automáticamente por OLGA según: tasa GPS, tasa firma, irregularidades históricas y tiempos de respuesta. Determina la prioridad de pago y la elegibilidad de nuevos contratos." wide />
+              </div>
               <p className="text-xs text-slate-400 mt-0.5">Métrica compuesta de cumplimiento</p>
             </div>
             <div className="p-2 flex-1 overflow-y-auto">
@@ -559,6 +602,7 @@ export default function AuditoriaPage() {
             <div className="flex items-center gap-2">
               <Users2 className="h-4 w-4 text-indigo-500" />
               <h2 className="text-base font-semibold text-slate-900">Atenciones efectivas por profesional</h2>
+              <Tip text="Desglose de servicios por profesional con su código CUPS (Clasificación Única de Procedimientos en Salud). Permite detectar concentración de servicios en un solo profesional, patrón de facturación inusual o profesionales con bajo cumplimiento GPS." wide />
             </div>
             <span className="text-xs text-slate-400">Mayo 2026 · CUPS verificados</span>
           </div>
@@ -568,10 +612,18 @@ export default function AuditoriaPage() {
                 <tr>
                   <th className="px-5 py-3 font-medium">Médico / Profesional</th>
                   <th className="px-4 py-3 font-medium">IPS</th>
-                  <th className="px-4 py-3 font-medium">CUPS principal</th>
-                  <th className="px-4 py-3 font-medium text-center">Atenciones</th>
-                  <th className="px-4 py-3 font-medium text-right">Monto total</th>
-                  <th className="px-5 py-3 font-medium text-center">% GPS</th>
+                  <th className="px-4 py-3 font-medium">
+                    <span className="flex items-center gap-1">CUPS principal <Tip text="Código CUPS: identificador único del tipo de procedimiento según el Ministerio de Salud. Base para tarifación y glosas en el sistema de salud colombiano." /></span>
+                  </th>
+                  <th className="px-4 py-3 font-medium text-center">
+                    <span className="flex items-center justify-center gap-1">Atenciones <Tip text="Número de visitas domiciliarias facturadas por este profesional en el mes bajo este CUPS." /></span>
+                  </th>
+                  <th className="px-4 py-3 font-medium text-right">
+                    <span className="flex items-center justify-end gap-1">Monto total <Tip text="Valor total facturado por este profesional en el período. Se cruza contra el contrato de la IPS para detectar sobrefacturación." /></span>
+                  </th>
+                  <th className="px-5 py-3 font-medium text-center">
+                    <span className="flex items-center justify-center gap-1">% GPS <Tip text="Porcentaje de visitas de este profesional donde el GPS fue verificado exitosamente. Verde = 100%. Ámbar = fallos técnicos pendientes." /></span>
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -599,7 +651,10 @@ export default function AuditoriaPage() {
 
         {/* ── Exportación ── */}
         <section className="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-          <h2 className="text-sm font-semibold text-slate-900 mb-4">Módulos de Reporte Regulatorio</h2>
+          <div className="flex items-center gap-1.5 mb-4">
+            <h2 className="text-sm font-semibold text-slate-900">Módulos de Reporte Regulatorio</h2>
+            <Tip text="Exportaciones a los entes reguladores del sistema de salud colombiano. RIPS: Registro Individual de Prestación de Servicios (obligatorio para el Ministerio de Salud). Supersalud: ente de control y vigilancia. ADRES: Administradora de los Recursos del Sistema General de Seguridad Social." wide />
+          </div>
           <div className="flex flex-wrap gap-3">
             {EXPORTES.map((e) => {
               const Icon = e.icon;
