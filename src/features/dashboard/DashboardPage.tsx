@@ -15,10 +15,6 @@ import {
   Zap,
   HelpCircle,
 } from "lucide-react";
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip as RechartsTooltip, Legend, ReferenceLine, ResponsiveContainer,
-} from "recharts";
 
 // --- DATA (Preservada íntegramente) ---
 const ALERTS = [
@@ -35,18 +31,6 @@ const REQUESTS = [
   { patient: "Ramiro Suárez B.", service: "Rehabilitación", date: "11:00 AM" },
   { patient: "Patricia Vega R.", service: "Medicamento", date: "2:00 PM" },
 ];
-
-// --- COMPARATIVO DATA ---
-const COMPARATIVO = [
-  { mes: "Dic", inversion: 18.2, gasto: 16.8 },
-  { mes: "Ene", inversion: 19.0, gasto: 17.4 },
-  { mes: "Feb", inversion: 18.5, gasto: 19.1 },
-  { mes: "Mar", inversion: 20.0, gasto: 18.3 },
-  { mes: "Abr", inversion: 21.0, gasto: 19.7 },
-  { mes: "May", inversion: 22.0, gasto: 18.4 },
-];
-
-const PRESUPUESTO_LIMITE = 21.5;
 
 // --- COMPONENTS ---
 const MiniKpi = ({ title, value, icon: Icon, color, bg, tooltip }: { title: string, value: string, icon: LucideIcon, color: string, bg: string, tooltip?: string }) => {
@@ -119,44 +103,6 @@ export default function DashboardCompacto() {
             tooltip="Solicitudes de autorización pendientes de revisión. Incluye PHD, PAD, PARD y curaciones en casa." />
           <MiniKpi title="Ejecución mes" value="80%" icon={CheckCircle} color="text-emerald-600" bg="bg-emerald-50"
             tooltip="Porcentaje de servicios programados ejecutados y verificados con GPS + firma digital en el mes." />
-        </div>
-
-        {/* COMPARATIVO INVERSIÓN VS GASTO */}
-        <div className="rounded-xl bg-white shadow-sm ring-1 ring-slate-200 overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-            <div>
-              <h2 className="text-base font-semibold text-slate-900">Inversión contratada vs. Gasto real</h2>
-              <p className="text-xs text-slate-400 mt-0.5">Millones COP · Dic 2025 – May 2026</p>
-            </div>
-            <div className="text-right">
-              <p className="text-xs text-slate-400 uppercase tracking-wider font-bold">Ahorro acumulado</p>
-              <p className="text-lg font-bold text-emerald-600">$9.4M COP</p>
-            </div>
-          </div>
-          <div className="p-4">
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={COMPARATIVO} margin={{ top: 8, right: 16, left: -8, bottom: 4 }} barCategoryGap="30%">
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis dataKey="mes" tick={{ fontSize: 11, fill: '#64748b' }} />
-                <YAxis tick={{ fontSize: 11, fill: '#64748b' }} unit="M" domain={[14, 24]} />
-                <RechartsTooltip
-                  formatter={(v: number | undefined) => v !== undefined ? [`$${v}M COP`] : ['']}
-                  contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e2e8f0' }}
-                />
-                <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
-                <ReferenceLine y={PRESUPUESTO_LIMITE} stroke="#f43f5e" strokeDasharray="4 4" label={{ value: 'Límite presup.', fill: '#f43f5e', fontSize: 10, position: 'right' }} />
-                <Bar dataKey="inversion" name="Inversión contratada" fill="#6366f1" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="gasto" name="Gasto real" fill="#10b981" radius={[4, 4, 0, 0]}
-                  label={(props: any) => {
-                    const { x, y, width, value, index } = props;
-                    return value > COMPARATIVO[index].inversion
-                      ? <text x={x + width / 2} y={y - 4} fill="#f43f5e" fontSize={9} textAnchor="middle" fontWeight={700}>▲</text>
-                      : null;
-                  }}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
         </div>
 
         {/* SECCIONES: 75% / 25% */}
