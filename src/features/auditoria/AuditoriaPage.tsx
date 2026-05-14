@@ -318,101 +318,47 @@ export default function AuditoriaPage() {
           
         </header>
 
-        {/* ── KPI Cards (5) ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        {/* ── KPI Cards (4) ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
-          {/* 1. Yield Real */}
-          <div className="lg:col-span-1 relative rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200 border-t-2 border-t-indigo-500">
+          {/* 1. Presupuesto */}
+          <div className="relative rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200 border-t-2 border-t-indigo-500">
             <div className="flex items-start justify-between mb-4">
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-tight">Yield real<br/>de operación</p>
-              <div className="relative flex-shrink-0">
-                <HelpCircle
-                  className="w-3.5 h-3.5 text-slate-300 cursor-help hover:text-slate-500 transition-colors"
-                  onMouseEnter={() => setTooltipKpi("yield")}
-                  onMouseLeave={() => setTooltipKpi(null)}
-                />
-                {tooltipKpi === "yield" && (
-                  <div className="absolute bottom-full right-0 mb-2 w-56 bg-slate-900 text-white text-xs rounded-lg p-2.5 shadow-xl z-50 leading-relaxed pointer-events-none">
-                    Operaciones limpias ÷ total. Excluye fallos hardware y fraude. Base matemática para el SLA con prestadores.
-                    <div className="absolute top-full right-2 border-4 border-transparent border-t-slate-900" />
-                  </div>
-                )}
-              </div>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-tight">Presupuesto</p>
+              <Tip text="Porcentaje del presupuesto mensual de atención domiciliaria que ya se ejecutó. Si supera el 90% antes de cerrar el mes, se activa alerta de sobrecosto." wide />
             </div>
-            <p className="text-4xl font-bold tabular-nums text-indigo-700 tracking-tight">{YIELD_REAL}%</p>
-            <p className="text-xs text-slate-400 mt-1">{TOTAL_OPS - TOTAL_FALLOS}/{TOTAL_OPS} ops verificadas</p>
+            <p className="text-4xl font-bold tabular-nums text-indigo-700 tracking-tight">83%</p>
+            <p className="text-xs text-slate-400 mt-1">$18.4M de $22M ejecutados</p>
           </div>
 
-          {/* 2. Fallos Hardware */}
-          <div className="lg:col-span-1 relative rounded-xl bg-slate-800 p-5 shadow-sm border-t-2 border-t-slate-600">
+          {/* 2. Servicios pactados vs realizados */}
+          <div className="relative rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200 border-t-2 border-t-emerald-500">
             <div className="flex items-start justify-between mb-4">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest leading-tight">Fallos de<br/>hardware / red</p>
-              <div className="flex items-center gap-1.5">
-                <Tip text="Errores técnicos del dispositivo del profesional: GPS timeout (sin señal), OS denied (permisos revocados), batería agotada. No implican intención de fraude — van a cuarentena para conciliación con el prestador." wide />
-                <Cpu className="w-4 h-4 text-slate-500 flex-shrink-0" />
-              </div>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-tight">Servicios<br/>pactados vs realizados</p>
+              <Tip text="Cuántos servicios se verificaron como prestados vs. los que estaban contratados. Los que faltan están en conciliación o con fallo técnico." wide />
             </div>
-            <p className="text-4xl font-bold tabular-nums text-slate-100 tracking-tight">{TOTAL_FALLOS_HW}</p>
-            <p className="text-xs text-slate-500 mt-1">Timeout · OS denied · Sin señal</p>
+            <p className="text-4xl font-bold tabular-nums text-emerald-700 tracking-tight">138/142</p>
+            <p className="text-xs text-slate-400 mt-1">97.2% de cumplimiento</p>
           </div>
 
-          {/* 3. Fraude Clínico */}
-          <div className="lg:col-span-1 relative rounded-xl bg-rose-950 p-5 shadow-sm border-t-2 border-t-rose-700">
+          {/* 3. % Reingresos */}
+          <div className="relative rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200 border-t-2 border-t-amber-400">
             <div className="flex items-start justify-between mb-4">
-              <p className="text-xs font-bold text-rose-400 uppercase tracking-widest leading-tight">Alertas de<br/>fraude clínico</p>
-              <div className="flex items-center gap-1.5">
-                <Tip text="Servicios donde la evidencia indica intención de fraude: GPS spoofing (coordenadas falsificadas), visita fantasma (coordenadas a más de 500m del domicilio), o servicios simultáneos del mismo profesional. El capital va a rechazo definitivo." wide />
-                <ShieldX className="w-4 h-4 text-rose-600 flex-shrink-0" />
-              </div>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-tight">% Reingresos<br/>30 días</p>
+              <Tip text="Porcentaje de pacientes que regresaron al hospital dentro de los 30 días posteriores al alta. Si este número baja, el cuidado domiciliario está funcionando. Meta: menos del 10%." wide />
             </div>
-            <p className="text-4xl font-bold tabular-nums text-rose-200 tracking-tight">{TOTAL_FRAUDE}</p>
-            <p className="text-xs text-rose-700 mt-1">GPS spoofing · Visita fantasma</p>
+            <p className="text-4xl font-bold tabular-nums text-amber-600 tracking-tight">8%</p>
+            <p className="text-xs text-slate-400 mt-1">↓ 2pp vs Abril · Meta: &lt;10%</p>
           </div>
 
-          {/* 4. Capital Radicado */}
-          <div className="lg:col-span-1 relative rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+          {/* 4. Índice de Confiabilidad */}
+          <div className="relative rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200 border-t-2 border-t-slate-400">
             <div className="flex items-start justify-between mb-4">
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-tight">Capital<br/>radicado</p>
-              <div className="relative flex-shrink-0">
-                <HelpCircle
-                  className="w-3.5 h-3.5 text-slate-300 cursor-help hover:text-slate-500 transition-colors"
-                  onMouseEnter={() => setTooltipKpi("capital")}
-                  onMouseLeave={() => setTooltipKpi(null)}
-                />
-                {tooltipKpi === "capital" && (
-                  <div className="absolute bottom-full right-0 mb-2 w-56 bg-slate-900 text-white text-xs rounded-lg p-2.5 shadow-xl z-50 leading-relaxed pointer-events-none">
-                    Monto total COP presentado para facturación. Incluye aprobado + cuarentena. Capital rechazado no se radica.
-                    <div className="absolute top-full right-2 border-4 border-transparent border-t-slate-900" />
-                  </div>
-                )}
-              </div>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-tight">Índice de<br/>confiabilidad</p>
+              <Tip text="Puntaje promedio de todos los prestadores activos, de 1 a 5. Se calcula con GPS, firma digital, irregularidades y tiempos de respuesta. Determina prioridad de pago y renovación de contratos." wide />
             </div>
-            <p className="text-3xl font-bold tabular-nums text-slate-900 tracking-tight">
-              {fmtM(TOTAL_APROBADO + TOTAL_CUARENTENA)}
-            </p>
-            <p className="text-xs text-slate-400 mt-1">{fmtM(TOTAL_RECHAZADO)} bloqueado</p>
-          </div>
-
-          {/* 5. Siniestralidad */}
-          <div className="lg:col-span-1 relative rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-            <div className="flex items-start justify-between mb-4">
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-tight">Siniestralidad<br/>extramural</p>
-              <div className="relative flex-shrink-0">
-                <HelpCircle
-                  className="w-3.5 h-3.5 text-slate-300 cursor-help hover:text-slate-500 transition-colors"
-                  onMouseEnter={() => setTooltipKpi("siniest")}
-                  onMouseLeave={() => setTooltipKpi(null)}
-                />
-                {tooltipKpi === "siniest" && (
-                  <div className="absolute bottom-full right-0 mb-2 w-56 bg-slate-900 text-white text-xs rounded-lg p-2.5 shadow-xl z-50 leading-relaxed pointer-events-none">
-                    Gasto real domiciliario vs presupuesto contratado. Meta EPS Sura: ≤ 2.5%.
-                    <div className="absolute top-full right-2 border-4 border-transparent border-t-slate-900" />
-                  </div>
-                )}
-              </div>
-            </div>
-            <p className="text-3xl font-bold tabular-nums text-slate-900 tracking-tight">2.1%</p>
-            <p className="text-xs text-slate-400 mt-1">↓ 0.3pp vs Abril · Meta: ≤2.5%</p>
+            <p className="text-4xl font-bold tabular-nums text-slate-800 tracking-tight">4.1/5</p>
+            <p className="text-xs text-slate-400 mt-1">Promedio red activa · Mayo 2026</p>
           </div>
 
         </div>
