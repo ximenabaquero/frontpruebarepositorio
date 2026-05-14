@@ -3,10 +3,10 @@
 import { useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import {
-  CheckCircle, DollarSign, TrendingUp,
+  CheckCircle, TrendingDown, TrendingUp,
   Star, Download, FileBarChart, Building2, Loader2,
   ChevronRight, Activity, HelpCircle, Users2,
-  X, Cpu, ShieldX, Clock
+  X, Cpu, ShieldX, Clock, AlertCircle
 } from "lucide-react";
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -104,6 +104,15 @@ const PRESTADORES: Prestador[] = [
     fallos: [],
   },
 ];
+
+// Datos de reingreso por prestador (% pacientes que volvieron al hospital en 30 días)
+const REINGRESO: Record<string, number> = {
+  "IPS Norte":        4,
+  "IPS Oncología":    5,
+  "IPS Neurología":   7,
+  "IPS SurOccidente": 12,
+  "IPS Chapinero":    19,
+};
 
 // Totales derivados
 const TOTAL_OPS        = PRESTADORES.reduce((s, p) => s + p.servicios, 0);
@@ -315,8 +324,23 @@ export default function AuditoriaPage() {
               {TOTAL_OPS} operaciones auditadas · {TOTAL_FALLOS} con fallo registrado · Conciliación financiera activa.
             </p>
           </div>
-          
         </header>
+
+        {/* ── Banner de contexto ── */}
+        <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-5">
+          <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-2">¿Qué muestra esta pantalla?</p>
+          <p className="text-sm text-slate-700 leading-relaxed">
+            Esta pantalla responde dos preguntas que ningún pagador puede responder hoy sin OLGA:{" "}
+            <strong>¿Me cobraron por visitas que realmente ocurrieron?</strong> y{" "}
+            <strong>¿las visitas que pagué mejoraron al paciente?</strong>{" "}
+            Cada fila es un prestador. Cada número es verificable con GPS, firma digital y nota clínica.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-4 text-xs font-medium text-slate-600">
+            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" /> Capital aprobado = visita con triple evidencia, lista para pago</span>
+            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" /> En cuarentena = fallo técnico, retenido hasta aclaración</span>
+            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block" /> Rechazado = fraude comprobado, no se paga</span>
+          </div>
+        </div>
 
         {/* ── KPI Cards (4) ── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -394,6 +418,9 @@ export default function AuditoriaPage() {
                       <span className="flex items-center justify-center gap-1">Firma <Tip text="Cuántos servicios tienen la firma digital del paciente o cuidador como constancia de que la atención fue recibida. Sin firma, el servicio queda en cuarentena hasta conciliación — no puede pagarse directamente." wide /></span>
                     </th>
                     <th className="px-3 py-3 font-medium text-right">
+                      <span className="flex items-center justify-end gap-1">Costo/visita <Tip text="Costo promedio por visita verificada (capital aprobado ÷ visitas con GPS + firma). Permite comparar eficiencia entre prestadores con el mismo tipo de servicio." wide /></span>
+                    </th>
+                    <th className="px-3 py-3 font-medium text-right">
                       <span className="flex items-center justify-end gap-1">Capital aprobado <Tip text="Servicios con GPS verificado + firma digital + nota clínica completa. Listos para pago sin glosa." /></span>
                     </th>
                     <th className="px-3 py-3 font-medium text-right">
@@ -424,6 +451,9 @@ export default function AuditoriaPage() {
                           <span className={p.firma === p.servicios ? "text-emerald-700 font-semibold" : "text-amber-600 font-semibold"}>
                             {p.firma}/{p.servicios}
                           </span>
+                        </td>
+                        <td className="px-3 py-3 text-right tabular-nums text-slate-600 text-xs">
+                          {p.gps > 0 ? `$${Math.round(p.cap_aprobado / p.gps / 1000)}K` : "—"}
                         </td>
                         <td className="px-3 py-3 text-right">
                           <CapitalCell value={p.cap_aprobado} variant="aprobado" />
@@ -558,6 +588,56 @@ export default function AuditoriaPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+
+        {/* ── Reingreso por prestador ── */}
+        <div className="rounded-xl bg-white shadow-sm ring-1 ring-slate-200 overflow-hidden">
+          <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <TrendingDown className="h-4 w-4 text-amber-500" />
+              <h2 className="text-base font-semibold text-slate-900">Tasa de reingreso hospitalario por prestador</h2>
+              <Tip text="Porcentaje de pacientes atendidos por cada prestador que volvieron al hospital dentro de los 30 días siguientes al alta. Si este número es alto, el cuidado domiciliario de ese prestador no está funcionando — el paciente se deterioró en casa. Meta: menos del 10%." wide />
+            </div>
+            <span className="text-xs text-slate-400">30 días post-alta · Mayo 2026</span>
+          </div>
+          <div className="p-5">
+            <div className="mb-3 flex items-center gap-4 text-[11px] font-medium text-slate-500">
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" /> Menos del 10% — dentro de meta</span>
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" /> 10–15% — bajo vigilancia</span>
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block" /> Más del 15% — requiere acción</span>
+            </div>
+            <div className="space-y-3">
+              {Object.entries(REINGRESO).sort((a, b) => a[1] - b[1]).map(([ips, pct]) => {
+                const color = pct < 10 ? "bg-emerald-500" : pct <= 15 ? "bg-amber-400" : "bg-rose-500";
+                const textColor = pct < 10 ? "text-emerald-700" : pct <= 15 ? "text-amber-700" : "text-rose-700";
+                const bgLight = pct < 10 ? "bg-emerald-50" : pct <= 15 ? "bg-amber-50" : "bg-rose-50";
+                const Icon = pct >= 15 ? AlertCircle : pct >= 10 ? TrendingUp : CheckCircle;
+                return (
+                  <div key={ips} className={`flex items-center gap-4 p-3 rounded-xl ${bgLight}`}>
+                    <Icon className={`w-4 h-4 flex-shrink-0 ${textColor}`} />
+                    <div className="w-28 flex-shrink-0">
+                      <p className="text-sm font-semibold text-slate-900">{ips}</p>
+                    </div>
+                    <div className="flex-1">
+                      <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                        <div className={`h-2 rounded-full ${color}`} style={{ width: `${Math.min(pct * 4, 100)}%` }} />
+                      </div>
+                    </div>
+                    <span className={`text-sm font-bold tabular-nums w-10 text-right ${textColor}`}>{pct}%</span>
+                    {pct >= 10 && (
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${pct >= 15 ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'}`}>
+                        {pct >= 15 ? 'Acción requerida' : 'Vigilancia'}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <p className="mt-4 text-xs text-slate-400 leading-relaxed">
+              Un paciente que regresa al hospital cuesta en promedio 8× más que una visita domiciliaria.
+              Reducir la tasa de reingreso del 12% al 8% en IPS SurOccidente representaría un ahorro estimado de <strong className="text-slate-600">$4.2M COP</strong> mensuales solo en esa IPS.
+            </p>
           </div>
         </div>
 
