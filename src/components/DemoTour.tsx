@@ -19,160 +19,128 @@ const TOURS: Record<string, TourStep[]> = {
   "/dashboard": [
     {
       popover: {
-        title: "🏠 Dashboard Ejecutivo",
-        description: "Esta es la vista central de la EPS. Aquí ves el estado de toda tu población domiciliaria en tiempo real.",
+        title: "Dashboard ejecutivo",
+        description: "Vista central de la EPS. Muestra el estado de toda la población domiciliaria: alertas activas, solicitudes pendientes y ejecución del mes.",
       },
     },
     {
-      element: "[data-tour='kpi-pacientes']",
       popover: {
-        title: "👥 Pacientes monitoreados",
-        description: "47 pacientes activos clasificados por nivel de riesgo: alto (rojo), medio (ámbar) y bajo (verde).",
-        side: "bottom",
+        title: "47 pacientes activos",
+        description: "Afiliados con plan domiciliario autorizado y activo en la red de prestadores. Clasificados por riesgo: alto, medio y bajo.",
       },
     },
     {
-      element: "[data-tour='kpi-alertas']",
       popover: {
-        title: "🚨 Alertas clínicas",
-        description: "5 alertas que requieren atención inmediata. Pacientes con signos de deterioro o visitas sin confirmar.",
-        side: "bottom",
+        title: "5 alertas críticas",
+        description: "Pacientes con visita no confirmada en 48h o signos vitales fuera de rango. Cada alerta enlaza directamente al detalle del paciente.",
       },
     },
     {
-      element: "[data-tour='kpi-solicitudes']",
       popover: {
-        title: "📋 Solicitudes pendientes",
-        description: "8 servicios esperan tu autorización. En Colombia, ningún servicio domiciliario se presta sin aprobación previa de la EPS.",
-        side: "bottom",
+        title: "8 por autorizar",
+        description: "Solicitudes de autorización pendientes. En Colombia ningún servicio domiciliario se presta sin aprobación previa del pagador.",
       },
     },
     {
-      element: "[data-tour='kpi-presupuesto']",
       popover: {
-        title: "💰 Presupuesto del mes",
-        description: "Llevas $247M de $310M ejecutados (79.7%). La barra se vuelve roja si superas el 85%.",
-        side: "bottom",
-      },
-    },
-    {
-      element: "[data-tour='top3']",
-      popover: {
-        title: "⚠️ Top 3 en riesgo",
-        description: "Los pacientes con mayor probabilidad de reingreso esta semana. Click en cualquiera para ver su detalle clínico.",
-        side: "top",
-      },
-    },
-    {
-      element: "[data-tour='alertas-panel']",
-      popover: {
-        title: "🔴 Panel de alertas",
-        description: "Detalle de cada alerta con botón 'Atender'. Los críticos (rojo) requieren acción en las próximas 2 horas.",
-        side: "top",
+        title: "Panel de atención prioritaria",
+        description: "Los pacientes críticos aparecen primero en rojo. Haz clic en cualquier alerta para ir al detalle clínico completo.",
       },
     },
   ],
   "/autorizaciones": [
     {
       popover: {
-        title: "📋 Solicitudes de Autorización",
-        description: "En Colombia, el pagador (EPS) debe autorizar cada servicio domiciliario antes de prestarlo. Esta pantalla es donde se toman esas decisiones.",
+        title: "Solicitudes de autorización",
+        description: "El pagador (EPS) debe autorizar cada servicio domiciliario antes de prestarlo. Aquí se toman esas decisiones con toda la información clínica disponible.",
       },
     },
     {
-      element: "[data-tour='filtros']",
       popover: {
-        title: "🔍 Filtros",
-        description: "Filtra por urgencia (rojos primero), tipo de servicio, o busca directamente por paciente o médico.",
-        side: "bottom",
+        title: "Filtros de urgencia y tipo",
+        description: "Filtra por urgencia (Urgente / Programado) o por tipo de servicio. Las urgentes aparecen marcadas en rojo.",
       },
     },
     {
-      element: "[data-tour='tabla-solicitudes']",
       popover: {
-        title: "📊 Tabla de solicitudes",
-        description: "Cada fila muestra: paciente, diagnóstico, complejidad clínica, plan propuesto, médico solicitante y costo estimado.",
-        side: "top",
+        title: "Datos de cada solicitud",
+        description: "Cada fila muestra: paciente, diagnóstico, complejidad clínica (alta/media/baja), plan propuesto (PHD, PAD, PARD), médico solicitante y costo estimado.",
       },
     },
     {
-      element: "[data-tour='acciones-solicitud']",
       popover: {
-        title: "✅ Tomar decisiones",
-        description: "Cuatro acciones disponibles: Aprobar (verde) · Con condiciones (ámbar) · Negar (rojo) · Solicitar más info (gris).",
-        side: "left",
+        title: "Tomar la decisión",
+        description: "Cuatro acciones por fila: Aprobar (verde) · Con condiciones (ámbar) · Negar (rojo) · Más info — abre los PDFs de orden médica e historia clínica.",
       },
     },
   ],
   "/pacientes": [
     {
       popover: {
-        title: "👥 Lista de Pacientes",
-        description: "Los 47 pacientes que la EPS está monitoreando activamente. Cada fila muestra su estado clínico de un vistazo.",
+        title: "Pacientes monitoreados",
+        description: "Los 47 pacientes que la EPS monitorea activamente este mes. Cada fila muestra el estado clínico sin necesidad de abrir el historial.",
       },
     },
     {
-      element: "[data-tour='filtro-riesgo']",
       popover: {
-        title: "🎯 Filtro por riesgo",
-        description: "Haz click en 'Alto', 'Medio' o 'Bajo' para filtrar. Los rojos son los que requieren intervención prioritaria.",
-        side: "bottom",
+        title: "Filtro por nivel de riesgo",
+        description: "Filtra por Alto, Medio o Bajo riesgo. Los rojos tienen mayor probabilidad de reingreso hospitalario esta semana.",
       },
     },
     {
-      element: "[data-tour='col-adherencia']",
       popover: {
-        title: "🟢 Adherencia al plan",
-        description: "Porcentaje de servicios del plan que el paciente ha cumplido. 🟢 ≥90% · 🟡 70–89% · 🔴 <70%.",
-        side: "top",
+        title: "Columna de Adherencia",
+        description: "Porcentaje de servicios del plan cumplidos por el paciente. Verde ≥90% · Ámbar 70–89% · Rojo <70%.",
       },
     },
     {
-      element: "[data-tour='col-tendencia']",
       popover: {
-        title: "📈 Tendencia clínica",
-        description: "↑ Mejorando (verde) · → Estable (gris) · ↓ Deteriorando (rojo). Detectado con los signos vitales de las últimas visitas.",
-        side: "top",
+        title: "Columna de Tendencia",
+        description: "↑ Mejorando (verde) · → Estable (gris) · ↓ Deteriorando (rojo). Se calcula con los signos vitales de las últimas visitas verificadas.",
+      },
+    },
+    {
+      popover: {
+        title: "Ver detalle del paciente",
+        description: "Haz clic en cualquier fila para acceder al detalle clínico completo: timeline de servicios, gráfico de signos vitales y documentos de respaldo.",
       },
     },
   ],
   "/auditoria": [
     {
       popover: {
-        title: "🔍 Auditoría y Reportes",
-        description: "Aquí el pagador verifica que cada servicio autorizado realmente se prestó, con evidencia verificable.",
+        title: "Auditoría domiciliaria",
+        description: "El pagador verifica que cada servicio autorizado y facturado realmente se prestó, con triple evidencia: GPS, firma digital y nota clínica.",
       },
     },
     {
-      element: "[data-tour='kpi-verificados']",
       popover: {
-        title: "✅ Servicios verificados",
-        description: "94% de los servicios tienen GPS + firma digital + nota clínica. El 6% restante está pendiente de revisión.",
-        side: "bottom",
+        title: "Yield real de operación: 97.9%",
+        description: "139 de 142 operaciones verificadas sin fallo. El porcentaje se calcula matemáticamente — sin redondear a 100%.",
       },
     },
     {
-      element: "[data-tour='kpi-irregularidades']",
       popover: {
-        title: "🚨 Irregularidades",
-        description: "3 servicios con anomalías detectadas: GPS que nunca llegó al domicilio, servicios simultáneos, o notas sin visita.",
-        side: "bottom",
+        title: "Fallos de hardware vs. fraude clínico",
+        description: "Se separan dos tipos de irregularidad: fallos técnicos (GPS timeout, OS denied) que van a cuarentena para conciliación, y fraude comprobado (GPS spoofing) que va a rechazo definitivo.",
       },
     },
     {
-      element: "[data-tour='tabla-cuentas']",
       popover: {
-        title: "📊 Cuentas radicadas",
-        description: "'Auditado con evidencia' = GPS ✅ + firma ✅ + nota clínica ✅. Solo estas cuentas se aprueban para pago.",
-        side: "top",
+        title: "Tabla de liquidación con tres estados de capital",
+        description: "Cada IPS muestra su capital dividido en: Aprobado (GPS + firma 100%) · En cuarentena (fallo técnico, esperando conciliación) · Rechazado (fraude comprobado).",
       },
     },
     {
-      element: "[data-tour='tabs-regulatorio']",
       popover: {
-        title: "🏛️ Módulos regulatorios",
-        description: "Integración con RIPS (reporte a Ministerio), Supersalud, ADRES y scoring de prestadores. En construcción — Fase 2.",
-        side: "bottom",
+        title: "Ver detalles del fallo",
+        description: "El botón 'Ver detalles →' en cada IPS abre un modal con el código técnico del fallo (ej. GPS-TIMEOUT-011), el motivo y el estado de resolución.",
+      },
+    },
+    {
+      popover: {
+        title: "Gráfico inversión vs. gasto",
+        description: "Comparativo mensual de la inversión contratada vs. el gasto real. La línea roja es el límite de presupuesto. Ahorro acumulado visible en el período.",
       },
     },
   ],
@@ -181,16 +149,17 @@ const TOURS: Record<string, TourStep[]> = {
 function getTourSteps(pathname: string): TourStep[] {
   if (TOURS[pathname]) return TOURS[pathname];
   if (pathname.startsWith("/pacientes/")) return [
-    { popover: { title: "👤 Detalle de Paciente", description: "Vista clínica completa: datos demográficos, timeline de servicios, signos vitales y acciones disponibles." } },
-    { element: "[data-tour='timeline']", popover: { title: "📅 Timeline de servicios", description: "✅ Cumplido · ⏳ Pendiente · ❌ No cumplido. Los rojos indican que el servicio no se verificó.", side: "right" } },
-    { element: "[data-tour='grafico-vitales']", popover: { title: "📈 Signos vitales", description: "Evolución de PA, FC y SpO₂ desde el alta. Si la curva sube en rojo, el paciente se está deteriorando.", side: "left" } },
-    { element: "[data-tour='acciones-paciente']", popover: { title: "⚙️ Acciones", description: "Modificar plan · Derivar a especialista · Suspender atención domiciliaria.", side: "bottom" } },
+    { popover: { title: "Detalle de paciente", description: "Vista clínica completa: datos demográficos, plan autorizado, timeline de servicios y signos vitales desde el alta." } },
+    { popover: { title: "Timeline cronológico", description: "Cada servicio muestra su estado: Cumplido (verde) · Pendiente (gris) · No cumplido (rojo). Los no cumplidos incluyen el motivo técnico del fallo." } },
+    { popover: { title: "Profesional y entidad prestadora", description: "Cada visita en el timeline muestra el nombre del profesional y la IPS que lo envió, para trazabilidad completa." } },
+    { popover: { title: "Gráfico de signos vitales", description: "Evolución de PA sistólica/diastólica, FC y SpO₂ desde el alta. En pacientes con diabetes también se grafica la glucemia." } },
+    { popover: { title: "Acciones clínicas", description: "Desde la barra inferior: Contactar prestador · Modificar plan (con justificación) · Derivar a urgencias." } },
   ];
   if (pathname.startsWith("/evidencia/")) return [
-    { popover: { title: "📍 Evidencia de Servicio", description: "Verificación completa de que el profesional llegó al domicilio del paciente." } },
-    { element: "[data-tour='mapa']", popover: { title: "🗺️ Mapa GPS", description: "Verde = llegó al domicilio (≤200m). Rojo discontinuo = GPS fuera de rango → posible visita fantasma.", side: "right" } },
-    { element: "[data-tour='firma']", popover: { title: "✍️ Firma digital", description: "El paciente confirma el servicio con su firma. Timestamp registrado automáticamente.", side: "left" } },
-    { element: "[data-tour='btn-aprobar']", popover: { title: "✅ Aprobar para auditoría", description: "Una vez verificado GPS + firma + nota clínica, el servicio queda listo para facturación sin glosa.", side: "top" } },
+    { popover: { title: "Evidencia de servicio", description: "Verificación triple: GPS del profesional, firma digital del paciente y nota clínica del servicio prestado." } },
+    { popover: { title: "Mapa GPS", description: "El marcador muestra dónde estaba el profesional al momento del servicio. Si coincide con el domicilio, el GPS está verificado." } },
+    { popover: { title: "Firma digital", description: "El paciente o cuidador firma digitalmente al finalizar el servicio. Timestamp registrado y asociado al expediente." } },
+    { popover: { title: "Aprobar o marcar irregularidad", description: "GPS + firma + nota clínica = cuenta lista para facturación sin glosa. Si hay discrepancia, se activa el flujo de auditoría." } },
   ];
   return [{ popover: { title: "💡 Tip", description: "Explora el menú lateral para navegar entre las 7 pantallas de la demo." } }];
 }
