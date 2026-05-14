@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
@@ -12,8 +12,13 @@ import {
   Activity,
   CheckCircle,
   ShieldAlert,
-  Zap
+  Zap,
+  HelpCircle,
 } from "lucide-react";
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip as RechartsTooltip, Legend, ReferenceLine, ResponsiveContainer,
+} from "recharts";
 
 // --- DATA (Preservada íntegramente) ---
 const ALERTS = [
@@ -31,20 +36,52 @@ const REQUESTS = [
   { patient: "Patricia Vega R.", service: "Medicamento", date: "2:00 PM" },
 ];
 
+// --- COMPARATIVO DATA ---
+const COMPARATIVO = [
+  { mes: "Dic", inversion: 18.2, gasto: 16.8 },
+  { mes: "Ene", inversion: 19.0, gasto: 17.4 },
+  { mes: "Feb", inversion: 18.5, gasto: 19.1 },
+  { mes: "Mar", inversion: 20.0, gasto: 18.3 },
+  { mes: "Abr", inversion: 21.0, gasto: 19.7 },
+  { mes: "May", inversion: 22.0, gasto: 18.4 },
+];
+
+const PRESUPUESTO_LIMITE = 21.5;
+
 // --- COMPONENTS ---
-const MiniKpi = ({ title, value, icon: Icon, color, bg }: { title: string, value: string, icon: LucideIcon, color: string, bg: string }) => (
-  <div className="relative overflow-hidden rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-    <div className="flex items-center justify-between">
-      <p className="text-sm font-medium text-slate-500 uppercase tracking-tight">{title}</p>
-      <div className={`flex h-8 w-8 items-center justify-center rounded-md ${bg}`}>
-        <Icon className={`h-4 w-4 ${color}`} />
+const MiniKpi = ({ title, value, icon: Icon, color, bg, tooltip }: { title: string, value: string, icon: LucideIcon, color: string, bg: string, tooltip?: string }) => {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative overflow-hidden rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
+          <p className="text-sm font-medium text-slate-500 uppercase tracking-tight">{title}</p>
+          {tooltip && (
+            <div className="relative flex-shrink-0">
+              <HelpCircle
+                className="w-3.5 h-3.5 text-slate-300 cursor-help hover:text-slate-500 transition-colors"
+                onMouseEnter={() => setShow(true)}
+                onMouseLeave={() => setShow(false)}
+              />
+              {show && (
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 bg-slate-900 text-white text-xs rounded-lg p-2.5 shadow-xl z-50 leading-relaxed pointer-events-none">
+                  {tooltip}
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900" />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+        <div className={`flex h-8 w-8 items-center justify-center rounded-md ${bg}`}>
+          <Icon className={`h-4 w-4 ${color}`} />
+        </div>
+      </div>
+      <div className="mt-4">
+        <p className={`text-3xl font-semibold tracking-tight text-slate-900`}>{value}</p>
       </div>
     </div>
-    <div className="mt-4">
-      <p className={`text-3xl font-semibold tracking-tight text-slate-900`}>{value}</p>
-    </div>
-  </div>
-);
+  );
+};
 
 export default function DashboardCompacto() {
   return (
@@ -72,12 +109,54 @@ export default function DashboardCompacto() {
           </div>
         </header>
 
-        {/* KPI GRID - Estilo Auditoría */}
+        {/* KPI GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <MiniKpi title="Pacientes activos" value="47" icon={Users} color="text-indigo-600" bg="bg-indigo-50" />
-          <MiniKpi title="Alertas críticas" value="05" icon={ShieldAlert} color="text-rose-600" bg="bg-rose-50" />
-          <MiniKpi title="Por autorizar" value="08" icon={FileText} color="text-amber-600" bg="bg-amber-50" />
-          <MiniKpi title="Ejecución mes" value="80%" icon={CheckCircle} color="text-emerald-600" bg="bg-emerald-50" />
+          <MiniKpi title="Pacientes activos" value="47" icon={Users} color="text-indigo-600" bg="bg-indigo-50"
+            tooltip="Total de afiliados con plan domiciliario autorizado y activo en la red de prestadores." />
+          <MiniKpi title="Alertas críticas" value="05" icon={ShieldAlert} color="text-rose-600" bg="bg-rose-50"
+            tooltip="Pacientes con visita no confirmada en 48h o signos vitales fuera de rango. Requieren intervención inmediata." />
+          <MiniKpi title="Por autorizar" value="08" icon={FileText} color="text-amber-600" bg="bg-amber-50"
+            tooltip="Solicitudes de autorización pendientes de revisión. Incluye PHD, PAD, PARD y curaciones en casa." />
+          <MiniKpi title="Ejecución mes" value="80%" icon={CheckCircle} color="text-emerald-600" bg="bg-emerald-50"
+            tooltip="Porcentaje de servicios programados ejecutados y verificados con GPS + firma digital en el mes." />
+        </div>
+
+        {/* COMPARATIVO INVERSIÓN VS GASTO */}
+        <div className="rounded-xl bg-white shadow-sm ring-1 ring-slate-200 overflow-hidden">
+          <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-semibold text-slate-900">Inversión contratada vs. Gasto real</h2>
+              <p className="text-xs text-slate-400 mt-0.5">Millones COP · Dic 2025 – May 2026</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-slate-400 uppercase tracking-wider font-bold">Ahorro acumulado</p>
+              <p className="text-lg font-bold text-emerald-600">$9.4M COP</p>
+            </div>
+          </div>
+          <div className="p-4">
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={COMPARATIVO} margin={{ top: 8, right: 16, left: -8, bottom: 4 }} barCategoryGap="30%">
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <XAxis dataKey="mes" tick={{ fontSize: 11, fill: '#64748b' }} />
+                <YAxis tick={{ fontSize: 11, fill: '#64748b' }} unit="M" domain={[14, 24]} />
+                <RechartsTooltip
+                  formatter={(v: number | undefined) => v !== undefined ? [`$${v}M COP`] : ['']}
+                  contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e2e8f0' }}
+                />
+                <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
+                <ReferenceLine y={PRESUPUESTO_LIMITE} stroke="#f43f5e" strokeDasharray="4 4" label={{ value: 'Límite presup.', fill: '#f43f5e', fontSize: 10, position: 'right' }} />
+                <Bar dataKey="inversion" name="Inversión contratada" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="gasto" name="Gasto real" fill="#10b981" radius={[4, 4, 0, 0]}
+                  label={(props: any) => {
+                    const { x, y, width, value, index } = props;
+                    return value > COMPARATIVO[index].inversion
+                      ? <text x={x + width / 2} y={y - 4} fill="#f43f5e" fontSize={9} textAnchor="middle" fontWeight={700}>▲</text>
+                      : null;
+                  }}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         {/* SECCIONES: 75% / 25% */}

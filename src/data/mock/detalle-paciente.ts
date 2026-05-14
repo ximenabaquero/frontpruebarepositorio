@@ -5,6 +5,7 @@ export type ServicioTimeline = {
   fecha: string;
   servicio: string;
   profesional: string;
+  entidad?: string;
   estado: EstadoServicio;
   nota?: string;
 };
@@ -44,16 +45,16 @@ export const detallesPacientes: DetallePaciente[] = [
     plan: "Enfermería diaria + cardiología 3x/sem + medicamentos IV",
     fecha_alta: "2026-05-03",
     timeline: [
-      { id: 1, fecha: "2026-05-03", servicio: "Alta hospitalaria + entrega de plan", profesional: "Dr. Andrés Ospina", estado: "cumplido" },
-      { id: 2, fecha: "2026-05-04", servicio: "Visita enfermería — signos vitales", profesional: "Sandra Muñoz", estado: "cumplido", nota: "PA 142/88, SpO₂ 96%" },
-      { id: 3, fecha: "2026-05-05", servicio: "Visita enfermería + medicación IV", profesional: "Sandra Muñoz", estado: "cumplido" },
-      { id: 4, fecha: "2026-05-06", servicio: "Cardiología domiciliaria", profesional: "Dr. Andrés Ospina", estado: "cumplido" },
-      { id: 5, fecha: "2026-05-07", servicio: "Visita enfermería", profesional: "Sandra Muñoz", estado: "no_cumplido", nota: "GPS no verificado — visita fantasma reportada" },
-      { id: 6, fecha: "2026-05-08", servicio: "Visita enfermería + curación", profesional: "Jorge Leal", estado: "cumplido" },
-      { id: 7, fecha: "2026-05-09", servicio: "Cardiología domiciliaria", profesional: "Dr. Andrés Ospina", estado: "cumplido" },
-      { id: 8, fecha: "2026-05-10", servicio: "Visita enfermería — signos vitales", profesional: "Sandra Muñoz", estado: "no_cumplido", nota: "Sin confirmar — PA 158/98 en último registro" },
-      { id: 9, fecha: "2026-05-11", servicio: "Visita enfermería", profesional: "Sandra Muñoz", estado: "pendiente" },
-      { id: 10, fecha: "2026-05-13", servicio: "Cardiología domiciliaria", profesional: "Dr. Andrés Ospina", estado: "pendiente" },
+      { id: 1, fecha: "2026-05-03", servicio: "Alta hospitalaria + entrega de plan", profesional: "Dr. Andrés Ospina", entidad: "Hospital Universitario Nacional", estado: "cumplido" },
+      { id: 2, fecha: "2026-05-04", servicio: "Visita enfermería — signos vitales", profesional: "Sandra Muñoz", entidad: "IPS Norte", estado: "cumplido", nota: "PA 142/88, SpO₂ 96%" },
+      { id: 3, fecha: "2026-05-05", servicio: "Visita enfermería + medicación IV", profesional: "Sandra Muñoz", entidad: "IPS Norte", estado: "cumplido" },
+      { id: 4, fecha: "2026-05-06", servicio: "Cardiología domiciliaria", profesional: "Dr. Andrés Ospina", entidad: "IPS Norte", estado: "cumplido" },
+      { id: 5, fecha: "2026-05-07", servicio: "Visita enfermería", profesional: "Sandra Muñoz", entidad: "IPS Norte", estado: "no_cumplido", nota: "GPS no verificado — visita fantasma reportada" },
+      { id: 6, fecha: "2026-05-08", servicio: "Visita enfermería + curación", profesional: "Jorge Leal", entidad: "IPS Norte", estado: "cumplido" },
+      { id: 7, fecha: "2026-05-09", servicio: "Cardiología domiciliaria", profesional: "Dr. Andrés Ospina", entidad: "IPS Norte", estado: "cumplido" },
+      { id: 8, fecha: "2026-05-10", servicio: "Visita enfermería — signos vitales", profesional: "Sandra Muñoz", entidad: "IPS Norte", estado: "no_cumplido", nota: "Sin confirmar — PA 158/98 en último registro" },
+      { id: 9, fecha: "2026-05-11", servicio: "Visita enfermería", profesional: "Sandra Muñoz", entidad: "IPS Norte", estado: "pendiente" },
+      { id: 10, fecha: "2026-05-13", servicio: "Cardiología domiciliaria", profesional: "Dr. Andrés Ospina", entidad: "IPS Norte", estado: "pendiente" },
     ],
     vitales: [
       { fecha: "May 03", pa_sistolica: 145, pa_diastolica: 90, fc: 88, spo2: 95 },
@@ -77,16 +78,16 @@ export const detallesPacientes: DetallePaciente[] = [
     plan: "Fisioterapia respiratoria 5x/sem + oxígeno domiciliario",
     fecha_alta: "2026-04-27",
     timeline: [
-      { id: 1, fecha: "2026-04-27", servicio: "Alta hospitalaria + plan de cuidado", profesional: "Dra. Claudia Restrepo", estado: "cumplido" },
-      { id: 2, fecha: "2026-04-28", servicio: "Fisioterapia respiratoria", profesional: "Diana Roa", estado: "cumplido", nota: "SpO₂ 91% al inicio, 95% al finalizar" },
-      { id: 3, fecha: "2026-04-29", servicio: "Fisioterapia respiratoria + oxígeno", profesional: "Diana Roa", estado: "cumplido" },
-      { id: 4, fecha: "2026-04-30", servicio: "Valoración médica domiciliaria", profesional: "Dra. Claudia Restrepo", estado: "cumplido" },
-      { id: 5, fecha: "2026-05-01", servicio: "Fisioterapia respiratoria", profesional: "Diana Roa", estado: "cumplido" },
-      { id: 6, fecha: "2026-05-05", servicio: "Fisioterapia respiratoria", profesional: "Diana Roa", estado: "cumplido" },
-      { id: 7, fecha: "2026-05-07", servicio: "Fisioterapia respiratoria", profesional: "Diana Roa", estado: "cumplido" },
-      { id: 8, fecha: "2026-05-09", servicio: "Valoración neumología domiciliaria", profesional: "Dra. Claudia Restrepo", estado: "cumplido", nota: "SpO₂ 88% en reposo — ajuste de plan" },
-      { id: 9, fecha: "2026-05-11", servicio: "Fisioterapia respiratoria", profesional: "Diana Roa", estado: "pendiente" },
-      { id: 10, fecha: "2026-05-12", servicio: "Fisioterapia respiratoria", profesional: "Diana Roa", estado: "pendiente" },
+      { id: 1, fecha: "2026-04-27", servicio: "Alta hospitalaria + plan de cuidado", profesional: "Dra. Claudia Restrepo", entidad: "Clínica del Country", estado: "cumplido" },
+      { id: 2, fecha: "2026-04-28", servicio: "Fisioterapia respiratoria", profesional: "Diana Roa", entidad: "IPS SurOccidente", estado: "cumplido", nota: "SpO₂ 91% al inicio, 95% al finalizar" },
+      { id: 3, fecha: "2026-04-29", servicio: "Fisioterapia respiratoria + oxígeno", profesional: "Diana Roa", entidad: "IPS SurOccidente", estado: "cumplido" },
+      { id: 4, fecha: "2026-04-30", servicio: "Valoración médica domiciliaria", profesional: "Dra. Claudia Restrepo", entidad: "IPS SurOccidente", estado: "cumplido" },
+      { id: 5, fecha: "2026-05-01", servicio: "Fisioterapia respiratoria", profesional: "Diana Roa", entidad: "IPS SurOccidente", estado: "cumplido" },
+      { id: 6, fecha: "2026-05-05", servicio: "Fisioterapia respiratoria", profesional: "Diana Roa", entidad: "IPS SurOccidente", estado: "cumplido" },
+      { id: 7, fecha: "2026-05-07", servicio: "Fisioterapia respiratoria", profesional: "Diana Roa", entidad: "IPS SurOccidente", estado: "cumplido" },
+      { id: 8, fecha: "2026-05-09", servicio: "Valoración neumología domiciliaria", profesional: "Dra. Claudia Restrepo", entidad: "IPS SurOccidente", estado: "cumplido", nota: "SpO₂ 88% en reposo — ajuste de plan" },
+      { id: 9, fecha: "2026-05-11", servicio: "Fisioterapia respiratoria", profesional: "Diana Roa", entidad: "IPS SurOccidente", estado: "pendiente" },
+      { id: 10, fecha: "2026-05-12", servicio: "Fisioterapia respiratoria", profesional: "Diana Roa", entidad: "IPS SurOccidente", estado: "pendiente" },
     ],
     vitales: [
       { fecha: "Abr 28", pa_sistolica: 148, pa_diastolica: 92, fc: 82, spo2: 91 },
@@ -108,16 +109,16 @@ export const detallesPacientes: DetallePaciente[] = [
     plan: "Glucometría diaria + curación pie diabético 3x/sem",
     fecha_alta: "2026-04-20",
     timeline: [
-      { id: 1, fecha: "2026-04-20", servicio: "Alta + entrega glucómetro + educación", profesional: "Dr. Ricardo Vargas", estado: "cumplido" },
-      { id: 2, fecha: "2026-04-21", servicio: "Curación pie diabético", profesional: "Jorge Leal", estado: "cumplido" },
-      { id: 3, fecha: "2026-04-23", servicio: "Curación pie diabético", profesional: "Jorge Leal", estado: "cumplido" },
-      { id: 4, fecha: "2026-04-25", servicio: "Curación pie diabético + valoración", profesional: "Jorge Leal", estado: "cumplido", nota: "Herida con mejoría — reducción 30%" },
-      { id: 5, fecha: "2026-04-28", servicio: "Curación pie diabético", profesional: "Jorge Leal", estado: "cumplido" },
-      { id: 6, fecha: "2026-04-30", servicio: "Curación pie diabético", profesional: "Jorge Leal", estado: "cumplido" },
-      { id: 7, fecha: "2026-05-02", servicio: "Valoración médica + glucometría", profesional: "Dr. Ricardo Vargas", estado: "cumplido", nota: "Glucemia en ayunas 195 mg/dL — ajuste insulina" },
-      { id: 8, fecha: "2026-05-05", servicio: "Curación pie diabético", profesional: "Jorge Leal", estado: "cumplido" },
-      { id: 9, fecha: "2026-05-08", servicio: "Curación pie diabético", profesional: "Jorge Leal", estado: "cumplido" },
-      { id: 10, fecha: "2026-05-11", servicio: "Curación pie diabético", profesional: "Jorge Leal", estado: "pendiente" },
+      { id: 1, fecha: "2026-04-20", servicio: "Alta + entrega glucómetro + educación", profesional: "Dr. Ricardo Vargas", entidad: "Hospital El Tunal", estado: "cumplido" },
+      { id: 2, fecha: "2026-04-21", servicio: "Curación pie diabético", profesional: "Jorge Leal", entidad: "IPS Chapinero", estado: "cumplido" },
+      { id: 3, fecha: "2026-04-23", servicio: "Curación pie diabético", profesional: "Jorge Leal", entidad: "IPS Chapinero", estado: "cumplido" },
+      { id: 4, fecha: "2026-04-25", servicio: "Curación pie diabético + valoración", profesional: "Jorge Leal", entidad: "IPS Chapinero", estado: "cumplido", nota: "Herida con mejoría — reducción 30%" },
+      { id: 5, fecha: "2026-04-28", servicio: "Curación pie diabético", profesional: "Jorge Leal", entidad: "IPS Chapinero", estado: "cumplido" },
+      { id: 6, fecha: "2026-04-30", servicio: "Curación pie diabético", profesional: "Jorge Leal", entidad: "IPS Chapinero", estado: "cumplido" },
+      { id: 7, fecha: "2026-05-02", servicio: "Valoración médica + glucometría", profesional: "Dr. Ricardo Vargas", entidad: "IPS Chapinero", estado: "cumplido", nota: "Glucemia en ayunas 195 mg/dL — ajuste insulina" },
+      { id: 8, fecha: "2026-05-05", servicio: "Curación pie diabético", profesional: "Jorge Leal", entidad: "IPS Chapinero", estado: "cumplido" },
+      { id: 9, fecha: "2026-05-08", servicio: "Curación pie diabético", profesional: "Jorge Leal", entidad: "IPS Chapinero", estado: "cumplido" },
+      { id: 10, fecha: "2026-05-11", servicio: "Curación pie diabético", profesional: "Jorge Leal", entidad: "IPS Chapinero", estado: "pendiente" },
     ],
     vitales: [
       { fecha: "Abr 21", pa_sistolica: 138, pa_diastolica: 84, fc: 76, spo2: 97, glucemia: 210 },

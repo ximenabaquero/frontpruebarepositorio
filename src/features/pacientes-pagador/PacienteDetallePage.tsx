@@ -191,6 +191,11 @@ export default function PacienteDetallePage({ id }: { id: number }) {
                         <p className={`text-sm font-semibold leading-tight mt-0.5 ${item.estado === "no_cumplido" ? "text-red-700" : "text-gray-900"}`}>
                           {item.servicio}
                         </p>
+                        <p className="text-[11px] text-gray-400 mt-0.5">
+                          {item.profesional}
+                          {item.entidad && <span className="text-gray-300"> · </span>}
+                          {item.entidad && <span className="text-gray-400">{item.entidad}</span>}
+                        </p>
                       </div>
                     </div>
                     {item.estado === "cumplido" && (

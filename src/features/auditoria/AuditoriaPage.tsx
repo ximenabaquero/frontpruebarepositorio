@@ -4,7 +4,7 @@ import { useState } from "react";
 import {
   CheckCircle, AlertTriangle, DollarSign, TrendingUp,
   Star, Download, FileBarChart, Building2, Loader2,
-  ChevronRight, Activity
+  ChevronRight, Activity, HelpCircle, Users2
 } from "lucide-react";
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
@@ -24,6 +24,21 @@ const SCORING = [
   { nombre: "IPS SurOccidente", score: 3.9, razon: "1 firma pendiente" },
   { nombre: "IPS Chapinero",    score: 2.8, razon: "3 visitas sin GPS verificado" },
 ];
+
+const CUPS_MEDICOS = [
+  { medico: "Sandra Muñoz",        ips: "IPS Norte",        cups: "890201 — Enfermería domiciliaria",         atenciones: 42, monto: "$3.8M", gps_pct: 100 },
+  { medico: "Diana Roa",           ips: "IPS SurOccidente", cups: "930101 — Fisioterapia respiratoria",       atenciones: 38, monto: "$2.9M", gps_pct: 100 },
+  { medico: "Jorge Leal",          ips: "IPS Chapinero",    cups: "890301 — Curación pie diabético",          atenciones: 28, monto: "$1.6M", gps_pct: 89  },
+  { medico: "Dr. Andrés Ospina",   ips: "IPS Norte",        cups: "890101 — Cardiología domiciliaria",        atenciones: 22, monto: "$4.1M", gps_pct: 100 },
+  { medico: "Dra. Claudia Restrepo", ips: "IPS SurOccidente", cups: "890102 — Neumología domiciliaria",      atenciones: 12, monto: "$2.3M", gps_pct: 100 },
+];
+
+const KPI_TOOLTIPS: Record<string, string> = {
+  "Cumplimiento GPS/Firma": "Porcentaje de visitas con verificación GPS activa y firma digital capturada. Base para aprobación de cuentas.",
+  "Irregularidades Activas": "Servicios facturados sin evidencia completa (GPS o firma ausente). Cada irregularidad activa una alerta de auditoría.",
+  "Capital Radicado": "Monto total en pesos COP presentado por los prestadores para facturación en el período. Sujeto a auditoría antes de pago.",
+  "Siniestralidad Extramural": "Relación entre gasto real en atención domiciliaria y el presupuesto contratado. Meta EPS Sura: ≤ 2.5%.",
+};
 
 const EXPORTES = [
   { id: "rips",       label: "Exportar RIPS Mayo 2025",     icon: FileBarChart },
@@ -62,6 +77,7 @@ function Stars({ score }: { score: number }) {
 
 export default function AuditoriaPage() {
   const [exportando, setExportando] = useState<string | null>(null);
+  const [tooltipKpi, setTooltipKpi] = useState<string | null>(null);
 
   function handleExport(id: string) {
     if (exportando) return;
@@ -111,8 +127,23 @@ export default function AuditoriaPage() {
             <div key={i} className="relative overflow-hidden rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
               {kpi.alert && <div className="absolute top-0 left-0 w-full h-1 bg-rose-500" />}
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-slate-500">{kpi.label}</p>
-                <div className={`flex h-8 w-8 items-center justify-center rounded-md ${kpi.bg}`}>
+                <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                  <p className="text-sm font-medium text-slate-500 truncate">{kpi.label}</p>
+                  <div className="relative flex-shrink-0">
+                    <HelpCircle
+                      className="w-3.5 h-3.5 text-slate-300 cursor-help hover:text-slate-500 transition-colors"
+                      onMouseEnter={() => setTooltipKpi(kpi.label)}
+                      onMouseLeave={() => setTooltipKpi(null)}
+                    />
+                    {tooltipKpi === kpi.label && (
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-60 bg-slate-900 text-white text-xs rounded-lg p-2.5 shadow-xl z-50 leading-relaxed pointer-events-none">
+                        {KPI_TOOLTIPS[kpi.label]}
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className={`flex h-8 w-8 items-center justify-center rounded-md flex-shrink-0 ${kpi.bg}`}>
                   <kpi.icon className={`h-4 w-4 ${kpi.color}`} />
                 </div>
               </div>
@@ -203,6 +234,50 @@ export default function AuditoriaPage() {
             </div>
           </div>
 
+        </div>
+
+        {/* ── Atenciones efectivas por profesional (CUPS) ── */}
+        <div className="rounded-xl bg-white shadow-sm ring-1 ring-slate-200 overflow-hidden">
+          <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Users2 className="h-4 w-4 text-indigo-500" />
+              <h2 className="text-base font-semibold text-slate-900">Atenciones efectivas por profesional</h2>
+            </div>
+            <span className="text-xs text-slate-400">Mayo 2026 · CUPS verificados</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm text-left">
+              <thead className="bg-slate-50/50 text-slate-500 text-xs uppercase tracking-wider">
+                <tr>
+                  <th className="px-5 py-3 font-medium">Médico / Profesional</th>
+                  <th className="px-4 py-3 font-medium">IPS</th>
+                  <th className="px-4 py-3 font-medium">CUPS principal</th>
+                  <th className="px-4 py-3 font-medium text-center">Atenciones</th>
+                  <th className="px-4 py-3 font-medium text-right">Monto total</th>
+                  <th className="px-5 py-3 font-medium text-center">% GPS</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {CUPS_MEDICOS.map((row) => (
+                  <tr key={row.medico} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="px-5 py-3 font-medium text-slate-900">{row.medico}</td>
+                    <td className="px-4 py-3 text-slate-500">{row.ips}</td>
+                    <td className="px-4 py-3 text-slate-600 text-xs font-mono">{row.cups}</td>
+                    <td className="px-4 py-3 text-center text-slate-700 font-semibold">{row.atenciones}</td>
+                    <td className="px-4 py-3 text-right tabular-nums text-slate-600">{row.monto}</td>
+                    <td className="px-5 py-3 text-center">
+                      <span className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold ${
+                        row.gps_pct === 100 ? "bg-emerald-500/10 text-emerald-700" : "bg-amber-500/10 text-amber-700"
+                      }`}>
+                        {row.gps_pct === 100 ? <CheckCircle className="h-3 w-3" /> : <AlertTriangle className="h-3 w-3" />}
+                        {row.gps_pct}%
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* ── Subrutinas de Exportación ── */}
