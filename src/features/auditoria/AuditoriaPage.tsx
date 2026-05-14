@@ -44,6 +44,8 @@ type Fallo = {
 type Prestador = {
   nombre: string;
   servicios: number;
+  gps: number;
+  firma: number;
   cap_aprobado: number;
   cap_cuarentena: number;
   cap_rechazado: number;
@@ -55,14 +57,14 @@ type Prestador = {
 const PRESTADORES: Prestador[] = [
   {
     nombre: "IPS Norte",
-    servicios: 42,
+    servicios: 42, gps: 42, firma: 42,
     cap_aprobado: 7_200_000, cap_cuarentena: 0, cap_rechazado: 0,
     fallos_hardware: 0, fallos_fraude: 0,
     fallos: [],
   },
   {
     nombre: "IPS SurOccidente",
-    servicios: 38,
+    servicios: 38, gps: 38, firma: 37,
     cap_aprobado: 5_650_000, cap_cuarentena: 150_000, cap_rechazado: 0,
     fallos_hardware: 1, fallos_fraude: 0,
     fallos: [
@@ -77,7 +79,7 @@ const PRESTADORES: Prestador[] = [
   },
   {
     nombre: "IPS Chapinero",
-    servicios: 28,
+    servicios: 28, gps: 25, firma: 28,
     cap_aprobado: 3_540_000, cap_cuarentena: 360_000, cap_rechazado: 200_000,
     fallos_hardware: 2, fallos_fraude: 1,
     fallos: [
@@ -106,14 +108,14 @@ const PRESTADORES: Prestador[] = [
   },
   {
     nombre: "IPS Oncología",
-    servicios: 22,
+    servicios: 22, gps: 22, firma: 22,
     cap_aprobado: 3_400_000, cap_cuarentena: 0, cap_rechazado: 0,
     fallos_hardware: 0, fallos_fraude: 0,
     fallos: [],
   },
   {
     nombre: "IPS Neurología",
-    servicios: 12,
+    servicios: 12, gps: 12, firma: 12,
     cap_aprobado: 1_900_000, cap_cuarentena: 0, cap_rechazado: 0,
     fallos_hardware: 0, fallos_fraude: 0,
     fallos: [],
@@ -498,6 +500,12 @@ export default function AuditoriaPage() {
                     <th className="px-3 py-3 font-medium text-center">
                       <span className="flex items-center justify-center gap-1">Ops <Tip text="Total de servicios domiciliarios facturados por esta IPS en el período." /></span>
                     </th>
+                    <th className="px-3 py-3 font-medium text-center">
+                      <span className="flex items-center justify-center gap-1">GPS <Tip text="Cuántos servicios registraron exitosamente la ubicación del profesional en el domicilio del paciente. Si el número es menor que Ops, hubo visitas donde no se pudo confirmar que el profesional llegó al lugar correcto." wide /></span>
+                    </th>
+                    <th className="px-3 py-3 font-medium text-center">
+                      <span className="flex items-center justify-center gap-1">Firma <Tip text="Cuántos servicios tienen la firma digital del paciente o cuidador como constancia de que la atención fue recibida. Sin firma, el servicio queda en cuarentena hasta conciliación — no puede pagarse directamente." wide /></span>
+                    </th>
                     <th className="px-3 py-3 font-medium text-right">
                       <span className="flex items-center justify-end gap-1">Capital aprobado <Tip text="Servicios con GPS verificado + firma digital + nota clínica completa. Listos para pago sin glosa." /></span>
                     </th>
@@ -520,6 +528,16 @@ export default function AuditoriaPage() {
                       <tr key={p.nombre} className="hover:bg-slate-50/30 transition-colors">
                         <td className="px-5 py-3 font-medium text-slate-900 whitespace-nowrap">{p.nombre}</td>
                         <td className="px-3 py-3 text-center text-slate-500 tabular-nums">{p.servicios}</td>
+                        <td className="px-3 py-3 text-center tabular-nums">
+                          <span className={p.gps === p.servicios ? "text-emerald-700 font-semibold" : "text-rose-600 font-semibold"}>
+                            {p.gps}/{p.servicios}
+                          </span>
+                        </td>
+                        <td className="px-3 py-3 text-center tabular-nums">
+                          <span className={p.firma === p.servicios ? "text-emerald-700 font-semibold" : "text-amber-600 font-semibold"}>
+                            {p.firma}/{p.servicios}
+                          </span>
+                        </td>
                         <td className="px-3 py-3 text-right">
                           <CapitalCell value={p.cap_aprobado} variant="aprobado" />
                         </td>
@@ -574,6 +592,12 @@ export default function AuditoriaPage() {
                   <tr>
                     <td className="px-5 py-3 text-xs font-bold text-slate-700 uppercase tracking-wider">Total</td>
                     <td className="px-3 py-3 text-center text-xs font-bold tabular-nums text-slate-700">{TOTAL_OPS}</td>
+                    <td className="px-3 py-3 text-center text-xs font-bold tabular-nums text-emerald-700">
+                      {PRESTADORES.reduce((s, p) => s + p.gps, 0)}/{TOTAL_OPS}
+                    </td>
+                    <td className="px-3 py-3 text-center text-xs font-bold tabular-nums text-emerald-700">
+                      {PRESTADORES.reduce((s, p) => s + p.firma, 0)}/{TOTAL_OPS}
+                    </td>
                     <td className="px-3 py-3 text-right text-xs font-bold text-emerald-700 tabular-nums">{fmtM(TOTAL_APROBADO)}</td>
                     <td className="px-3 py-3 text-right text-xs font-bold text-amber-700 tabular-nums">{fmtM(TOTAL_CUARENTENA)}</td>
                     <td className="px-3 py-3 text-right text-xs font-bold text-rose-700 tabular-nums">{fmtM(TOTAL_RECHAZADO)}</td>
