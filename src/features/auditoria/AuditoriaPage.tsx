@@ -394,28 +394,22 @@ export default function AuditoriaPage() {
                   <tr>
                     <th className="px-5 py-3 font-medium">Prestador</th>
                     <th className="px-3 py-3 font-medium text-center">
-                      <span className="flex items-center justify-center gap-1">Ops <Tip text="Total de servicios domiciliarios facturados por esta IPS en el período." /></span>
-                    </th>
-                    <th className="px-3 py-3 font-medium text-center">
-                      <span className="flex items-center justify-center gap-1">GPS <Tip text="Cuántos servicios registraron exitosamente la ubicación del profesional en el domicilio del paciente. Si el número es menor que Ops, hubo visitas donde no se pudo confirmar que el profesional llegó al lugar correcto." wide /></span>
-                    </th>
-                    <th className="px-3 py-3 font-medium text-center">
-                      <span className="flex items-center justify-center gap-1">Firma <Tip text="Cuántos servicios tienen la firma digital del paciente o cuidador como constancia de que la atención fue recibida. Sin firma, el servicio queda en cuarentena hasta conciliación — no puede pagarse directamente." wide /></span>
+                      <span className="flex items-center justify-center gap-1">
+                        Verificación
+                        <Tip text="GPS: confirma que el profesional llegó al domicilio. Firma: el paciente confirma que fue atendido. Ambas son obligatorias para aprobar el pago." wide />
+                      </span>
                     </th>
                     <th className="px-3 py-3 font-medium text-right">
-                      <span className="flex items-center justify-end gap-1">Costo/visita <Tip text="Costo promedio por visita verificada (capital aprobado ÷ visitas con GPS + firma). Permite comparar eficiencia entre prestadores con el mismo tipo de servicio." wide /></span>
+                      <span className="flex items-center justify-end gap-1">Costo/visita <Tip text="Costo promedio por visita con evidencia completa. Permite comparar eficiencia entre prestadores que hacen el mismo tipo de servicio." wide /></span>
                     </th>
                     <th className="px-3 py-3 font-medium text-right">
-                      <span className="flex items-center justify-end gap-1">Capital aprobado <Tip text="Servicios con GPS verificado + firma digital + nota clínica completa. Listos para pago sin glosa." /></span>
+                      <span className="flex items-center justify-end gap-1">Capital aprobado <Tip text="Dinero listo para pagar. Estas visitas tienen GPS + firma + nota clínica — no hay razón para retenerlas." /></span>
                     </th>
                     <th className="px-3 py-3 font-medium text-right">
-                      <span className="flex items-center justify-end gap-1">En cuarentena <Tip text="Servicios con fallo técnico (hardware o red) que impidió capturar evidencia. Están en proceso de conciliación con el prestador antes de decidir pago." wide /></span>
+                      <span className="flex items-center justify-end gap-1">En cuarentena <Tip text="Dinero retenido por fallo técnico (sin señal, batería muerta, permisos del celular). No se pierde — se espera que el prestador lo aclare antes de pagarlo." wide /></span>
                     </th>
                     <th className="px-3 py-3 font-medium text-right">
-                      <span className="flex items-center justify-end gap-1">Rechazado <Tip text="Servicios con fraude comprobado (GPS spoofing, visita fantasma). El capital queda bloqueado y el caso se deriva a fiscalía interna." wide /></span>
-                    </th>
-                    <th className="px-4 py-3 font-medium text-center">
-                      <span className="flex items-center justify-center gap-1">Fallos <Tip text="Chip gris = fallo de hardware/red (conciliable). Chip rojo = fraude clínico (rechazo definitivo)." /></span>
+                      <span className="flex items-center justify-end gap-1">Rechazado <Tip text="Dinero bloqueado por fraude comprobado. El GPS reportó coordenadas falsas — el profesional no estaba en el domicilio. No se paga." wide /></span>
                     </th>
                     <th className="px-4 py-3 font-medium"></th>
                   </tr>
@@ -423,57 +417,48 @@ export default function AuditoriaPage() {
                 <tbody className="divide-y divide-slate-100">
                   {PRESTADORES.map((p) => {
                     const tienefallos = p.fallos.length > 0;
+                    const gpsOk = p.gps === p.servicios;
+                    const firmaOk = p.firma === p.servicios;
                     return (
                       <tr key={p.nombre} className="hover:bg-slate-50/30 transition-colors">
-                        <td className="px-5 py-3 font-medium text-slate-900 whitespace-nowrap">{p.nombre}</td>
-                        <td className="px-3 py-3 text-center text-slate-500 tabular-nums">{p.servicios}</td>
-                        <td className="px-3 py-3 text-center tabular-nums">
-                          <span className={p.gps === p.servicios ? "text-emerald-700 font-semibold" : "text-rose-600 font-semibold"}>
-                            {p.gps}/{p.servicios}
-                          </span>
+                        <td className="px-5 py-4 font-semibold text-slate-900 whitespace-nowrap">{p.nombre}</td>
+                        <td className="px-3 py-4 text-center">
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="flex items-center gap-1.5 text-xs">
+                              <span className="text-slate-400 w-8 text-right">GPS</span>
+                              <span className={`font-semibold tabular-nums ${gpsOk ? "text-emerald-700" : "text-rose-600"}`}>
+                                {p.gps}/{p.servicios}
+                              </span>
+                              {gpsOk ? <CheckCircle className="w-3 h-3 text-emerald-500" /> : <Cpu className="w-3 h-3 text-rose-400" />}
+                            </div>
+                            <div className="flex items-center gap-1.5 text-xs">
+                              <span className="text-slate-400 w-8 text-right">Firma</span>
+                              <span className={`font-semibold tabular-nums ${firmaOk ? "text-emerald-700" : "text-amber-600"}`}>
+                                {p.firma}/{p.servicios}
+                              </span>
+                              {firmaOk ? <CheckCircle className="w-3 h-3 text-emerald-500" /> : <ShieldX className="w-3 h-3 text-amber-400" />}
+                            </div>
+                          </div>
                         </td>
-                        <td className="px-3 py-3 text-center tabular-nums">
-                          <span className={p.firma === p.servicios ? "text-emerald-700 font-semibold" : "text-amber-600 font-semibold"}>
-                            {p.firma}/{p.servicios}
-                          </span>
-                        </td>
-                        <td className="px-3 py-3 text-right tabular-nums text-slate-600 text-xs">
+                        <td className="px-3 py-4 text-right tabular-nums text-slate-600 text-sm font-medium">
                           {p.gps > 0 ? `$${Math.round(p.cap_aprobado / p.gps / 1000)}K` : "—"}
                         </td>
-                        <td className="px-3 py-3 text-right">
+                        <td className="px-3 py-4 text-right">
                           <CapitalCell value={p.cap_aprobado} variant="aprobado" />
                         </td>
-                        <td className="px-3 py-3 text-right">
+                        <td className="px-3 py-4 text-right">
                           <CapitalCell value={p.cap_cuarentena} variant="cuarentena" />
                           {p.cap_cuarentena > 0 && (
-                            <p className="text-[10px] text-amber-600 font-semibold mt-0.5">Pendiente conciliación</p>
+                            <p className="text-[10px] text-amber-500 font-medium mt-0.5">Pendiente aclaración</p>
                           )}
                         </td>
-                        <td className="px-3 py-3 text-right">
+                        <td className="px-3 py-4 text-right">
                           <CapitalCell value={p.cap_rechazado} variant="rechazado" />
                           {p.cap_rechazado > 0 && (
-                            <p className="text-[10px] text-rose-600 font-semibold mt-0.5">Fraude comprobado</p>
+                            <p className="text-[10px] text-rose-500 font-medium mt-0.5">Fraude comprobado</p>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-center">
-                          {tienefallos ? (
-                            <div className="flex items-center justify-center gap-1.5">
-                              {p.fallos_hardware > 0 && (
-                                <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded">
-                                  <Cpu className="w-2.5 h-2.5" />{p.fallos_hardware}
-                                </span>
-                              )}
-                              {p.fallos_fraude > 0 && (
-                                <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded">
-                                  <ShieldX className="w-2.5 h-2.5" />{p.fallos_fraude}
-                                </span>
-                              )}
-                            </div>
-                          ) : (
-                            <CheckCircle className="w-4 h-4 text-emerald-500 mx-auto" />
-                          )}
-                        </td>
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-4 text-center">
                           {tienefallos ? (
                             <button
                               onClick={() => setFalloModal(p)}
@@ -482,28 +467,24 @@ export default function AuditoriaPage() {
                               Ver detalles →
                             </button>
                           ) : (
-                            <span className="text-[10px] text-slate-300">—</span>
+                            <CheckCircle className="w-4 h-4 text-emerald-400 mx-auto" />
                           )}
                         </td>
                       </tr>
                     );
                   })}
                 </tbody>
-                {/* Totales */}
                 <tfoot className="bg-slate-50/80 border-t-2 border-slate-200">
                   <tr>
                     <td className="px-5 py-3 text-xs font-bold text-slate-700 uppercase tracking-wider">Total</td>
-                    <td className="px-3 py-3 text-center text-xs font-bold tabular-nums text-slate-700">{TOTAL_OPS}</td>
-                    <td className="px-3 py-3 text-center text-xs font-bold tabular-nums text-emerald-700">
-                      {PRESTADORES.reduce((s, p) => s + p.gps, 0)}/{TOTAL_OPS}
+                    <td className="px-3 py-3 text-center text-xs text-slate-400">
+                      GPS {PRESTADORES.reduce((s, p) => s + p.gps, 0)}/{TOTAL_OPS} · Firma {PRESTADORES.reduce((s, p) => s + p.firma, 0)}/{TOTAL_OPS}
                     </td>
-                    <td className="px-3 py-3 text-center text-xs font-bold tabular-nums text-emerald-700">
-                      {PRESTADORES.reduce((s, p) => s + p.firma, 0)}/{TOTAL_OPS}
-                    </td>
+                    <td className="px-3 py-3" />
                     <td className="px-3 py-3 text-right text-xs font-bold text-emerald-700 tabular-nums">{fmtM(TOTAL_APROBADO)}</td>
                     <td className="px-3 py-3 text-right text-xs font-bold text-amber-700 tabular-nums">{fmtM(TOTAL_CUARENTENA)}</td>
                     <td className="px-3 py-3 text-right text-xs font-bold text-rose-700 tabular-nums">{fmtM(TOTAL_RECHAZADO)}</td>
-                    <td colSpan={2} className="px-4 py-3 text-xs text-slate-400">{TOTAL_FALLOS} fallos registrados</td>
+                    <td className="px-4 py-3 text-xs text-slate-400">{TOTAL_FALLOS} irregularidades</td>
                   </tr>
                 </tfoot>
               </table>
