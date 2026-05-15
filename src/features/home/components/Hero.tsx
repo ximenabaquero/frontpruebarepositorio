@@ -42,7 +42,7 @@ const OlgaHero: React.FC = () => {
         aria-hidden="true"
         className="absolute inset-0 z-0"
         style={{
-          backgroundImage: "url('C:\\Proyectos\\Olga\\olga-demo-front\\public\\imagenhero.jpeg')",
+          backgroundImage: "url('/imagenhero.jpeg')",
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
